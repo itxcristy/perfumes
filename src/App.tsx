@@ -1,5 +1,6 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './styles/pwa-responsive.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
@@ -14,6 +15,7 @@ import { RecommendationsProvider } from './contexts/RecommendationsContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthModalProvider } from './contexts/AuthModalContext';
 import { MonitoringProvider } from './contexts/MonitoringContext';
+import { SecurityProvider } from './components/Security/SecurityProvider';
 import { Layout } from './components/Layout/Layout';
 import { DatabaseErrorOverlay } from './components/Common/DatabaseErrorOverlay';
 import { ErrorBoundary } from './components/Common/ErrorBoundary';
@@ -28,7 +30,7 @@ const HomePage = React.lazy(() => import('./pages/HomePage.tsx'));
 const ProductsPage = React.lazy(() => import('./pages/ProductsPage.tsx'));
 const ProductDetailPage = React.lazy(() => import('./pages/ProductDetailPage.tsx'));
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage.tsx'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage.tsx'));
+const ProfilePage = React.lazy(() => import('./pages/ProductionProfilePage.tsx'));
 const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage.tsx'));
 const SearchPage = React.lazy(() => import('./pages/SearchPage.tsx'));
 const WishlistPage = React.lazy(() => import('./pages/WishlistPage.tsx'));
@@ -65,14 +67,14 @@ function App() {
         tagName: target.tagName,
         error: target.error
       });
-      
+
       // Prevent the error from propagating
       e.stopImmediatePropagation();
     };
 
     // Add event listeners for media elements
     document.addEventListener('error', handleMediaError, true);
-    
+
     return () => {
       document.removeEventListener('error', handleMediaError, true);
     };
@@ -85,7 +87,7 @@ function App() {
       const { initializeAccessibility } = await import('./utils/accessibilityEnhancements');
       initializeAccessibility();
     };
-    
+
     initializeAccessibility();
   }, []);
 
@@ -93,7 +95,7 @@ function App() {
   useEffect(() => {
     const initializeMonitoring = async () => {
       const { initMonitoring } = await import('./utils/monitoring');
-      
+
       // Initialize monitoring with configuration
       initMonitoring({
         sentry: {
@@ -107,7 +109,7 @@ function App() {
         }
       });
     };
-    
+
     initializeMonitoring();
   }, []);
 
@@ -120,66 +122,68 @@ function App() {
       >
         <ErrorProvider>
           <ThemeProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <AuthModalProvider>
-                  <ProductProvider>
-                    <CollectionProvider>
-                      <RecommendationsProvider>
-                        <CartProvider>
-                        <WishlistProvider>
-                          <CompareProvider>
-                            <OrderProvider>
-                              <AddressProvider>
-                                <MonitoringProvider>
-                                  <Router>
-                                    <GlobalMediaErrorHandler />
-                                    <ScrollToTop />
-                                    <SkipLink href="#main-content">Skip to main content</SkipLink>
-                                    <Layout>
-                                      <main id="main-content" className="focus:outline-none">
-                                        <Suspense fallback={<PageLoadingFallback />}>
-                                          <Routes>
-                                            <Route path="/" element={<HomePage />} />
-                                            <Route path="/products" element={<ProductsPage />} />
-                                            <Route path="/products/:id" element={<ProductDetailPage />} />
-                                            <Route path="/search" element={<SearchPage />} />
-                                            <Route path="/compare" element={<ComparePage />} />
-                                            <Route path="/dashboard" element={<DashboardPage />} />
-                                            <Route path="/profile" element={<ProfilePage />} />
-                                            <Route path="/wishlist" element={<WishlistPage />} />
-                                            <Route path="/orders" element={<OrdersPage />} />
-                                            <Route path="/checkout" element={<CheckoutPage />} />
-                                            <Route path="/settings" element={<SettingsPage />} />
-                                            <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-                                            <Route path="/deals" element={<DealsPage />} />
-                                            <Route path="/categories" element={<CategoriesPage />} />
-                                            <Route path="/categories/:slug" element={<ProductsPage />} />
-                                            <Route path="/collections" element={<CollectionsPage />} />
-                                            <Route path="/collections/:slug" element={<ProductsPage />} />
-                                            <Route path="/auth" element={<AuthPage />} />
-                                            <Route path="/health" element={<HealthPage />} />
-                                            <Route path="/test" element={<TestPage />} />
-                                            <Route path="/direct-login-test" element={<DirectLoginTest />} />
-                                            <Route path="*" element={<NotFoundPage />} />
-                                          </Routes>
-                                        </Suspense>
-                                      </main>
-                                    </Layout>
-                                    <DatabaseErrorOverlay />
-                                  </Router>
-                                </MonitoringProvider>
-                              </AddressProvider>
-                            </OrderProvider>
-                          </CompareProvider>
-                        </WishlistProvider>
-                      </CartProvider>
-                    </RecommendationsProvider>
-                  </CollectionProvider>
-                </ProductProvider>
-                </AuthModalProvider>
-              </NotificationProvider>
-            </AuthProvider>
+            <NotificationProvider>
+              <AuthProvider>
+                <SecurityProvider>
+                  <AuthModalProvider>
+                    <ProductProvider>
+                      <CollectionProvider>
+                        <RecommendationsProvider>
+                          <CartProvider>
+                            <WishlistProvider>
+                              <CompareProvider>
+                                <OrderProvider>
+                                  <AddressProvider>
+                                    <MonitoringProvider>
+                                      <Router>
+                                        <GlobalMediaErrorHandler />
+                                        <ScrollToTop />
+                                        <SkipLink href="#main-content">Skip to main content</SkipLink>
+                                        <Layout>
+                                          <main id="main-content" className="focus:outline-none">
+                                            <Suspense fallback={<PageLoadingFallback />}>
+                                              <Routes>
+                                                <Route path="/" element={<HomePage />} />
+                                                <Route path="/products" element={<ProductsPage />} />
+                                                <Route path="/products/:id" element={<ProductDetailPage />} />
+                                                <Route path="/search" element={<SearchPage />} />
+                                                <Route path="/compare" element={<ComparePage />} />
+                                                <Route path="/dashboard" element={<DashboardPage />} />
+                                                <Route path="/profile" element={<ProfilePage />} />
+                                                <Route path="/wishlist" element={<WishlistPage />} />
+                                                <Route path="/orders" element={<OrdersPage />} />
+                                                <Route path="/checkout" element={<CheckoutPage />} />
+                                                <Route path="/settings" element={<SettingsPage />} />
+                                                <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+                                                <Route path="/deals" element={<DealsPage />} />
+                                                <Route path="/categories" element={<CategoriesPage />} />
+                                                <Route path="/categories/:slug" element={<ProductsPage />} />
+                                                <Route path="/collections" element={<CollectionsPage />} />
+                                                <Route path="/collections/:slug" element={<ProductsPage />} />
+                                                <Route path="/auth" element={<AuthPage />} />
+                                                <Route path="/health" element={<HealthPage />} />
+                                                <Route path="/test" element={<TestPage />} />
+                                                <Route path="/direct-login-test" element={<DirectLoginTest />} />
+                                                <Route path="*" element={<NotFoundPage />} />
+                                              </Routes>
+                                            </Suspense>
+                                          </main>
+                                        </Layout>
+                                        <DatabaseErrorOverlay />
+                                      </Router>
+                                    </MonitoringProvider>
+                                  </AddressProvider>
+                                </OrderProvider>
+                              </CompareProvider>
+                            </WishlistProvider>
+                          </CartProvider>
+                        </RecommendationsProvider>
+                      </CollectionProvider>
+                    </ProductProvider>
+                  </AuthModalProvider>
+                </SecurityProvider>
+              </AuthProvider>
+            </NotificationProvider>
           </ThemeProvider>
         </ErrorProvider>
       </PerformanceOptimizer>

@@ -21,9 +21,11 @@ import {
 import { ComprehensiveAdminDashboard } from './Admin/ComprehensiveAdminDashboard';
 import { UserManagement } from './Admin/UserManagement';
 import { EnhancedUserManagement } from './Admin/EnhancedUserManagement';
+import ProductionUserManagement from './Admin/ProductionUserManagement';
 import { ProductManagement } from './Admin/ProductManagement';
 import { OrderManager } from './Admin/OrderManager';
 import { CategoryManagement } from './Admin/CategoryManagement';
+import { CollectionManagement } from './Admin/CollectionManagement';
 import { CouponManagement } from './Admin/CouponManagement';
 import { SettingsManagement } from './Admin/SettingsManagement';
 import { EnhancedAnalyticsDashboard } from './Admin/EnhancedAnalyticsDashboard';
@@ -71,7 +73,7 @@ export const AdminDashboard: React.FC = () => {
     {
       name: 'Users',
       icon: <Users className="h-5 w-5" />,
-      component: <EnhancedUserManagement />
+      component: <ProductionUserManagement />
     },
     {
       name: 'Products',
@@ -166,13 +168,11 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`${
-        isMobile
-          ? sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          : sidebarCollapsed ? 'w-16' : 'w-64'
-      } ${
-        isMobile ? 'fixed inset-y-0 left-0 z-50 w-64' : 'relative'
-      } bg-white transform transition-all duration-300 ease-in-out shadow-lg border-r border-gray-200`}>
+      <div className={`${isMobile
+        ? sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        : sidebarCollapsed ? 'w-16' : 'w-64'
+        } ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-64' : 'relative'
+        } bg-white transform transition-all duration-300 ease-in-out shadow-lg border-r border-gray-200`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between flex-shrink-0 px-4 py-4 border-b border-gray-200">
@@ -187,9 +187,8 @@ export const AdminDashboard: React.FC = () => {
 
             {/* Toggle button for desktop, close button for mobile */}
             <button
-              className={`p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${
-                sidebarCollapsed && !isMobile ? 'mx-auto' : ''
-              }`}
+              className={`p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${sidebarCollapsed && !isMobile ? 'mx-auto' : ''
+                }`}
               onClick={isMobile ? closeSidebar : toggleSidebar}
               aria-label={isMobile ? 'Close sidebar' : 'Toggle sidebar'}
             >
@@ -212,19 +211,16 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item.name)}
-                    className={`${
-                      isActive
-                        ? 'bg-indigo-100 text-indigo-700 border-r-4 border-indigo-600'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-r-4 border-transparent'
-                    } group flex items-center w-full text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-l-lg ${
-                      sidebarCollapsed && !isMobile ? 'px-3 py-3 justify-center' : 'px-4 py-3'
-                    }`}
+                    className={`${isActive
+                      ? 'bg-indigo-100 text-indigo-700 border-r-4 border-indigo-600'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-r-4 border-transparent'
+                      } group flex items-center w-full text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-l-lg ${sidebarCollapsed && !isMobile ? 'px-3 py-3 justify-center' : 'px-4 py-3'
+                      }`}
                     title={sidebarCollapsed && !isMobile ? item.name : undefined}
                     aria-label={item.name}
                   >
-                    <div className={`${
-                      isActive ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-600'
-                    } transition-colors duration-200 flex-shrink-0`}>
+                    <div className={`${isActive ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-600'
+                      } transition-colors duration-200 flex-shrink-0`}>
                       {item.icon}
                     </div>
 

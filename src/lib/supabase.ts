@@ -1485,47 +1485,223 @@ export const getAllUsers = async () => {
   }
 };
 
-// Enhanced user creation with all details (for when needed)
-export const createNewUser = async (user: Partial<User>) => {
+// Enhanced user creation with Supabase Auth integration
+export const createNewUser = async (userData: {
+  email: string;
+  name: string;
+  role: 'admin' | 'seller' | 'customer';
+  phone?: string;
+  dateOfBirth?: string;
+  isActive?: boolean;
+  sendEmail?: boolean;
+}) => {
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert({
-        ...user,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+    // Call the enhanced backend function
+    const { data, error } = await supabase.rpc('admin_create_user', {
+      p_email: userData.email,
+      p_full_name: userData.name,
+      p_role: userData.role,
+      p_phone: userData.phone || null,
+      p_date_of_birth: userData.dateOfBirth || null,
+      p_is_active: userData.isActive !== undefined ? userData.isActive : true,
+      p_send_email: userData.sendEmail !== undefined ? userData.sendEmail : true
+    });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating user:', error);
+      return { success: false, error: error.message };
+    }
 
-    return data;
+    if (!data.success) {
+      return { success: false, error: data.error };
+    }
+
+    // If email should be sent, handle email sending
+    if (userData.sendEmail !== false && data.password) {
+      try {
+        const { emailService } = await import('../services/emailService');
+        const confirmationUrl = data.confirmation_required
+          ? `${window.location.origin}/confirm-email?token=${data.confirmation_token}&email=${encodeURIComponent(userData.email)}`
+          : undefined;
+
+        await emailService.sendUserCreationEmail({
+          email: userData.email,
+          name: userData.name,
+          password: data.password,
+          role: userData.role,
+          confirmationUrl
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Don't fail user creation if email fails
+      }
+    }
+
+    // Return user data in expected format
+    const user: User = {
+      id: data.user_id,
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
+      phone: userData.phone,
+      dateOfBirth: userData.dateOfBirth,
+      isActive: userData.isActive !== undefined ? userData.isActive : true,
+      emailVerified: !data.confirmation_required,
+      createdAt: new Date()
+    };
+
+    return { success: true, user, password: data.password };
   } catch (error) {
     console.error('Error creating new user:', error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create user'
+    };
   }
 };
 
-// Enhanced user update with all details (for when needed)
-export const updateUser = async (userId: string, updates: Partial<User>) => {
+// Enhanced user update with all details and password reset option
+export const updateUser = async (
+  userId: string,
+  updates: Partial<User> & { resetPassword?: boolean }
+) => {
   try {
-    const { data, error } = await supabase
+    const { resetPassword, ...userUpdates } = updates;
+
+    // Call the enhanced backend function
+    const { data, error } = await supabase.rpc('admin_update_user', {
+      p_user_id: userId,
+      p_email: userUpdates.email || null,
+      p_full_name: userUpdates.name || null,
+      p_role: userUpdates.role || null,
+      p_phone: userUpdates.phone || null,
+      p_date_of_birth: userUpdates.dateOfBirth || null,
+      p_is_active: userUpdates.isActive !== undefined ? userUpdates.isActive : null,
+      p_reset_password: resetPassword || false
+    });
+
+    if (error) {
+      console.error('Error updating user:', error);
+      return { success: false, error: error.message };
+    }
+
+    if (!data.success) {
+      return { success: false, error: data.error };
+    }
+
+    // If password was reset, send email notification
+    if (resetPassword && data.new_password) {
+      try {
+        const { emailService } = await import('../services/emailService');
+        await emailService.sendPasswordResetEmail(
+          userUpdates.email || '',
+          userUpdates.name || '',
+          data.new_password
+        );
+      } catch (emailError) {
+        console.error('Error sending password reset email:', emailError);
+      }
+    }
+
+    // Fetch updated user data
+    const { data: userData, error: fetchError } = await supabase
       .from('profiles')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .select('*')
       .eq('id', userId)
-      .select()
       .single();
 
-    if (error) throw error;
+    if (fetchError) {
+      console.error('Error fetching updated user:', fetchError);
+      return { success: false, error: 'User updated but failed to fetch updated data' };
+    }
 
-    return data;
+    const user: User = {
+      id: userData.id,
+      email: userData.email,
+      name: userData.full_name,
+      role: userData.role,
+      phone: userData.phone,
+      dateOfBirth: userData.date_of_birth,
+      isActive: userData.is_active,
+      emailVerified: userData.email_verified,
+      createdAt: new Date(userData.created_at),
+      updatedAt: new Date(userData.updated_at)
+    };
+
+    return { success: true, user, newPassword: data.new_password };
   } catch (error) {
     console.error('Error updating user:', error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update user'
+    };
+  }
+};
+
+// Resend confirmation email
+export const resendConfirmationEmail = async (userId: string) => {
+  try {
+    const { data, error } = await supabase.rpc('admin_resend_confirmation', {
+      p_user_id: userId
+    });
+
+    if (error) {
+      console.error('Error resending confirmation:', error);
+      return { success: false, error: error.message };
+    }
+
+    if (!data.success) {
+      return { success: false, error: data.error };
+    }
+
+    // Send the confirmation email
+    try {
+      const { emailService } = await import('../services/emailService');
+      const confirmationUrl = `${window.location.origin}/confirm-email?token=${data.token}&email=${encodeURIComponent(data.email)}`;
+
+      await emailService.sendConfirmationReminder(
+        data.email,
+        'User', // We might not have the name here
+        confirmationUrl
+      );
+    } catch (emailError) {
+      console.error('Error sending confirmation email:', emailError);
+      return { success: false, error: 'Failed to send confirmation email' };
+    }
+
+    return { success: true, message: 'Confirmation email sent successfully' };
+  } catch (error) {
+    console.error('Error resending confirmation email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to resend confirmation'
+    };
+  }
+};
+
+// Manually confirm user email (admin action)
+export const confirmUserEmail = async (userId: string) => {
+  try {
+    const { data, error } = await supabase.rpc('admin_confirm_user_email', {
+      p_user_id: userId
+    });
+
+    if (error) {
+      console.error('Error confirming user email:', error);
+      return { success: false, error: error.message };
+    }
+
+    if (!data.success) {
+      return { success: false, error: data.error };
+    }
+
+    return { success: true, message: 'User email confirmed successfully' };
+  } catch (error) {
+    console.error('Error confirming user email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to confirm email'
+    };
   }
 };
 
