@@ -1,17 +1,5 @@
 import React from 'react';
-import {
-  Edit,
-  Trash2,
-  Mail,
-  Key,
-  MoreVertical,
-  Shield,
-  CheckCircle,
-  Clock,
-  X,
-  Send,
-  Users
-} from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Send, Users } from 'lucide-react';
 import { User } from '../../../types';
 
 interface UserManagementTableProps {
@@ -89,12 +77,12 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                     <div className="flex-shrink-0 h-10 w-10">
                       <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                         <span className="text-sm font-medium text-indigo-700">
-                          {user.name.charAt(0).toUpperCase()}
+                          {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </span>
                       </div>
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                      <div className="text-sm font-medium text-gray-900">{user?.name || 'Unknown User'}</div>
                       <div className="text-sm text-gray-500">{user.email}</div>
                       {user.phone && (
                         <div className="text-xs text-gray-400">{user.phone}</div>
@@ -171,12 +159,12 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                 <div className="flex-shrink-0">
                   <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                     <span className="text-sm font-medium text-indigo-700">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">{user.name}</div>
+                  <div className="text-sm font-medium text-gray-900 truncate">{user?.name || 'Unknown User'}</div>
                   <div className="text-sm text-gray-500 truncate">{user.email}</div>
                   {user.phone && (
                     <div className="text-xs text-gray-400">{user.phone}</div>

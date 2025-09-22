@@ -1,0 +1,23 @@
+{
+  "name": "sufi-essences-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Sufi Essences E-commerce",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.2",
+    "@supabase/supabase-js": "^2.51.0",
+    "@sendgrid/mail": "^8.1.3"
+  },
+  "keywords": [
+    "netlify",
+    "functions",
+    "razorpay",
+    "supabase",
+    "ecommerce"
+  ],
+  "author": "Sufi Essences",
+  "license": "MIT"
+}

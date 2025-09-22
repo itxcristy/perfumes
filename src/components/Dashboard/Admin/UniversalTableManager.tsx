@@ -1,21 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Search,
-  Filter,
-  Download,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  RefreshCw,
-  ArrowUpDown,
-  Save,
-  X,
-  AlertTriangle
-} from 'lucide-react';
+import { Search, Filter, Download, Plus, Edit, Trash2, ChevronLeft, RefreshCw, Save, X, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { ErrorFallback } from '../../Common/ErrorFallback';

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
-import { CheckCircle, AlertTriangle, Info, X, AlertCircle, ShoppingBag } from 'lucide-react';
-import { AppError, handleSupabaseError, logError } from '../utils/errorHandling';
+import { CheckCircle, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
+import { AppError, handleSupabaseError } from '../utils/errorHandling';
 
 interface Notification {
   id: string;
@@ -43,43 +43,43 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     const timestamp = Date.now();
     const id = `${timestamp}-${Math.random().toString(36).substring(2, 9)}`;
     const duration = notification.duration || 5000;
-    
+
     // Check for duplicates within the last 2 seconds
-    const isDuplicate = notifications.some(n => 
-      n.type === notification.type && 
-      n.message === notification.message && 
+    const isDuplicate = notifications.some(n =>
+      n.type === notification.type &&
+      n.message === notification.message &&
       n.title === notification.title &&
       timestamp - n.timestamp < 2000
     );
-    
+
     if (isDuplicate) {
       return; // Prevent duplicate notifications
     }
-    
-    const newNotification: Notification = { 
-      ...notification, 
-      id, 
-      timestamp, 
+
+    const newNotification: Notification = {
+      ...notification,
+      id,
+      timestamp,
       duration,
       isVisible: false,
       isDismissing: false
     };
-    
+
     setNotifications(prev => [newNotification, ...prev]);
-    
+
     // Show notification with animation
     setTimeout(() => {
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, isVisible: true } : n)
       );
     }, 10);
-    
+
     // Auto-dismiss notification
     if (duration > 0) {
       const timer = setTimeout(() => {
         dismissNotification(id);
       }, duration);
-      
+
       notificationTimers.current.set(id, timer);
     }
   };
@@ -91,22 +91,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       clearTimeout(timer);
       notificationTimers.current.delete(id);
     }
-    
+
     // Start dismiss animation
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, isDismissing: true } : n)
     );
-    
+
     // Remove after animation completes
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 300);
   };
-  
+
   const removeNotification = (id: string) => {
     dismissNotification(id);
   };
-  
+
   // Clean up timers on unmount
   useEffect(() => {
     return () => {
@@ -117,7 +117,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
   const showError = (error: Error | AppError, context?: string) => {
     const appError = 'type' in error ? error : handleSupabaseError(error);
-    logError(appError, context);
 
     showNotification({
       type: 'error',
@@ -158,7 +157,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const ToastNotification: React.FC<{ notification: Notification }> = ({ notification }) => {
     const [progress, setProgress] = useState(100);
     const progressRef = useRef<NodeJS.Timeout | null>(null);
-    
+
     useEffect(() => {
       if (notification.duration && notification.duration > 0 && notification.isVisible && !notification.isDismissing) {
         const startTime = Date.now();
@@ -167,21 +166,21 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
           const elapsed = Date.now() - startTime;
           const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
           setProgress(remaining);
-          
+
           if (remaining > 0) {
             progressRef.current = setTimeout(updateProgress, 50);
           }
         };
         updateProgress();
       }
-      
+
       return () => {
         if (progressRef.current) {
           clearTimeout(progressRef.current);
         }
       };
     }, [notification.duration, notification.isVisible, notification.isDismissing]);
-    
+
     const getStyles = () => {
       switch (notification.type) {
         case 'success':
@@ -215,17 +214,17 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
           };
       }
     };
-    
+
     const styles = getStyles();
-    
+
     return (
       <div
         className={`
           ${styles.container}
           rounded-lg overflow-hidden backdrop-blur-sm max-w-sm w-full
           transform transition-all duration-300 ease-out
-          ${notification.isVisible && !notification.isDismissing 
-            ? 'translate-x-0 opacity-100 scale-100' 
+          ${notification.isVisible && !notification.isDismissing
+            ? 'translate-x-0 opacity-100 scale-100'
             : 'translate-x-full opacity-0 scale-95'
           }
           ${notification.isDismissing ? 'translate-x-full opacity-0 scale-95' : ''}
@@ -252,7 +251,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
             </button>
           </div>
         </div>
-        
+
         {/* Progress bar */}
         {notification.duration && notification.duration > 0 && (
           <div className="h-1 bg-gray-200">
@@ -269,7 +268,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   // Scroll-aware positioning for notifications
   useEffect(() => {
     let ticking = false;
-    
+
     const updateNotificationPosition = () => {
       const container = document.querySelector('.notification-container');
       if (container) {
@@ -303,9 +302,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       showWarning
     }}>
       {children}
-      
+
       {/* Modern toast container with viewport-aware positioning */}
-      <div 
+      <div
         className="fixed top-4 right-4 z-[9999] pointer-events-none notification-container"
         style={{
           position: 'fixed',

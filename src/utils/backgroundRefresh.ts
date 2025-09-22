@@ -244,17 +244,13 @@ if (typeof window !== 'undefined') {
     backgroundRefreshManager.stopAllRefreshes();
   });
 
-  // Pause refreshes when page is not visible
+  // Pause refreshes when page is not visible (but don't restart automatically)
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       backgroundRefreshManager.stopAllRefreshes();
-    } else {
-      // Restart when page becomes visible again
-      setTimeout(() => {
-        backgroundRefreshManager.startProductRefresh();
-        backgroundRefreshManager.startCategoryRefresh();
-      }, 5000);
     }
+    // Removed automatic restart to prevent auto-refresh on tab switch
+    // Background refreshes will only start on initial page load
   });
 }
 

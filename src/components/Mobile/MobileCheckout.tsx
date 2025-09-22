@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  CreditCard, 
-  MapPin, 
-  Package, 
-  CheckCircle,
-  Lock,
-  Smartphone,
-  Apple
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, CreditCard, CheckCircle, Lock, Smartphone, Apple } from 'lucide-react';
 import { MobileTouchButton } from './MobileTouchButton';
 import { useMobileDetection } from '../../hooks/useMobileGestures';
 

@@ -37,9 +37,9 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
     : '';
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 focus:ring-purple-500 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-500',
-    secondary: 'bg-white text-purple-700 hover:bg-purple-100 focus:ring-purple-500 dark:bg-purple-800 dark:text-purple-100 dark:hover:bg-purple-700',
-    ghost: 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 focus:ring-purple-500 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-800',
+    primary: 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 focus:ring-purple-500',
+    secondary: 'bg-white text-purple-700 hover:bg-purple-100 focus:ring-purple-500',
+    ghost: 'text-purple-600 hover:text-purple-700 hover:bg-purple-50 focus:ring-purple-500',
   };
 
   // Enhanced size classes with mobile-optimized touch targets
@@ -59,9 +59,8 @@ export const EnhancedButton: React.FC<EnhancedButtonProps> = ({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${baseClasses} ${mobileClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className} ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
+      className={`${baseClasses} ${mobileClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       aria-label={ariaLabel}
       title={title}
     >
@@ -86,15 +85,15 @@ interface BadgeProps {
   className?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ 
-  count, 
+export const Badge: React.FC<BadgeProps> = ({
+  count,
   variant = 'default',
-  className = '' 
+  className = ''
 }) => {
   if (count <= 0) return null;
 
   const variantClasses = {
-    default: 'bg-neutral-900 text-white dark:bg-blue-500',
+    default: 'bg-neutral-900 text-white',
     success: 'bg-green-500 text-white',
     warning: 'bg-orange-500 text-white',
     error: 'bg-red-500 text-white',
@@ -120,10 +119,10 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ 
-  content, 
-  children, 
-  position = 'bottom' 
+export const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  children,
+  position = 'bottom'
 }) => {
   const [isVisible, setIsVisible] = React.useState(false);
 
@@ -135,7 +134,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="relative inline-block"
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
@@ -147,15 +146,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.15 }}
-          className={`absolute z-50 px-2 py-1 text-xs font-medium text-white bg-neutral-900 rounded-md whitespace-nowrap dark:bg-neutral-700 ${positionClasses[position]}`}
+          className={`absolute z-50 px-2 py-1 text-xs font-medium text-white bg-neutral-900 rounded-md whitespace-nowrap ${positionClasses[position]}`}
         >
           {content}
-          <div className={`absolute w-2 h-2 bg-neutral-900 dark:bg-neutral-700 rotate-45 ${
-            position === 'top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' :
+          <div className={`absolute w-2 h-2 bg-neutral-900 rotate-45 ${position === 'top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' :
             position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 -mb-1' :
-            position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' :
-            'right-full top-1/2 -translate-y-1/2 -mr-1'
-          }`} />
+              position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' :
+                'right-full top-1/2 -translate-y-1/2 -mr-1'
+            }`} />
         </motion.div>
       )}
     </div>

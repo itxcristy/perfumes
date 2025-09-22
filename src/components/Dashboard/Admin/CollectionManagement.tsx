@@ -6,30 +6,7 @@ import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { Modal } from '../../Common/Modal';
 import { ImageUpload } from '../../Common/ImageUpload';
 import { StorageService } from '../../../services/storageService';
-import {
-  Plus,
-  Search,
-  Filter,
-  Download,
-  Edit,
-  Trash2,
-  Eye,
-  Copy,
-  RefreshCw,
-  Calendar,
-  Tag,
-  Crown,
-  Zap,
-  Award,
-  Sparkles,
-  Gift,
-  Star,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
-
-
+import { Plus, Search, Download, Edit, Trash2, Eye, Copy, RefreshCw, Calendar, Tag, Crown, Zap, Award, Sparkles, Gift, Star, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CollectionManagementProps {
   className?: string;

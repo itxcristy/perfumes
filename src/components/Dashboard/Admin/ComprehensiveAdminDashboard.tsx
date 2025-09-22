@@ -1,40 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import {
-  Database,
-  Users,
-  Package,
-  ShoppingCart,
-  CreditCard,
-  MapPin,
-  Star,
-  Tag,
-  Truck,
-  Settings,
-  Activity,
-  BarChart3,
-  TrendingUp,
-  Eye,
-  Download,
-  Filter,
-  Search,
-  RefreshCw,
-  GitBranch,
-  DollarSign,
-  Clock,
-  AlertTriangle,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Bell,
-  Calendar,
-  FileText
-} from 'lucide-react';
+import { Database, Users, Package, ShoppingCart, CreditCard, MapPin, Star, Tag, Truck, Settings, Activity, BarChart3, TrendingUp, Eye, Download, Filter, Search, RefreshCw, GitBranch, DollarSign, Clock, AlertTriangle, ArrowUp, ArrowDown, Minus, Bell } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { ErrorFallback } from '../../Common/ErrorFallback';
 import { UniversalTableManager } from './UniversalTableManager';
 import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { DatabaseSchemaViewer } from './DatabaseSchemaViewer';
+import {
+  useAdvancedMemo,
+  useDebouncedCallback
+} from '../utils/performanceOptimizations';
 
 interface TableInfo {
   name: string;
@@ -82,7 +57,12 @@ interface RealtimeMetrics {
   systemStatus: string;
 }
 
-export const ComprehensiveAdminDashboard: React.FC = () => {
+export const ComprehensiveAdminDashboard: React.FC = memo(() => {
+  // Performance monitoring (development only)
+  if (import.meta.env.DEV) {
+    // Performance monitoring hooks would go here in development
+  }
+
   const [stats, setStats] = useState<DatabaseStats | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [kpiMetrics, setKpiMetrics] = useState<KPIMetric[]>([]);
@@ -209,12 +189,13 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch table counts
+      // Fetch table counts in parallel with better error handling
       const tableNames = Object.keys(tableConfigs);
       const tableCounts: Record<string, number> = {};
       let totalRecords = 0;
 
-      for (const tableName of tableNames) {
+      // Batch requests for better performance
+      const countPromises = tableNames.map(async (tableName) => {
         try {
           const { count, error } = await supabase
             .from(tableName)
@@ -222,16 +203,25 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
 
           if (error) {
             console.warn(`Error fetching count for ${tableName}:`, error.message);
-            tableCounts[tableName] = 0;
-          } else {
-            tableCounts[tableName] = count || 0;
-            totalRecords += count || 0;
+            return { tableName, count: 0 };
           }
+          return { tableName, count: count || 0 };
         } catch (err) {
           console.warn(`Error fetching count for ${tableName}:`, err);
-          tableCounts[tableName] = 0;
+          return { tableName, count: 0 };
         }
-      }
+      });
+
+      // Execute all count queries in parallel
+      const results = await Promise.allSettled(countPromises);
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          const { tableName, count } = result.value;
+          tableCounts[tableName] = count;
+          totalRecords += count;
+        }
+      });
 
       const tables: TableInfo[] = tableNames.map(name => ({
         ...tableConfigs[name],
@@ -254,10 +244,21 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
     }
   }, [tableConfigs]);
 
-  // Fetch dashboard overview metrics
+  // Fetch dashboard overview metrics with caching
   const fetchDashboardMetrics = useCallback(async () => {
     try {
-      // Fetch basic metrics from tables directly since RPC functions don't exist
+      // Check cache first
+      const cacheKey = 'dashboard-metrics';
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTime = sessionStorage.getItem(`${cacheKey}-time`);
+
+      // Use cached data if less than 2 minutes old
+      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 120000) {
+        setMetrics(JSON.parse(cached));
+        return;
+      }
+
+      // Fetch basic metrics from tables directly with optimized queries
       const [ordersResult, usersResult, productsResult] = await Promise.all([
         supabase.from('orders').select('id, total_amount, status, created_at'),
         supabase.from('profiles').select('id, created_at'),
@@ -281,7 +282,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
         .filter(order => order.status === 'completed')
         .reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0);
 
-      setMetrics({
+      const metricsData = {
         totalUsers: users.length,
         totalProducts: products.length,
         totalOrders: orders.length,
@@ -292,7 +293,13 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
         ordersToday: ordersToday.length,
         revenueToday: revenueToday,
         conversionRate: users.length > 0 ? (orders.length / users.length) * 100 : 0
-      });
+      };
+
+      setMetrics(metricsData);
+
+      // Cache the results
+      sessionStorage.setItem(cacheKey, JSON.stringify(metricsData));
+      sessionStorage.setItem(`${cacheKey}-time`, Date.now().toString());
     } catch (err) {
       console.error('Error in fetchDashboardMetrics:', err);
     }
@@ -373,7 +380,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
   const fetchAllData = useCallback(async () => {
     setRefreshing(true);
     setLastRefresh(new Date());
-    
+
     try {
       await Promise.all([
         fetchDatabaseStats(),
@@ -469,22 +476,22 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
   // Auto-refresh functionality
   useEffect(() => {
     if (!autoRefresh) return;
-    
+
     const interval = setInterval(() => {
       fetchRealtimeMetrics();
     }, 30000); // Refresh real-time metrics every 30 seconds
-    
+
     return () => clearInterval(interval);
   }, [autoRefresh, fetchRealtimeMetrics]);
 
   // Full data refresh every 5 minutes
   useEffect(() => {
     if (!autoRefresh) return;
-    
+
     const interval = setInterval(() => {
       fetchAllData();
     }, 300000); // Refresh all data every 5 minutes
-    
+
     return () => clearInterval(interval);
   }, [autoRefresh, fetchAllData]);
 
@@ -492,13 +499,22 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
     await fetchAllData();
   };
 
-  const filteredTables = useMemo(() => {
+  // Optimized search with advanced memoization
+  const filteredTables = useAdvancedMemo(() => {
     if (!stats?.tables) return [];
+    const lowerSearchTerm = searchTerm.toLowerCase();
     return stats.tables.filter(table =>
-      table.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      table.description.toLowerCase().includes(searchTerm.toLowerCase())
+      table.displayName.toLowerCase().includes(lowerSearchTerm) ||
+      table.description.toLowerCase().includes(lowerSearchTerm)
     );
-  }, [stats?.tables, searchTerm]);
+  }, [stats?.tables, searchTerm], `filtered-tables-${searchTerm}`);
+
+  // Debounced search handler
+  const debouncedSearch = useDebouncedCallback(
+    (term: string) => setSearchTerm(term),
+    300,
+    []
+  );
 
   // Handle different views
   if (currentView === 'table' && selectedTable) {
@@ -768,7 +784,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Top Performing Products Widget */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-               onClick={() => setCurrentView('analytics')}>
+            onClick={() => setCurrentView('analytics')}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
               <Package className="h-5 w-5 text-green-600" />
@@ -803,7 +819,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
 
           {/* Recent Activity Widget */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-               onClick={() => { setSelectedTable('orders'); setCurrentView('table'); }}>
+            onClick={() => { setSelectedTable('orders'); setCurrentView('table'); }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
               <Activity className="h-5 w-5 text-blue-600" />
@@ -848,7 +864,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
 
           {/* Low Stock Alerts Widget */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-               onClick={() => { setSelectedTable('products'); setCurrentView('table'); }}>
+            onClick={() => { setSelectedTable('products'); setCurrentView('table'); }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Stock Alerts</h3>
               <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -862,17 +878,15 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
                       <span className="text-sm font-medium text-gray-900">
                         {product.name || `Product ${index + 1}`}
                       </span>
-                      <p className={`text-xs ${
-                        product.stock <= 5 ? 'text-red-500' : 
+                      <p className={`text-xs ${product.stock <= 5 ? 'text-red-500' :
                         product.stock <= 10 ? 'text-orange-500' : 'text-yellow-500'
-                      }`}>
+                        }`}>
                         Only {product.stock || 0} left
                       </p>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      product.stock <= 5 ? 'bg-red-100 text-red-800' : 
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-800' :
                       product.stock <= 10 ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                      }`}>
                       {product.stock <= 5 ? 'Critical' : product.stock <= 10 ? 'Low' : 'Medium'}
                     </span>
                   </div>
@@ -906,7 +920,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button 
+          <button
             onClick={() => { setSelectedTable('products'); setCurrentView('table'); }}
             className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all hover:border-primary text-left"
           >
@@ -918,8 +932,8 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">Create new product</p>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => { setSelectedTable('orders'); setCurrentView('table'); }}
             className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all hover:border-primary text-left"
           >
@@ -931,8 +945,8 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">Manage customer orders</p>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => { setSelectedTable('profiles'); setCurrentView('table'); }}
             className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all hover:border-primary text-left"
           >
@@ -944,8 +958,8 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">User administration</p>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setCurrentView('analytics')}
             className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all hover:border-primary text-left"
           >
@@ -1020,7 +1034,7 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </button>
-          <button 
+          <button
             onClick={handleExportData}
             className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
@@ -1041,30 +1055,30 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
               setCurrentView('table');
             }}
           >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 ${table.color} rounded-lg text-white`}>
-                    {table.icon}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900">{table.count.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">records</p>
-                  </div>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 ${table.color} rounded-lg text-white`}>
+                  {table.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{table.displayName}</h3>
-                <p className="text-sm text-gray-600 mb-4">{table.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    {table.name}
-                  </span>
-                  <button className="flex items-center text-primary hover:text-primary-dark text-sm font-medium">
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </button>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-gray-900">{table.count.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">records</p>
                 </div>
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{table.displayName}</h3>
+              <p className="text-sm text-gray-600 mb-4">{table.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  {table.name}
+                </span>
+                <button className="flex items-center text-primary hover:text-primary-dark text-sm font-medium">
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </button>
+              </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {filteredTables.length === 0 && searchTerm && (
@@ -1076,4 +1090,6 @@ export const ComprehensiveAdminDashboard: React.FC = () => {
       )}
     </div>
   );
-};
+});
+
+ComprehensiveAdminDashboard.displayName = 'ComprehensiveAdminDashboard';

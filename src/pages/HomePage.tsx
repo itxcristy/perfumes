@@ -7,8 +7,9 @@ import { Testimonials } from '../components/Home/Testimonials';
 import { RecentlyViewed } from '../components/Home/RecentlyViewed';
 import { useProducts } from '../contexts/ProductContext';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
+
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, Star, Truck, ShieldCheck, Clock, Headphones, Zap, Award, Users, Heart, CheckCircle, Gift, Globe, Sparkles, Crown } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Star, ShieldCheck, Headphones, Zap, Award, Users, CheckCircle, Gift, Globe, Sparkles, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Import banner images
@@ -86,13 +87,13 @@ const PromotionalBanners: React.FC = () => {
             >
               {/* Background with Gradient Overlay */}
               <div className={`absolute inset-0 bg-gradient-to-br ${banner.bgColor}`} />
-              
+
               {/* Background Image */}
-              <div 
+              <div
                 className="absolute inset-0 opacity-20 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                 style={{ backgroundImage: `url(${banner.image})` }}
               />
-              
+
               {/* Content with Mobile-Optimized Layout */}
               <div className="relative p-3 sm:p-4 md:p-5 lg:p-6 h-36 sm:h-40 md:h-44 lg:h-52 xl:h-56 flex flex-col justify-between text-white">
                 {/* Top Section */}
@@ -103,16 +104,16 @@ const PromotionalBanners: React.FC = () => {
                       {banner.discount}
                     </span>
                   </div>
-                  
+
                   <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1 leading-tight">
                     {banner.title}
                   </h3>
-                  
+
                   <p className="text-xs sm:text-sm text-white/90 leading-relaxed line-clamp-2">
                     {banner.subtitle}
                   </p>
                 </div>
-                
+
                 {/* Mobile-Optimized CTA Button */}
                 <Link to={banner.link} className="inline-block">
                   <motion.button
@@ -125,7 +126,7 @@ const PromotionalBanners: React.FC = () => {
                   </motion.button>
                 </Link>
               </div>
-              
+
               {/* Decorative Elements - Responsive */}
               <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/10 rounded-full blur-lg" />
               <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 w-6 h-6 sm:w-8 sm:h-8 bg-yellow-300/20 rounded-full blur-md" />
@@ -168,7 +169,7 @@ const SpecialOffers: React.FC = () => {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='m0 40l40-40h-40v40zm40 0v-40h-40l40 40z'/%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
       </div>
-      
+
       <div className="container-luxury relative px-4 sm:px-6 lg:px-8">
         <div className="text-center px-4 sm:px-6">
           <motion.div
@@ -180,7 +181,7 @@ const SpecialOffers: React.FC = () => {
             <Gift className="h-5 w-5 sm:h-6 sm:w-6 text-blue-200" />
             <span className="text-sm sm:text-base lg:text-lg font-semibold text-blue-100">Special Offers</span>
           </motion.div>
-          
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -189,7 +190,7 @@ const SpecialOffers: React.FC = () => {
           >
             Exclusive Member Benefits
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -199,7 +200,7 @@ const SpecialOffers: React.FC = () => {
           >
             Join our community and unlock premium features, early access, and exclusive discounts
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -241,21 +242,21 @@ const BrandStory: React.FC = () => {
                 <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">Our Story</span>
               </div>
-              
+
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                 Connecting You to
                 <span className="text-blue-600"> Quality & Trust</span>
               </h2>
-              
+
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Founded with a vision to revolutionize online shopping, we've built relationships with premium brands worldwide to bring you authentic, high-quality products at competitive prices.
               </p>
-              
+
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Every product in our catalog is carefully vetted, every seller thoroughly verified, and every transaction secured with industry-leading protection.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div className="text-center p-3 sm:p-4 bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100">
                 <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mx-auto mb-1.5 sm:mb-2" />
@@ -269,7 +270,7 @@ const BrandStory: React.FC = () => {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -281,7 +282,7 @@ const BrandStory: React.FC = () => {
               alt="Our Brand Story"
               className="w-full rounded-xl sm:rounded-2xl shadow-lg"
             />
-            
+
             <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 bg-white rounded-lg sm:rounded-xl shadow-lg p-3 sm:p-4 border border-gray-100 max-w-[200px] sm:max-w-[240px]">
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
@@ -363,14 +364,14 @@ const EnhancedValueProposition: React.FC = () => {
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
                 <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              
+
               <div className="mb-2 sm:mb-3">
                 <div className="text-base sm:text-lg font-bold text-blue-600 mb-1">{feature.stats}</div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2">
                   {feature.title}
                 </h3>
               </div>
-              
+
               <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                 {feature.description}
               </p>
@@ -385,6 +386,10 @@ const EnhancedValueProposition: React.FC = () => {
 export const HomePage: React.FC = () => {
   const { categories, loading } = useProducts();
 
+  // Debug: Log the loading state
+  console.log('HomePage: loading state:', loading);
+  console.log('HomePage: categories:', categories?.length || 0);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -395,9 +400,10 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-0">
+
       {/* Luxury Perfume Hero Section */}
       <Hero />
-      
+
       {/* Categories Section */}
       {categories && categories.length > 0 && (
         <CategorySection categories={categories} />
@@ -408,19 +414,19 @@ export const HomePage: React.FC = () => {
 
       {/* Featured Products */}
       <FeaturedProducts />
-      
+
       {/* Brand Story */}
       <BrandStory />
 
       {/* Trending Section */}
       <TrendingSection />
-      
+
       {/* Recently Viewed (if user has viewed products) */}
       <RecentlyViewed maxItems={6} className="bg-gray-50" />
 
       {/* Enhanced Value Proposition */}
       <EnhancedValueProposition />
-      
+
       {/* Testimonials */}
       <Testimonials />
 

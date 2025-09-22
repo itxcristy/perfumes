@@ -67,9 +67,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                         <button
                           key={index}
                           onClick={() => setSelectedImage(index)}
-                          className={`w-16 h-16 rounded border-2 overflow-hidden ${
-                            selectedImage === index ? 'border-indigo-500' : 'border-gray-200'
-                          }`}
+                          className={`w-16 h-16 rounded border-2 overflow-hidden ${selectedImage === index ? 'border-indigo-500' : 'border-gray-200'
+                            }`}
                         >
                           <img src={image} alt="" className="w-full h-full object-cover" />
                         </button>
@@ -83,22 +82,21 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                   <div className="mb-4">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
                     <p className="text-gray-600 mb-4">{product.description}</p>
-                    
+
                     {/* Rating */}
                     <div className="flex items-center mb-4">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-5 w-5 ${
-                              i < Math.floor(product.rating)
+                            className={`h-5 w-5 ${i < Math.floor(product.rating)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
-                            }`}
+                              }`}
                           />
                         ))}
                       </div>
-                      <span className="text-gray-600 ml-2">({product.rating}) • {product.reviews.length} reviews</span>
+                      <span className="text-gray-600 ml-2">({product.rating}) • {product.reviews?.length || 0} reviews</span>
                     </div>
 
                     {/* Price */}
@@ -146,9 +144,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                     <motion.button
                       onClick={handleAddToCartClick}
                       disabled={product.stock === 0}
-                      className={`flex-1 btn-primary btn-lg flex items-center justify-center space-x-2 ${
-                        product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`flex-1 btn-primary btn-lg flex items-center justify-center space-x-2 ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                       whileHover={product.stock > 0 ? { scale: 1.02 } : {}}
                       whileTap={product.stock > 0 ? { scale: 0.98 } : {}}
                     >

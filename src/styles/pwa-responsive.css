@@ -2,6 +2,7 @@
 
 /* Mobile-first responsive design */
 @media (max-width: 640px) {
+
   /* User Management Container */
   .user-management-container {
     padding: 1rem;
@@ -97,7 +98,8 @@
   }
 
   .form-input {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+    /* Prevents zoom on iOS */
   }
 
   /* Table responsiveness */
@@ -147,6 +149,7 @@
 
 /* PWA-specific styles */
 @media (display-mode: standalone) {
+
   /* Add safe area padding for devices with notches */
   .pwa-safe-area {
     padding-top: env(safe-area-inset-top);
@@ -176,6 +179,7 @@
 
 /* Touch-friendly interactions */
 @media (hover: none) and (pointer: coarse) {
+
   /* Larger touch targets */
   .touch-target {
     min-height: 44px;
@@ -183,13 +187,15 @@
   }
 
   /* Button adjustments */
-  button, .button {
+  button,
+  .button {
     min-height: 44px;
     padding: 0.75rem 1rem;
   }
 
   /* Checkbox and radio adjustments */
-  input[type="checkbox"], input[type="radio"] {
+  input[type="checkbox"],
+  input[type="radio"] {
     width: 20px;
     height: 20px;
   }
@@ -224,34 +230,7 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .user-management-container {
-    background-color: #1f2937;
-    color: #f9fafb;
-  }
-
-  .user-card {
-    background-color: #374151;
-    border-color: #4b5563;
-  }
-
-  .modal-content {
-    background-color: #374151;
-    color: #f9fafb;
-  }
-
-  .form-input {
-    background-color: #4b5563;
-    border-color: #6b7280;
-    color: #f9fafb;
-  }
-
-  .form-input:focus {
-    border-color: #818cf8;
-    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-  }
-}
+/* Dark mode support removed - website only supports light mode */
 
 /* Print styles */
 @media print {
@@ -327,8 +306,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Accessibility improvements */

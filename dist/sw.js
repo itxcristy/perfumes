@@ -127,12 +127,7 @@ self.addEventListener('fetch', (event) => {
   if (request.headers.get('upgrade') === 'websocket') {
     return;
   }
-
-  // Skip external requests (different origin)
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-
+  
   // Skip service worker in development mode to avoid conflicts with HMR
   if (isDevelopment) {
     // Only handle specific requests in development
@@ -141,7 +136,7 @@ self.addEventListener('fetch', (event) => {
     }
     return;
   }
-
+  
   event.respondWith(handleRequest(request));
 });
 

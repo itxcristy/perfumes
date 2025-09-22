@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertTriangle, RefreshCw, Image as ImageIcon } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface MediaErrorHandlerProps {
   src: string;
@@ -37,7 +37,7 @@ export const SafeImage: React.FC<MediaErrorHandlerProps> = ({
 
   const handleError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.warn(`Image load failed: ${currentSrc}`);
-    
+
     if (onError) {
       onError(event.nativeEvent);
     }
@@ -82,7 +82,7 @@ export const SafeImage: React.FC<MediaErrorHandlerProps> = ({
 
   if (hasError) {
     return (
-      <div 
+      <div
         className={`flex flex-col items-center justify-center bg-gray-100 border border-gray-200 rounded ${className}`}
         style={{ width, height: height || 'auto', minHeight: height ? `${height}px` : '100px' }}
       >
@@ -182,7 +182,7 @@ export const SafeVideo: React.FC<SafeVideoProps> = ({
     console.warn(`Video load failed: ${src}`);
     setHasError(true);
     setIsLoading(false);
-    
+
     if (onError) {
       onError(event.nativeEvent);
     }
@@ -198,7 +198,7 @@ export const SafeVideo: React.FC<SafeVideoProps> = ({
 
   if (hasError) {
     return (
-      <div 
+      <div
         className={`flex flex-col items-center justify-center bg-gray-100 border border-gray-200 rounded ${className}`}
         style={{ width, height: height || 'auto', minHeight: '200px' }}
       >
@@ -235,12 +235,6 @@ export const GlobalMediaErrorHandler: React.FC = () => {
     const handleGlobalMediaError = (event: Event) => {
       const target = event.target as HTMLMediaElement;
       if (target && (target.tagName === 'IMG' || target.tagName === 'VIDEO' || target.tagName === 'AUDIO')) {
-        console.warn('Global media error caught:', {
-          src: target.src || (target as HTMLImageElement).src,
-          tagName: target.tagName,
-          error: target.error
-        });
-        
         // Prevent the error from bubbling up and causing console errors
         event.preventDefault();
         event.stopPropagation();

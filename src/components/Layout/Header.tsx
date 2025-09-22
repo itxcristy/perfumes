@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Package,
-  ChevronDown, Zap, RefreshCw, Sparkles
-} from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Heart, LogOut, Settings, Package, ChevronDown, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
@@ -83,7 +80,6 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
   
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
 
   const navigationItems: NavigationItem[] = [
     { name: 'Home', href: '/' },
@@ -372,9 +368,7 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                           <span>My Orders</span>
                         </Link>
                       </div>
-                      
 
-                      
                       <div className="border-t border-gray-200 py-1">
                         <button
                           onClick={() => { 

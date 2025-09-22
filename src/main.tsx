@@ -4,7 +4,7 @@ import App from './App.tsx';
 import './index.css';
 
 // Initialize service worker for PWA and enhanced caching
-import './utils/serviceWorker';
+import './utils/serviceWorker.ts';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

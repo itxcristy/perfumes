@@ -3,8 +3,9 @@ import { Product, Category } from '../../types';
 import { useProducts } from '../../contexts/ProductContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { ImageUpload } from '../Common/ImageUpload';
 import { motion } from 'framer-motion';
-import { X, Image, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Image, Plus, Trash2, AlertCircle } from 'lucide-react';
 
 interface EnhancedProductFormProps {
   product: Product | null;
@@ -17,8 +18,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
   const { showNotification } = useNotification();
 
   const [activeTab, setActiveTab] = useState('basic');
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
@@ -80,9 +80,9 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
         metaTitle: product.metaTitle || '',
         metaDescription: product.metaDescription || ''
       };
-      
+
       setFormData(productData);
-      setImagePreviews(product.images || ['']);
+      setImagePaths(product.images || ['']);
     } else {
       // Reset to default values for new product
       setFormData({
@@ -113,52 +113,52 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
         metaTitle: '',
         metaDescription: ''
       });
-      setImagePreviews(['']);
+      setImagePaths(['']);
     }
   }, [product, categories]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Product name is required';
     }
-    
+
     if (!formData.description.trim()) {
       newErrors.description = 'Product description is required';
     }
-    
+
     if (!formData.shortDescription.trim()) {
       newErrors.shortDescription = 'Short description is required';
     }
-    
+
     if (!formData.sku.trim()) {
       newErrors.sku = 'SKU is required';
     }
-    
+
     if (formData.price <= 0) {
       newErrors.price = 'Price must be greater than 0';
     }
-    
+
     if (formData.stock < 0) {
       newErrors.stock = 'Stock quantity cannot be negative';
     }
-    
+
     if (formData.weight <= 0) {
       newErrors.weight = 'Weight must be greater than 0';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (name === 'category') {
       const selectedCategory = categories.find(c => c.name === value);
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData(prev => ({
+        ...prev,
         category: value,
         categoryId: selectedCategory?.id || ''
       }));
@@ -168,7 +168,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => {
@@ -178,7 +178,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
       });
     }
   };
-  
+
   const handleSpecificationChange = (key: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -198,7 +198,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
       }
     }));
   };
-  
+
   const handleTagChange = (tag: string) => {
     setFormData(prev => {
       const newTags = prev.tags.includes(tag)
@@ -212,11 +212,12 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData(prev => ({ ...prev, images: newImages }));
-    
-    // Update previews
-    const newPreviews = [...imagePreviews];
-    newPreviews[index] = value;
-    setImagePreviews(newPreviews);
+  };
+
+  const handleImagePathChange = (index: number, path: string) => {
+    const newPaths = [...imagePaths];
+    newPaths[index] = path;
+    setImagePaths(newPaths);
   };
 
   const addImageField = () => {
@@ -224,48 +225,30 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
       ...prev,
       images: [...prev.images, '']
     }));
-    setImagePreviews(prev => [...prev, '']);
+    setImagePaths(prev => [...prev, '']);
   };
 
   const removeImageField = (index: number) => {
     if (formData.images.length <= 1) return;
-    
+
     const newImages = [...formData.images];
     newImages.splice(index, 1);
     setFormData(prev => ({ ...prev, images: newImages }));
-    
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
+
+    const newPaths = [...imagePaths];
+    newPaths.splice(index, 1);
+    setImagePaths(newPaths);
   };
 
-  const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    
-    // Simulate image upload - in a real app, you would upload to a service
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        const imageUrl = event.target.result as string;
-        handleImageChange(index, imageUrl);
-        setIsUploading(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     if (!validateForm()) {
-      showNotification({ 
-        type: 'error', 
-        title: 'Validation Error', 
-        message: 'Please fix the errors in the form before submitting.' 
+      showNotification({
+        type: 'error',
+        title: 'Validation Error',
+        message: 'Please fix the errors in the form before submitting.'
       });
       return;
     }
@@ -273,7 +256,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
     // Check if we're in direct login mode
     const isDirectLogin = import.meta.env.VITE_DIRECT_LOGIN_ENABLED === 'true';
     let sellerId = user?.id;
-    
+
     // If in direct login mode and no user.id, try to get from localStorage
     if (isDirectLogin && !sellerId) {
       const storedUser = localStorage.getItem('direct_login_current_user');
@@ -311,26 +294,35 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
 
     try {
       if (product) {
-        updateProduct({ ...product, ...productData });
-        showNotification({ 
-          type: 'success', 
-          title: 'Product Updated', 
-          message: `${product.name} has been updated successfully.` 
+        // Create the updated product object with the original ID preserved
+        const updatedProduct = {
+          ...product,
+          ...productData,
+          id: product.id, // Ensure ID is preserved
+          updatedAt: new Date()
+        };
+
+        await updateProduct(updatedProduct);
+        showNotification({
+          type: 'success',
+          title: 'Product Updated',
+          message: `${formData.name} has been updated successfully.`
         });
       } else {
-        addProduct(productData);
-        showNotification({ 
-          type: 'success', 
-          title: 'Product Added', 
-          message: `${formData.name} has been added successfully.` 
+        await addProduct(productData);
+        showNotification({
+          type: 'success',
+          title: 'Product Added',
+          message: `${formData.name} has been added successfully.`
         });
       }
       onClose();
     } catch (error) {
-      showNotification({ 
-        type: 'error', 
-        title: 'Operation Failed', 
-        message: `Failed to ${product ? 'update' : 'add'} product. Please try again.` 
+      console.error('Product operation error:', error);
+      showNotification({
+        type: 'error',
+        title: 'Operation Failed',
+        message: `Failed to ${product ? 'update' : 'add'} product. Please try again.`
       });
     }
   };
@@ -352,11 +344,10 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-              activeTab === tab.id
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
+              ? 'border-indigo-600 text-indigo-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
           >
             {tab.label}
           </button>
@@ -378,9 +369,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Enter product name"
                 />
                 {errors.name && (
@@ -390,7 +380,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   </p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   SKU *
@@ -400,9 +390,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   name="sku"
                   value={formData.sku}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.sku ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.sku ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Enter SKU"
                 />
                 {errors.sku && (
@@ -412,7 +401,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   </p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category *
@@ -430,7 +419,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Weight (kg) *
@@ -440,9 +429,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   name="weight"
                   value={formData.weight}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.weight ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.weight ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="0.00"
                   step="0.001"
                   min="0"
@@ -455,7 +443,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 )}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Short Description *
@@ -465,9 +453,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 name="shortDescription"
                 value={formData.shortDescription}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                  errors.shortDescription ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.shortDescription ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Brief product description"
               />
               {errors.shortDescription && (
@@ -477,7 +464,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 </p>
               )}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Full Description *
@@ -487,9 +474,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 value={formData.description}
                 onChange={handleChange}
                 rows={6}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Detailed product description"
               />
               {errors.description && (
@@ -499,7 +485,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 </p>
               )}
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -528,9 +514,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   name="price"
                   value={formData.price}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.price ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.price ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="0.00"
                   step="0.01"
                   min="0"
@@ -542,7 +527,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   </p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Original Price
@@ -558,7 +543,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   min="0"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Stock Quantity *
@@ -568,9 +553,8 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   name="stock"
                   value={formData.stock}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.stock ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.stock ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="0"
                   min="0"
                 />
@@ -581,7 +565,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   </p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Min Stock Level
@@ -597,7 +581,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -613,7 +597,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   min="0"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Width (cm)
@@ -628,7 +612,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                   min="0"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Height (cm)
@@ -656,51 +640,32 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
               </label>
               <div className="space-y-4">
                 {formData.images.map((image, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      {imagePreviews[index] ? (
-                        <img
-                          src={imagePreviews[index]}
-                          alt={`Preview ${index + 1}`}
-                          className="h-16 w-16 rounded-lg object-cover border border-gray-300"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                          <Image className="h-6 w-6 text-gray-400" />
-                        </div>
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Image {index + 1} {index === 0 && '(Main Image)'}
+                      </span>
+                      {formData.images.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeImageField(index)}
+                          className="inline-flex items-center px-2 py-1 text-sm text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Remove
+                        </button>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
-                        value={image}
-                        onChange={(e) => handleImageChange(index, e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Image URL"
-                      />
-                      <div className="mt-2 flex space-x-2">
-                        <label className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                          <span>Upload</span>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(index, e)}
-                            disabled={isUploading}
-                          />
-                        </label>
-                        {formData.images.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeImageField(index)}
-                            className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <ImageUpload
+                      value={image}
+                      onChange={(url) => handleImageChange(index, url)}
+                      onPathChange={(path) => handleImagePathChange(index, path)}
+                      folder="products"
+                      placeholder={`Upload product image ${index + 1} or enter URL`}
+                      aspectRatio="square"
+                      maxWidth={400}
+                      maxHeight={400}
+                    />
                   </div>
                 ))}
                 <button
@@ -735,7 +700,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 </div>
               ))}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tags
@@ -746,18 +711,17 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                     key={tag}
                     type="button"
                     onClick={() => handleTagChange(tag)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      formData.tags.includes(tag)
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${formData.tags.includes(tag)
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                   >
                     {tag}
                   </button>
                 ))}
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -789,7 +753,7 @@ export const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({ produc
                 placeholder="Product meta title"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Meta Description

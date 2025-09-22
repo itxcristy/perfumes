@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  User, Camera, Edit3, Save, X, LogOut, Package, Heart,
-  Settings, Shield, CreditCard, MapPin, Bell, Eye, EyeOff,
-  Download, Upload, Trash2, Plus, Check, AlertCircle,
-  Smartphone, Globe, Lock, Key, Mail, Phone
-} from 'lucide-react';
+import { User, Camera, Edit3, Save, X, LogOut, Package, Heart, Settings, Shield, CreditCard, MapPin, Download, Upload, Trash2, Check, AlertCircle, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';

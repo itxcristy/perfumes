@@ -166,7 +166,7 @@ export const useMemoryCleanup = () => {
       try {
         element.removeEventListener(event, handler, options);
       } catch (error) {
-        console.warn('Error during event listener cleanup:', error);
+        // Silent cleanup
       }
     });
 
@@ -175,7 +175,7 @@ export const useMemoryCleanup = () => {
       try {
         observer.disconnect();
       } catch (error) {
-        console.warn('Error during observer cleanup:', error);
+        // Silent cleanup
       }
     });
 
@@ -184,7 +184,7 @@ export const useMemoryCleanup = () => {
       try {
         controller.abort();
       } catch (error) {
-        console.warn('Error during AbortController cleanup:', error);
+        // Silent cleanup
       }
     });
 

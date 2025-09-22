@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, MapPin, Package, ArrowLeft, Lock, CheckCircle } from 'lucide-react';
+import { CreditCard, MapPin, Package, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrders } from '../contexts/OrderContext';
@@ -24,6 +24,8 @@ import {
   MobileOrderSummary
 } from '../components/Mobile/MobileCheckoutForms';
 import { useMobileDetection } from '../hooks/useMobileGestures';
+import { RazorpayPayment } from '../components/Payment/RazorpayPayment';
+import { emailService } from '../services/emailService';
 
 export const CheckoutPage: React.FC = () => {
   const { items, total, clearCart } = useCart();
@@ -34,7 +36,8 @@ export const CheckoutPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('razorpay');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const [formData, setFormData] = useState({
     // Shipping Info
@@ -46,22 +49,26 @@ export const CheckoutPage: React.FC = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'United States',
-    
+    country: 'India',
+
     // Payment Info
     cardNumber: '',
     expiryDate: '',
     cvv: '',
     cardName: '',
-    
+
     // Options
     saveInfo: false,
     sameAsBilling: true,
   });
 
-  const shipping = 15.99;
-  const tax = total * 0.08;
-  const finalTotal = total + shipping + tax;
+  // Calculate Indian pricing
+  const subtotal = total;
+  const gst = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST for perfumes
+  const freeShippingThreshold = 2000;
+  const shipping = subtotal >= freeShippingThreshold ? 0 :
+    (formData.state.toLowerCase().includes('kashmir') ? 50 : 100);
+  const finalTotal = subtotal + gst + shipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -90,7 +97,7 @@ export const CheckoutPage: React.FC = () => {
         return false;
       }
     }
-    
+
     if (currentStep === 2) {
       if (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardName) {
         showNotification({
@@ -125,7 +132,7 @@ export const CheckoutPage: React.FC = () => {
         return false;
       }
     }
-    
+
     return true;
   };
 
@@ -135,60 +142,101 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
+  const handlePaymentSuccess = async (paymentId: string) => {
+    const shippingAddress = {
+      fullName: `${formData.firstName} ${formData.lastName}`,
+      streetAddress: formData.address,
+      city: formData.city,
+      state: formData.state,
+      postalCode: formData.zipCode,
+      country: formData.country,
+      phone: formData.phone,
+      // Legacy fields for backward compatibility
+      street: formData.address,
+      zipCode: formData.zipCode
+    };
+
+    let newOrderId: string | null = null;
+
+    if (user) {
+      // Authenticated user order
+      newOrderId = await createOrder(
+        items,
+        shippingAddress,
+        undefined, // billing address
+        selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay'
+      );
+    } else {
+      // Guest user order
+      newOrderId = await createGuestOrder({
+        items,
+        shippingAddress,
+        paymentMethod: selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay',
+        guestEmail: formData.email,
+        guestName: `${formData.firstName} ${formData.lastName}`,
+        paymentId: paymentId
+      });
+    }
+
+    if (newOrderId) {
+      setOrderId(newOrderId);
+      setOrderComplete(true);
+      setShowPaymentModal(false);
+      clearCart();
+
+      // Send order confirmation email
+      try {
+        await emailService.sendOrderConfirmationEmail({
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          orderId: newOrderId,
+          items: items.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            image: item.product.images[0]
+          })),
+          subtotal: subtotal,
+          gst: gst,
+          shipping: shipping,
+          total: finalTotal,
+          shippingAddress: {
+            street: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country
+          },
+          paymentMethod: selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay'
+        });
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+        // Don't fail the order if email fails
+      }
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    showNotification({
+      type: 'error',
+      title: 'Payment Failed',
+      message: error
+    });
+    setShowPaymentModal(false);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentModal(false);
+  };
+
   const handlePlaceOrder = async () => {
     if (validateStep(step)) {
-      const shippingAddress = {
-        fullName: `${formData.firstName} ${formData.lastName}`,
-        streetAddress: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.zipCode,
-        country: formData.country,
-        phone: formData.phone,
-        // Legacy fields for backward compatibility
-        street: formData.address,
-        zipCode: formData.zipCode
-      };
-
-      let newOrderId: string | null = null;
-
-      if (user) {
-        // Authenticated user order
-        newOrderId = await createOrder(
-          items,
-          shippingAddress,
-          'Credit Card', // Payment method
-          finalTotal
-        );
+      if (selectedPaymentMethod === 'cod') {
+        // Handle Cash on Delivery directly
+        await handlePaymentSuccess('cod_' + Date.now());
       } else {
-        // Guest user order
-        newOrderId = await createGuestOrder({
-          items,
-          shippingAddress,
-          paymentMethod: 'Credit Card',
-          guestEmail: formData.email,
-          guestName: `${formData.firstName} ${formData.lastName}`
-        });
-      }
-
-      if (newOrderId) {
-        setOrderId(newOrderId);
-        setOrderComplete(true);
-        clearCart();
-
-        showNotification({
-          type: 'success',
-          title: 'Order Placed Successfully!',
-          message: user
-            ? 'Your order has been placed and you can track it in your account.'
-            : 'Your order has been placed. You will receive updates via email.'
-        });
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Order Failed',
-          message: 'There was an error placing your order. Please try again.'
-        });
+        // Show Razorpay payment modal
+        setShowPaymentModal(true);
       }
     }
   };
@@ -292,12 +340,12 @@ export const CheckoutPage: React.FC = () => {
       switch (step) {
         case 1:
           return formData.firstName && formData.lastName && formData.email &&
-                 formData.phone && formData.address && formData.city &&
-                 formData.state && formData.zipCode;
+            formData.phone && formData.address && formData.city &&
+            formData.state && formData.zipCode;
         case 2:
           if (selectedPaymentMethod === 'card') {
             return formData.cardNumber && formData.expiryDate &&
-                   formData.cvv && formData.cardName;
+              formData.cvv && formData.cardName;
           }
           return true;
         case 3:
@@ -389,27 +437,24 @@ export const CheckoutPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
               <div className="flex items-center space-x-4 mt-2">
                 <div className={`flex items-center space-x-2 ${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    step >= 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${step >= 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+                    }`}>
                     1
                   </div>
                   <span className="text-sm font-medium">Shipping</span>
                 </div>
                 <div className="w-8 h-px bg-gray-300"></div>
                 <div className={`flex items-center space-x-2 ${step >= 2 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    step >= 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${step >= 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+                    }`}>
                     2
                   </div>
                   <span className="text-sm font-medium">Payment</span>
                 </div>
                 <div className="w-8 h-px bg-gray-300"></div>
                 <div className={`flex items-center space-x-2 ${step >= 3 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    step >= 3 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${step >= 3 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+                    }`}>
                     3
                   </div>
                   <span className="text-sm font-medium">Review</span>
@@ -576,7 +621,7 @@ export const CheckoutPage: React.FC = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
@@ -663,7 +708,7 @@ export const CheckoutPage: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
-                          ${(item.product.price * item.quantity).toFixed(2)}
+                          ₹{(item.product.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -699,24 +744,35 @@ export const CheckoutPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-28">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">${total.toFixed(2)}</span>
+                  <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">GST (18%)</span>
+                  <span className="font-medium">₹{gst.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">${shipping.toFixed(2)}</span>
+                  <span className="font-medium">
+                    {shipping === 0 ? (
+                      <span className="text-green-600 font-semibold">FREE</span>
+                    ) : (
+                      `₹${shipping.toFixed(2)}`
+                    )}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${tax.toFixed(2)}</span>
-                </div>
+                {shipping === 0 && (
+                  <div className="text-xs text-green-600 text-right">
+                    Free shipping on orders ≥ ₹2,000
+                  </div>
+                )}
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between">
                     <span className="text-lg font-semibold text-gray-900">Total</span>
-                    <span className="text-lg font-bold text-indigo-600">${finalTotal.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-indigo-600">₹{finalTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -727,6 +783,33 @@ export const CheckoutPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Razorpay Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <RazorpayPayment
+              amount={subtotal}
+              items={items}
+              customerInfo={{
+                name: `${formData.firstName} ${formData.lastName}`,
+                email: formData.email,
+                phone: formData.phone
+              }}
+              shippingAddress={{
+                street: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zipCode: formData.zipCode,
+                country: formData.country
+              }}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onCancel={handlePaymentCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

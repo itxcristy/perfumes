@@ -1,20 +1,23 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo, memo } from 'react';
 import { Product, ProductContextType, Review, Category } from '../types';
+import { useAuth } from './AuthContext';
 import {
   getProducts,
   getProductsBasic,
   getProductsMinimal,
   getFeaturedProducts,
   getCategories,
+  addReview,
+  supabase
+} from '../lib/supabase';
+import {
   createProduct,
   updateProduct,
   deleteProduct,
-  addReview,
-  supabase,
   createCategory,
   updateCategory,
   deleteCategory
-} from '../lib/supabase';
+} from '../lib/crudOperations';
 import { useError } from './ErrorContext';
 import { productCache, categoryCache, generateCacheKey, invalidateProductCache, invalidateCategoryCache } from '../utils/cache';
 
@@ -26,16 +29,17 @@ export const useProducts = () => {
   return context;
 };
 
-export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [basicLoading, setBasicLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [basicLoading, setBasicLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [featuredLoading, setFeaturedLoading] = useState(false);
   const [isUsingMockData, setIsUsingMockData] = useState(false);
   const { setError } = useError();
+  const { user: authUser } = useAuth();
 
   // Debug: Log initial state
   useEffect(() => {
@@ -60,6 +64,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [isUsingMockData]);
 
   const fetchCategories = useCallback(async () => {
+    console.log('🔥 fetchCategories called!');
     try {
       // Check cache first
       const cacheKey = generateCacheKey('categories');
@@ -71,14 +76,34 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
         return;
       }
 
-      const categoriesData = await getCategories();
+      // Use working REST API approach instead of hanging Supabase client
+      const { testDirectRestAPI } = await import('../lib/supabase');
+      const result = await testDirectRestAPI();
 
-      console.log('Using database categories:', categoriesData.length);
-      setCategories(categoriesData);
-      setIsUsingMockData(false);
+      if (result.success && result.data) {
+        // Transform the REST API data to match our Category interface
+        const transformedCategories = result.data.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-'),
+          description: cat.description || `${cat.name} products`,
+          imageUrl: cat.image_url || 'https://via.placeholder.com/400',
+          parentId: cat.parent_id,
+          sortOrder: cat.sort_order || 0,
+          isActive: cat.is_active !== false,
+          createdAt: new Date(cat.created_at || Date.now()),
+          updatedAt: new Date(cat.updated_at || Date.now())
+        }));
 
-      // Cache the results
-      categoryCache.set(cacheKey, categoriesData);
+        console.log('Using database categories via REST API:', transformedCategories.length);
+        setCategories(transformedCategories);
+        setIsUsingMockData(false);
+
+        // Cache the results
+        categoryCache.set(cacheKey, transformedCategories);
+      } else {
+        throw new Error(result.error || 'Failed to fetch categories');
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
       setError('Failed to load categories from database');
@@ -88,6 +113,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [setError]);
 
   const fetchFeaturedProducts = useCallback(async (limit: number = 8) => {
+    console.log('🔥 fetchFeaturedProducts called with limit:', limit);
     try {
       setFeaturedLoading(true);
       const cacheKey = generateCacheKey('featured-products', { limit });
@@ -146,9 +172,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
           getCategories()
         ]);
 
-        console.log('Database fetch results:', { 
-          productsCount: productsResult.length, 
-          categoriesCount: categoriesResult.length 
+        console.log('Database fetch results:', {
+          productsCount: productsResult.length,
+          categoriesCount: categoriesResult.length
         });
 
         // If we get data from database, use it
@@ -208,24 +234,41 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
 
 
+  // Auto-fetch products and featured products on context initialization
   useEffect(() => {
+    console.log('ProductContext: Auto-fetching products on initialization');
     fetchProducts();
   }, [fetchProducts]);
 
   useEffect(() => {
+    console.log('ProductContext: Auto-fetching featured products on initialization');
     fetchFeaturedProducts();
   }, [fetchFeaturedProducts]);
 
+  useEffect(() => {
+    console.log('ProductContext: Auto-fetching categories on initialization');
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // CRUD functions with new implementation
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt' | 'reviews' | 'rating' | 'reviewCount'>) => {
     try {
-      // Try to use database
-      const productId = await createProduct(productData);
-      if (productId) {
-        // Invalidate cache and refresh
+      const sellerId = authUser?.id;
+      const newProduct = await createProduct({
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        categoryId: productData.categoryId,
+        sellerId: sellerId,
+        stock: productData.stock,
+        imageUrl: productData.images?.[0] || '', // Use first image from array
+        featured: productData.featured
+      });
+
+      if (newProduct) {
         invalidateProductCache();
         await fetchProducts(true);
-      } else {
-        setError('Failed to add product');
+        setError(null);
       }
     } catch (error) {
       console.error('Error adding product:', error);
@@ -235,14 +278,13 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const updateProductData = async (updatedProduct: Product) => {
     try {
-      // Try database
-      const success = await updateProduct(updatedProduct);
-      if (success) {
-        // Invalidate cache for this specific product and refresh
-        invalidateProductCache(updatedProduct.id);
+      const { id, createdAt, reviews, rating, reviewCount, ...updates } = updatedProduct;
+
+      const result = await updateProduct(id, updates);
+      if (result) {
+        invalidateProductCache();
         await fetchProducts(true);
-      } else {
-        setError('Failed to update product');
+        setError(null);
       }
     } catch (error) {
       console.error('Error updating product:', error);
@@ -250,16 +292,13 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const deleteProductData = async (productId: string) => {
+  const deleteProductData = async (productId: string, sellerId?: string) => {
     try {
-      // Try database
-      const success = await deleteProduct(productId);
-      if (success) {
-        // Invalidate cache for this specific product and refresh
-        invalidateProductCache(productId);
+      const result = await deleteProduct(productId);
+      if (result) {
+        invalidateProductCache();
         await fetchProducts(true);
-      } else {
-        setError('Failed to delete product');
+        setError(null);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -288,7 +327,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const submitReview = async (review: Omit<Review, 'id' | 'createdAt' | 'profiles'>) => {
     try {
-      const success = await addReview(review.productId || review.product_id!, review.rating, review.comment || '', review.title);
+      const payload: Partial<Review> = {
+        productId: review.productId || review.product_id!,
+        rating: review.rating,
+        comment: review.comment,
+        title: review.title,
+        createdAt: new Date()
+      } as any;
+      const success = await addReview(payload as any);
       if (!success) {
         setError('Failed to submit review');
       }
@@ -299,16 +345,17 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const addCategory = async (categoryData: Omit<Category, 'id' | 'productCount' | 'createdAt' | 'updatedAt'>) => {
     try {
-      // Try to use database
-      const categoryId = await createCategory(categoryData);
-      if (categoryId) {
-        // Invalidate cache and refresh
+      const newCategory = await createCategory({
+        name: categoryData.name,
+        description: categoryData.description,
+        imageUrl: categoryData.imageUrl
+      });
+
+      if (newCategory) {
         invalidateCategoryCache();
         await fetchCategories();
+        setError(null);
         return Promise.resolve();
-      } else {
-        setError('Failed to add category');
-        return Promise.reject(new Error('Failed to add category'));
       }
     } catch (error) {
       console.error('Error adding category:', error);
@@ -319,16 +366,14 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const updateCategoryData = async (updatedCategory: Category) => {
     try {
-      // Try database
-      const success = await updateCategory(updatedCategory);
-      if (success) {
-        // Invalidate cache and refresh
+      const { id, createdAt, updatedAt, productCount, ...updates } = updatedCategory;
+      const result = await updateCategory(id, updates);
+
+      if (result) {
         invalidateCategoryCache();
         await fetchCategories();
+        setError(null);
         return Promise.resolve();
-      } else {
-        setError('Failed to update category');
-        return Promise.reject(new Error('Failed to update category'));
       }
     } catch (error) {
       console.error('Error updating category:', error);
@@ -339,16 +384,13 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const deleteCategoryData = async (categoryId: string) => {
     try {
-      // Try database
       const success = await deleteCategory(categoryId);
+
       if (success) {
-        // Invalidate cache and refresh
         invalidateCategoryCache();
         await fetchCategories();
+        setError(null);
         return Promise.resolve();
-      } else {
-        setError('Failed to delete category - it may have products associated with it');
-        return Promise.reject(new Error('Failed to delete category'));
       }
     } catch (error) {
       console.error('Error deleting category:', error);
@@ -357,8 +399,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  // Add the new functions to the context value
-  const contextValue: ProductContextType = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue: ProductContextType = useMemo(() => ({
     products,
     featuredProducts,
     categories,
@@ -378,11 +420,31 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     addCategory,
     updateCategory: updateCategoryData,
     deleteCategory: deleteCategoryData
-  };
+  }), [
+    products,
+    featuredProducts,
+    categories,
+    loading,
+    basicLoading,
+    detailsLoading,
+    featuredLoading,
+    isUsingMockData,
+    addProduct,
+    updateProductData,
+    deleteProductData,
+    fetchReviewsForProduct,
+    submitReview,
+    fetchProducts,
+    fetchCategories,
+    fetchFeaturedProducts,
+    addCategory,
+    updateCategoryData,
+    deleteCategoryData
+  ]);
 
   return (
     <ProductContext.Provider value={contextValue}>
       {children}
     </ProductContext.Provider>
   );
-};
+});

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, Suspense, lazy } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -16,125 +16,308 @@ import {
   FileText,
   Shield,
   Bell,
-  Gift
+  Gift,
+  Palette
 } from 'lucide-react';
-import { ComprehensiveAdminDashboard } from './Admin/ComprehensiveAdminDashboard';
-import { UserManagement } from './Admin/UserManagement';
-import { EnhancedUserManagement } from './Admin/EnhancedUserManagement';
-import ProductionUserManagement from './Admin/ProductionUserManagement';
-import { ProductManagement } from './Admin/ProductManagement';
-import { OrderManager } from './Admin/OrderManager';
-import { CategoryManagement } from './Admin/CategoryManagement';
-import { CollectionManagement } from './Admin/CollectionManagement';
-import { CouponManagement } from './Admin/CouponManagement';
-import { SettingsManagement } from './Admin/SettingsManagement';
-import { EnhancedAnalyticsDashboard } from './Admin/EnhancedAnalyticsDashboard';
-import { DedicatedAnalyticsDashboard } from './Admin/DedicatedAnalyticsDashboard';
-import { MarketingManagement } from './Admin/MarketingManagement';
-import { SystemHealthMonitoring } from './Admin/SystemHealthMonitoring';
-import { AuditLogs } from './Admin/AuditLogs';
-import { AdvancedReports } from './Admin/AdvancedReports';
 import { AdminErrorBoundary } from '../Common/AdminErrorBoundary';
 import { AdminLoadingState } from '../Common/EnhancedLoadingStates';
+
+// Lazy-loaded admin components for code splitting and performance optimization
+const ComprehensiveAdminDashboard = lazy(() =>
+  import('./Admin/ComprehensiveAdminDashboard').then(module => ({
+    default: module.ComprehensiveAdminDashboard
+  }))
+);
+
+const ProductionUserManagement = lazy(() =>
+  import('./Admin/ProductionUserManagement')
+);
+
+const ProductManagement = lazy(() =>
+  import('./Admin/ProductManagement').then(module => ({
+    default: module.ProductManagement
+  }))
+);
+
+const OrderManager = lazy(() =>
+  import('./Admin/OrderManager').then(module => ({
+    default: module.OrderManager
+  }))
+);
+
+const CategoryManagement = lazy(() =>
+  import('./Admin/CategoryManagement').then(module => ({
+    default: module.CategoryManagement
+  }))
+);
+
+const CollectionManagement = lazy(() =>
+  import('./Admin/CollectionManagement').then(module => ({
+    default: module.CollectionManagement
+  }))
+);
+
+const CouponManagement = lazy(() =>
+  import('./Admin/CouponManagement').then(module => ({
+    default: module.CouponManagement
+  }))
+);
+
+const SettingsManagement = lazy(() =>
+  import('./Admin/SettingsManagement').then(module => ({
+    default: module.SettingsManagement
+  }))
+);
+
+const EnhancedAnalyticsDashboard = lazy(() =>
+  import('./Admin/EnhancedAnalyticsDashboard').then(module => ({
+    default: module.EnhancedAnalyticsDashboard
+  }))
+);
+
+const DedicatedAnalyticsDashboard = lazy(() =>
+  import('./Admin/DedicatedAnalyticsDashboard').then(module => ({
+    default: module.DedicatedAnalyticsDashboard
+  }))
+);
+
+const MarketingManagement = lazy(() =>
+  import('./Admin/MarketingManagement').then(module => ({
+    default: module.MarketingManagement
+  }))
+);
+
+
+
+const AuditLogs = lazy(() =>
+  import('./Admin/AuditLogs').then(module => ({
+    default: module.AuditLogs
+  }))
+);
+
+const AdvancedReports = lazy(() =>
+  import('./Admin/AdvancedReports').then(module => ({
+    default: module.AdvancedReports
+  }))
+);
+
+const AccessibilityDashboard = lazy(() =>
+  import('./Admin/AccessibilityDashboard').then(module => ({
+    default: module.AccessibilityDashboard
+  }))
+);
+
+const ThemeCustomizationDashboard = lazy(() =>
+  import('./Admin/ThemeCustomizationDashboard').then(module => ({
+    default: module.ThemeCustomizationDashboard
+  }))
+);
 
 interface NavItem {
   name: string;
   icon: React.ReactNode;
-  component: React.ReactNode;
+  component: React.ComponentType;
+  preload?: boolean;
 }
 
-export const AdminDashboard: React.FC = () => {
+// Memoized navigation item component for performance
+const NavigationItem = memo<{
+  item: NavItem;
+  isActive: boolean;
+  onClick: () => void;
+  collapsed: boolean;
+}>(({ item, isActive, onClick, collapsed }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${isActive
+      ? 'bg-indigo-100 text-indigo-700 border-r-2 border-indigo-500'
+      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+      }`}
+    title={collapsed ? item.name : undefined}
+  >
+    <span className="flex-shrink-0">{item.icon}</span>
+    {!collapsed && (
+      <span className="ml-3 truncate">{item.name}</span>
+    )}
+  </button>
+));
+
+NavigationItem.displayName = 'NavigationItem';
+
+// Memoized component renderer with Suspense
+const ComponentRenderer = memo<{
+  component: React.ComponentType;
+  isActive: boolean;
+}>(({ component: Component, isActive }) => {
+  if (!isActive) return null;
+
+  return (
+    <Suspense fallback={
+      <AdminLoadingState
+        type="dashboard"
+        message="Loading component..."
+      />
+    }>
+      <Component />
+    </Suspense>
+  );
+});
+
+ComponentRenderer.displayName = 'ComponentRenderer';
+
+export const AdminDashboard: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check for mobile screen size
+  // Simple responsive detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   useEffect(() => {
-    const checkScreenSize = () => {
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setSidebarCollapsed(false); // Always expanded on mobile when open
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Preload critical components for better performance
+  useEffect(() => {
+    const preloadCriticalComponents = async () => {
+      try {
+        // Preload the most commonly used admin components
+        await import('./Admin/ComprehensiveAdminDashboard');
+
+        // Preload secondary components after a delay
+        setTimeout(async () => {
+          await Promise.all([
+            import('./Admin/ProductionUserManagement'),
+            import('./Admin/ProductManagement'),
+            import('./Admin/OrderManager')
+          ]);
+        }, 2000);
+      } catch (error) {
+        console.warn('Failed to preload some admin components:', error);
       }
     };
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    // Preload after initial render is complete
+    const timeoutId = setTimeout(preloadCriticalComponents, 500);
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  const navigation: NavItem[] = [
+  // Memoized navigation configuration with performance optimizations
+  const navigation: NavItem[] = useMemo(() => [
     {
       name: 'Dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
-      component: <ComprehensiveAdminDashboard />
+      component: ComprehensiveAdminDashboard,
+      preload: true // Preload critical dashboard component
     },
     {
       name: 'Users',
       icon: <Users className="h-5 w-5" />,
-      component: <ProductionUserManagement />
+      component: ProductionUserManagement
     },
     {
       name: 'Products',
       icon: <Package className="h-5 w-5" />,
-      component: <ProductManagement />
+      component: ProductManagement
     },
     {
       name: 'Orders',
       icon: <ShoppingCart className="h-5 w-5" />,
-      component: <OrderManager />
+      component: OrderManager
     },
     {
       name: 'Categories',
       icon: <Tag className="h-5 w-5" />,
-      component: <CategoryManagement />
+      component: CategoryManagement
     },
     {
       name: 'Collections',
       icon: <Gift className="h-5 w-5" />,
-      component: <CollectionManagement />
+      component: CollectionManagement
     },
     {
       name: 'Coupons',
       icon: <Tag className="h-5 w-5" />,
-      component: <CouponManagement />
+      component: CouponManagement
     },
     {
       name: 'Marketing',
       icon: <TrendingUp className="h-5 w-5" />,
-      component: <MarketingManagement />
+      component: MarketingManagement
     },
     {
       name: 'Analytics',
       icon: <BarChart3 className="h-5 w-5" />,
-      component: <DedicatedAnalyticsDashboard />
+      component: DedicatedAnalyticsDashboard
     },
     {
       name: 'Reports',
       icon: <FileText className="h-5 w-5" />,
-      component: <AdvancedReports />
+      component: AdvancedReports
     },
-    {
-      name: 'System Health',
-      icon: <Shield className="h-5 w-5" />,
-      component: <SystemHealthMonitoring />
-    },
+
     {
       name: 'Audit Logs',
       icon: <Bell className="h-5 w-5" />,
-      component: <AuditLogs />
+      component: AuditLogs
+    },
+    {
+      name: 'Accessibility',
+      icon: <UserCog className="h-5 w-5" />,
+      component: AccessibilityDashboard
+    },
+    {
+      name: 'Theme',
+      icon: <Palette className="h-5 w-5" />,
+      component: ThemeCustomizationDashboard
     },
     {
       name: 'Settings',
       icon: <Settings className="h-5 w-5" />,
-      component: <SettingsManagement />
+      component: SettingsManagement
     }
-  ];
+  ], []);
+
+  // Optimized tab switching with preloading and caching
+  const handleTabSwitch = useCallback((tabName: string) => {
+    const normalizedTabName = tabName.toLowerCase();
+    if (normalizedTabName !== activeTab) {
+      setIsLoading(true);
+      setActiveTab(normalizedTabName);
+
+      // Reduced loading time for better UX
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 150);
+    }
+  }, [activeTab]);
+
+  // Preload critical components on mount
+  useEffect(() => {
+    const preloadComponents = navigation.filter(item => item.preload);
+    preloadComponents.forEach(item => {
+      // Trigger lazy loading for preload components
+      item.component;
+    });
+  }, [navigation]);
+
+  // Memoized active navigation item
+  const activeNavItem = useMemo(() =>
+    navigation.find(item => item.name.toLowerCase() === activeTab),
+    [navigation, activeTab]
+  );
 
   const handleNavigation = async (tabName: string) => {
+    const normalizedTabName = tabName.toLowerCase();
     setIsLoading(true);
-    setActiveTab(tabName.toLowerCase());
+    setActiveTab(normalizedTabName);
+
     if (isMobile) {
       setSidebarOpen(false); // Close mobile sidebar after navigation
     }
@@ -158,7 +341,16 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Skip Links for Accessibility */}
+      <div className="sr-only">
+        <a href="#main-content" className="focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded z-50">
+          Skip to main content
+        </a>
+        <a href="#sidebar-nav" className="focus:not-sr-only focus:absolute focus:top-4 focus:left-32 bg-blue-600 text-white px-4 py-2 rounded z-50">
+          Skip to navigation
+        </a>
+      </div>
       {/* Mobile sidebar overlay */}
       {sidebarOpen && isMobile && (
         <div
@@ -168,11 +360,15 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`${isMobile
-        ? sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        : sidebarCollapsed ? 'w-16' : 'w-64'
-        } ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-64' : 'relative'
-        } bg-white transform transition-all duration-300 ease-in-out shadow-lg border-r border-gray-200`}>
+      <aside
+        className={`${isMobile
+          ? sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          : sidebarCollapsed ? 'w-16' : 'w-64'
+          } ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-64' : 'flex-shrink-0'
+          } bg-white transform transition-all duration-300 ease-in-out shadow-lg border-r border-gray-200 h-full`}
+        aria-label="Admin navigation sidebar"
+        role="navigation"
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between flex-shrink-0 px-4 py-4 border-b border-gray-200">
@@ -204,35 +400,22 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Navigation */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <nav
+              id="sidebar-nav"
+              className="flex-1 px-3 py-4 space-y-1 overflow-y-auto"
+              aria-label="Admin dashboard navigation"
+              role="navigation"
+            >
               {navigation.map((item) => {
                 const isActive = activeTab === item.name.toLowerCase();
                 return (
-                  <button
+                  <NavigationItem
                     key={item.name}
-                    onClick={() => handleNavigation(item.name)}
-                    className={`${isActive
-                      ? 'bg-indigo-100 text-indigo-700 border-r-4 border-indigo-600'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-r-4 border-transparent'
-                      } group flex items-center w-full text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-l-lg ${sidebarCollapsed && !isMobile ? 'px-3 py-3 justify-center' : 'px-4 py-3'
-                      }`}
-                    title={sidebarCollapsed && !isMobile ? item.name : undefined}
-                    aria-label={item.name}
-                  >
-                    <div className={`${isActive ? 'text-indigo-700' : 'text-gray-400 group-hover:text-gray-600'
-                      } transition-colors duration-200 flex-shrink-0`}>
-                      {item.icon}
-                    </div>
-
-                    {(!sidebarCollapsed || isMobile) && (
-                      <>
-                        <span className="ml-3 font-medium truncate">{item.name}</span>
-                        {isActive && (
-                          <ChevronRight className="ml-auto h-4 w-4 text-indigo-700 flex-shrink-0" />
-                        )}
-                      </>
-                    )}
-                  </button>
+                    item={item}
+                    isActive={isActive}
+                    onClick={() => handleTabSwitch(item.name)}
+                    collapsed={sidebarCollapsed && !isMobile}
+                  />
                 );
               })}
             </nav>
@@ -248,10 +431,15 @@ export const AdminDashboard: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 min-w-0">
+      <main
+        id="main-content"
+        className="flex flex-col flex-1 min-w-0 h-full overflow-hidden"
+        aria-label="Main dashboard content"
+        role="main"
+      >
         {/* Mobile header */}
         {isMobile && (
           <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
@@ -292,23 +480,32 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="p-4 md:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-4 md:p-6 lg:p-8 h-full">
+            <div className="max-w-7xl mx-auto h-full">
               <AdminErrorBoundary>
                 {isLoading ? (
                   <AdminLoadingState
                     type={activeTab as any}
-                    message={`Loading ${navigation.find(item => item.name.toLowerCase() === activeTab)?.name || 'content'}...`}
+                    message={`Loading ${activeNavItem?.name || 'content'}...`}
+                  />
+                ) : activeNavItem ? (
+                  <ComponentRenderer
+                    component={activeNavItem.component}
+                    isActive={true}
                   />
                 ) : (
-                  navigation.find(item => item.name.toLowerCase() === activeTab)?.component
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">Component not found</p>
+                  </div>
                 )}
               </AdminErrorBoundary>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
-};
+});
+
+AdminDashboard.displayName = 'AdminDashboard';

@@ -1,22 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  Package,
-  BarChart3,
-  PieChart,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-  ArrowUp,
-  ArrowDown,
-  Eye,
-  Clock
-} from 'lucide-react';
+import { TrendingUp, DollarSign, Users, ShoppingCart, Package, Download, RefreshCw, ArrowUp, ArrowDown, Eye } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { ErrorFallback } from '../../Common/ErrorFallback';

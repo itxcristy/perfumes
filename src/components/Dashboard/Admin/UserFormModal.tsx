@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Eye, EyeOff, Mail, User, Phone, Calendar, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, User, Phone, Calendar, Shield } from 'lucide-react';
 import { Modal } from '../../Common/Modal';
 import { EnhancedButton } from '../../Common/EnhancedButton';
 

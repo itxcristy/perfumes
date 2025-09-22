@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Star, Heart, ShieldCheck, Truck, RotateCcw, Plus, Minus, MessageSquare, Edit } from 'lucide-react';
+import { Heart, ShieldCheck, Truck, RotateCcw, Plus, Minus, MessageSquare, Edit } from 'lucide-react';
 import { useProducts } from '../contexts/ProductContext';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -34,7 +34,7 @@ export const ProductDetailPage: React.FC = () => {
   const { addItem: toggleWishlistItem, isInWishlist } = useWishlist();
   const { addToRecentlyViewed, getRelatedProducts, getFrequentlyBoughtTogether } = useRecommendations();
   const { showNotification } = useNotification();
-  
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -79,7 +79,7 @@ export const ProductDetailPage: React.FC = () => {
   const handleToggleWishlist = () => {
     toggleWishlistItem(product);
   };
-  
+
   const handleReviewSubmit = async (rating: number, comment: string) => {
     if (!user) {
       showNotification({ type: 'error', title: 'Login Required', message: 'You must be logged in to submit a review.' });
@@ -110,12 +110,16 @@ export const ProductDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="aspect-square mb-4">
-              <img src={(product.images && product.images.length > 0 ? product.images[selectedImage] || product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='} alt={product.name} className="w-full h-full object-cover rounded-xl shadow-lg"/>
+              <img src={
+                (product.images && product.images.length > 0 && product.images[selectedImage]) ||
+                (product.images && product.images.length > 0 && product.images[0]) ||
+                'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='
+              } alt={product.name} className="w-full h-full object-cover rounded-xl shadow-lg" />
             </div>
             {product.images && product.images.length > 1 && (
               <div className="grid grid-cols-5 gap-4">
                 {product.images.map((image, index) => (
-                  <button key={index} onClick={() => setSelectedImage(index)} className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${ selectedImage === index ? 'border-indigo-500 scale-105' : 'border-gray-200' }`}>
+                  <button key={index} onClick={() => setSelectedImage(index)} className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-indigo-500 scale-105' : 'border-gray-200'}`}>
                     <img src={image} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
@@ -174,7 +178,7 @@ export const ProductDetailPage: React.FC = () => {
               <motion.button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 btn-primary !text-lg" whileHover={product.stock > 0 ? { scale: 1.02 } : {}} whileTap={product.stock > 0 ? { scale: 0.98 } : {}}>
                 <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
               </motion.button>
-              <motion.button onClick={handleToggleWishlist} className={`p-4 border rounded-xl transition-colors ${ isInWishlist(product.id) ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-300 hover:bg-gray-50' }`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.button onClick={handleToggleWishlist} className={`p-4 border rounded-xl transition-colors ${isInWishlist(product.id) ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-300 hover:bg-gray-50'}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Heart className="h-6 w-6" fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
               </motion.button>
             </div>
@@ -215,7 +219,7 @@ export const ProductDetailPage: React.FC = () => {
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6">
                 {tabs.map((tab) => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-4 px-1 border-b-2 font-medium text-sm ${ activeTab === tab.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700' }`}>{tab.name}</button>
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>{tab.name}</button>
                 ))}
               </nav>
             </div>
@@ -227,7 +231,7 @@ export const ProductDetailPage: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                    <button onClick={() => setIsReviewModalOpen(true)} className="btn-primary"><Edit className="h-4 w-4 mr-2"/><span>Write a Review</span></button>
+                    <button onClick={() => setIsReviewModalOpen(true)} className="btn-primary"><Edit className="h-4 w-4 mr-2" /><span>Write a Review</span></button>
                   </div>
                   {reviewsLoading ? <LoadingSpinner /> : reviews.length > 0 ? (
                     <div className="space-y-4">

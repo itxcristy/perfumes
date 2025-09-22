@@ -31,7 +31,7 @@ const SecurityContext = createContext<SecurityContextType | undefined>(undefined
 export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
-  
+
   const [securityState, setSecurityState] = useState({
     isSecureConnection: false,
     hasValidSession: false,
@@ -49,7 +49,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     checkSecureConnection();
     validateSession();
     generateCSRFToken();
-    
+
     // Set up periodic security checks
     const securityInterval = setInterval(() => {
       validateSession();
@@ -61,13 +61,13 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
 
   // Check if connection is secure (HTTPS)
   const checkSecureConnection = () => {
-    const isSecure = window.location.protocol === 'https:' || 
-                     window.location.hostname === 'localhost' ||
-                     window.location.hostname === '127.0.0.1';
-    
+    const isSecure = window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
     setSecurityState(prev => ({ ...prev, isSecureConnection: isSecure }));
-    
-    if (!isSecure && process.env.NODE_ENV === 'production') {
+
+    if (!isSecure && import.meta.env.MODE === 'production') {
       showNotification({
         type: 'warning',
         title: 'Insecure Connection',
@@ -86,7 +86,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   const generateCSRFToken = () => {
     const token = btoa(Math.random().toString()).substr(10, 32);
     setCsrfToken(token);
-    
+
     // Store in session storage for validation
     sessionStorage.setItem('csrf_token', token);
   };
@@ -111,7 +111,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     }
 
     const userRole = user.role;
-    
+
     // Define permission matrix
     const permissions: { [key: string]: { [key: string]: string[] } } = {
       user_management: {
@@ -143,7 +143,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     }
 
     const hasPermission = allowedRoles.includes(userRole);
-    
+
     if (!hasPermission) {
       logSecurityEvent({
         type: 'permission_denied',
@@ -160,12 +160,6 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   // Log security events
   const logSecurityEvent = (event: SecurityEvent) => {
     setSecurityEvents(prev => [...prev, event]);
-    
-    // Send to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
-      // This would typically send to your logging service
-      console.warn('Security Event:', event);
-    }
 
     // Show user notification for critical events
     if (event.type === 'permission_denied' || event.type === 'suspicious_activity') {
@@ -187,14 +181,14 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     const now = Date.now();
     const key = `${operation}_${user?.id}`;
     const stored = localStorage.getItem(key);
-    
+
     if (!stored) {
       localStorage.setItem(key, JSON.stringify({ count: 1, resetTime: now + 60000 }));
       return true;
     }
 
     const data = JSON.parse(stored);
-    
+
     // Reset if time window has passed
     if (now > data.resetTime) {
       localStorage.setItem(key, JSON.stringify({ count: 1, resetTime: now + 60000 }));
@@ -214,7 +208,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
         details: { count: data.count, limit: limits[operation] },
         timestamp: new Date()
       });
-      
+
       setSecurityState(prev => ({
         ...prev,
         rateLimitStatus: {
@@ -222,23 +216,23 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
           [operation]: false
         }
       }));
-      
+
       return false;
     }
 
     // Increment counter
-    localStorage.setItem(key, JSON.stringify({ 
-      count: data.count + 1, 
-      resetTime: data.resetTime 
+    localStorage.setItem(key, JSON.stringify({
+      count: data.count + 1,
+      resetTime: data.resetTime
     }));
-    
+
     return true;
   };
 
   // Input sanitization
   const sanitizeInput = (input: string): string => {
     if (!input) return '';
-    
+
     return input
       .replace(/[<>]/g, '') // Remove angle brackets
       .replace(/javascript:/gi, '') // Remove javascript: protocol
@@ -308,7 +302,7 @@ export const withSecurity = <P extends object>(
 ) => {
   return (props: P) => {
     const { checkPermission } = useSecurity();
-    
+
     if (!checkPermission(requiredPermission, resource)) {
       return (
         <div className="flex items-center justify-center h-64">
@@ -320,7 +314,7 @@ export const withSecurity = <P extends object>(
         </div>
       );
     }
-    
+
     return <Component {...props} />;
   };
 };

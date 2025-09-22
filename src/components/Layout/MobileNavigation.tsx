@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  X, Home, Package, Star, Tag, User, ShoppingCart, Heart, 
-  ChevronRight, LogOut, Settings, Package as PackageIcon
-} from 'lucide-react';
+import { X, Home, Package, Star, Tag, User, ShoppingCart, Heart, ChevronRight, LogOut, Settings, Package as PackageIcon } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
@@ -27,10 +24,10 @@ interface NavigationItem {
   }[];
 }
 
-const MobileNavigation: React.FC<MobileNavigationProps> = ({ 
-  isOpen, 
-  onClose, 
-  onCartClick 
+const MobileNavigation: React.FC<MobileNavigationProps> = ({
+  isOpen,
+  onClose,
+  onCartClick
 }) => {
   const { user, logout } = useAuth();
   const { itemCount } = useCart();
@@ -38,9 +35,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef<HTMLDivElement>(null);
-  
+
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  
+
   // Navigation items with icons for mobile
   const navigationItems: NavigationItem[] = [
     { name: 'Home', href: '/', icon: <Home className="h-5 w-5" /> },
@@ -120,7 +117,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     <>
       {/* Backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden"
           onClick={onClose}
           role="button"
@@ -137,9 +134,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       {/* Mobile Navigation Panel - Android-like slide-in from left */}
       <div
         ref={navRef}
-        className={`fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-out md:hidden ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-out md:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="mobile-nav-title"
@@ -211,7 +207,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </div>
             <span className="text-xs mt-1 text-gray-600">Wishlist</span>
           </Link>
-          
+
           <button
             onClick={() => {
               onCartClick();
@@ -229,7 +225,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </div>
             <span className="text-xs mt-1 text-gray-600">Cart</span>
           </button>
-          
+
           {user ? (
             <Link
               to="/profile"
@@ -262,24 +258,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   <>
                     <button
                       onClick={() => toggleDropdown(item.name)}
-                      className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium ${
-                        isActiveLink(item.href)
+                      className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium ${isActiveLink(item.href)
                           ? 'text-purple-600 bg-purple-50'
                           : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                       aria-expanded={activeDropdown === item.name}
                     >
                       <div className="flex items-center">
                         <span className="mr-3 text-gray-500">{item.icon}</span>
                         <span>{item.name}</span>
                       </div>
-                      <ChevronRight 
-                        className={`h-5 w-5 text-gray-400 transition-transform ${
-                          activeDropdown === item.name ? 'rotate-90' : ''
-                        }`} 
+                      <ChevronRight
+                        className={`h-5 w-5 text-gray-400 transition-transform ${activeDropdown === item.name ? 'rotate-90' : ''
+                          }`}
                       />
                     </button>
-                    
+
                     {activeDropdown === item.name && (
                       <div className="bg-gray-50" role="region" aria-label={`${item.name} submenu`}>
                         {item.dropdownItems?.map((dropdownItem) => (
@@ -287,11 +281,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                             key={dropdownItem.name}
                             to={dropdownItem.href}
                             onClick={onClose}
-                            className={`block px-12 py-3 text-sm ${
-                              isActiveLink(dropdownItem.href)
+                            className={`block px-12 py-3 text-sm ${isActiveLink(dropdownItem.href)
                                 ? 'text-purple-600 bg-purple-50'
                                 : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                              }`}
                           >
                             {dropdownItem.name}
                           </Link>
@@ -303,11 +296,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   <Link
                     to={item.href}
                     onClick={onClose}
-                    className={`flex items-center px-4 py-3 text-base font-medium ${
-                      isActiveLink(item.href)
+                    className={`flex items-center px-4 py-3 text-base font-medium ${isActiveLink(item.href)
                         ? 'text-purple-600 bg-purple-50'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <span className="mr-3 text-gray-500">{item.icon}</span>
                     <span>{item.name}</span>
@@ -329,7 +321,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               <Settings className="h-5 w-5 text-gray-500 mr-3" />
               <span>Dashboard</span>
             </Link>
-            
+
             <Link
               to="/orders"
               onClick={onClose}
@@ -338,12 +330,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               <PackageIcon className="h-5 w-5 text-gray-500 mr-3" />
               <span>My Orders</span>
             </Link>
-            
 
-            
             <button
-              onClick={() => { 
-                logout(); 
+              onClick={() => {
+                logout();
                 onClose();
               }}
               className="flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -353,7 +343,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </button>
           </div>
         )}
-
 
       </div>
     </>

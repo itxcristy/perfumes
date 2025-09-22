@@ -16,16 +16,14 @@
     "@types/node": "^24.3.0",
     "@types/recharts": "^2.0.1",
     "axios": "^1.9.0",
-    "dotenv": "^17.2.1",
     "framer-motion": "^12.23.6",
     "logrocket": "^10.1.0",
     "lucide-react": "^0.511.0",
+    "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-is": "^19.1.0",
     "react-router-dom": "^7.6.3",
-    "recharts": "^3.1.0",
-    "tsx": "^4.20.5"
+    "recharts": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

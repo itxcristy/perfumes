@@ -5,25 +5,7 @@ import { Product } from '../../../types';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { EnhancedProductForm } from '../../Product/EnhancedProductForm';
 import { Modal } from '../../Common/Modal';
-import {
-  Edit,
-  Trash2,
-  Plus,
-  Package,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  CheckSquare,
-  Square,
-  MoreVertical,
-  Eye,
-  Copy,
-  Archive,
-  RefreshCw,
-  SortAsc,
-  SortDesc
-} from 'lucide-react';
+import { Edit, Trash2, Plus, Package, Search, Filter, Download, CheckSquare, Square, Eye, Copy, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveTable } from '../../Common/ResponsiveTable';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
@@ -54,7 +36,7 @@ export const ProductManagement: React.FC = () => {
   const filteredProducts = useMemo(() => {
     const filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
 
       // Stock filter
@@ -292,11 +274,11 @@ export const ProductManagement: React.FC = () => {
       render: (value: any, record: Product) => (
         <div className="flex items-center">
           <img
-            src={record.images[0] || '/placeholder-image.jpg'}
+            src={(record.images && record.images.length > 0 && record.images[0]) || 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=No+Image'}
             alt={record.name}
             className="h-12 w-12 rounded-lg object-cover border border-gray-200"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=No+Image';
             }}
           />
           <div className="ml-4">
@@ -304,7 +286,7 @@ export const ProductManagement: React.FC = () => {
               {record.name}
             </div>
             <div className="text-sm text-gray-500">
-              {record.description.slice(0, 50)}...
+              {record.description?.slice(0, 50)}...
             </div>
           </div>
         </div>
@@ -337,11 +319,12 @@ export const ProductManagement: React.FC = () => {
       render: (value: any, record: Product) => (
         <div>
           <div className="text-sm font-medium text-gray-900">
-            ${record.price.toFixed(2)}
+
+            ₹{record.price.toFixed(2)}
           </div>
           {record.originalPrice && (
             <div className="text-sm text-gray-500 line-through">
-              ${record.originalPrice.toFixed(2)}
+              ₹{record.originalPrice.toFixed(2)}
             </div>
           )}
           {record.originalPrice && (
@@ -674,11 +657,11 @@ export const ProductManagement: React.FC = () => {
               >
                 <div className="relative">
                   <img
-                    src={product.images[0] || '/placeholder-image.jpg'}
+                    src={(product.images && product.images.length > 0 && product.images[0]) || 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=No+Image'}
                     alt={product.name}
                     className="w-full h-48 object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=No+Image';
                     }}
                   />
                   <div className="absolute top-2 left-2">
@@ -719,11 +702,11 @@ export const ProductManagement: React.FC = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <span className="text-lg font-bold text-gray-900">
-                        ${product.price.toFixed(2)}
+                        ₹{product.price.toFixed(2)}
                       </span>
                       {product.originalPrice && (
                         <span className="text-sm text-gray-500 line-through ml-2">
-                          ${product.originalPrice.toFixed(2)}
+                          ₹{product.originalPrice.toFixed(2)}
                         </span>
                       )}
                     </div>

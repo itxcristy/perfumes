@@ -46,24 +46,119 @@ export default defineConfig({
 
   server: {
     host: 'localhost',
-    port: 5179,
+    port: 5173,
+    strictPort: false,
     hmr: {
       protocol: 'ws',
-      host: 'localhost',
-      port: 5179
+      host: 'localhost'
     }
   },
 
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['framer-motion'],
-          icons: ['lucide-react'],
-          charts: ['recharts'],
-          supabase: ['@supabase/supabase-js']
+        manualChunks: (id) => {
+          // Core React libraries
+          if (id.includes('react') || id.includes('react-dom')) {
+            return 'vendor';
+          }
+          
+          // Router
+          if (id.includes('react-router')) {
+            return 'router';
+          }
+          
+          // UI libraries
+          if (id.includes('framer-motion')) {
+            return 'ui';
+          }
+          
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          
+          if (id.includes('recharts')) {
+            return 'charts';
+          }
+          
+          // Monitoring libraries - separate chunk
+          if (id.includes('@sentry') || id.includes('logrocket')) {
+            return 'monitoring';
+          }
+
+          // Supabase
+          if (id.includes('@supabase')) {
+            return 'supabase';
+          }
+
+          // Payment libraries
+          if (id.includes('razorpay')) {
+            return 'payment';
+          }
+          
+          // Admin components - split by functionality
+          if (id.includes('src/components/Dashboard/Admin/')) {
+            if (id.includes('Analytics') || id.includes('Reports')) {
+              return 'admin-analytics';
+            }
+            if (id.includes('Management') || id.includes('Manager')) {
+              return 'admin-management';
+            }
+            return 'admin-components';
+          }
+          
+          // Dashboard components
+          if (id.includes('src/components/Dashboard/')) {
+            return 'dashboard';
+          }
+          
+          // Settings components
+          if (id.includes('src/components/Settings/')) {
+            return 'settings';
+          }
+          
+          // Product components
+          if (id.includes('src/components/Product/')) {
+            return 'product';
+          }
+          
+          // Context providers
+          if (id.includes('src/contexts/')) {
+            return 'contexts';
+          }
+          
+          // Utils
+          if (id.includes('src/utils/')) {
+            return 'utils';
+          }
+          
+          // Services
+          if (id.includes('src/services/')) {
+            return 'services';
+          }
+          
+          // Pages - split by functionality for route-based loading
+          if (id.includes('src/pages/')) {
+            if (id.includes('Dashboard') || id.includes('Admin')) {
+              return 'pages-admin';
+            }
+            if (id.includes('Product') || id.includes('Search') || id.includes('Category') || id.includes('Collection')) {
+              return 'pages-catalog';
+            }
+            if (id.includes('Profile') || id.includes('Settings') || id.includes('Orders') || id.includes('Wishlist')) {
+              return 'pages-user';
+            }
+            if (id.includes('Checkout') || id.includes('Payment')) {
+              return 'pages-checkout';
+            }
+            if (id.includes('Home')) {
+              return 'pages-home';
+            }
+            return 'pages';
+          }
+          
+          // Default chunk for everything else
+          return 'common';
         },
         // Optimize chunk naming
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -75,7 +170,7 @@ export default defineConfig({
     // Enable CSS code splitting
     cssCodeSplit: true,
     // Generate CSS sourcemaps in development
-    sourcemap: process.env.NODE_ENV === 'development',
+    sourcemap: true,
     // Minify with terser for better compression
     minify: 'terser',
     terserOptions: {

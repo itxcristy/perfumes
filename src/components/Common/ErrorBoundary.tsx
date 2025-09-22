@@ -50,9 +50,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       error.message?.includes(ignored) || error.stack?.includes(ignored)
     );
 
-    if (!shouldIgnore) {
-      console.error('Error caught by boundary:', error, errorInfo);
-    }
+    // Error logging removed for production
 
     this.setState({
       error,
@@ -92,11 +90,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertTriangle className="h-8 w-8 text-red-600" />
               </div>
-              
+
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 Something went wrong
               </h1>
-              
+
               <p className="text-gray-600 mb-6">
                 We're sorry, but something unexpected happened. Please try again or return to the home page.
               </p>
@@ -118,7 +116,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </button>
-                
+
                 <a
                   href="/"
                   className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium flex items-center justify-center"

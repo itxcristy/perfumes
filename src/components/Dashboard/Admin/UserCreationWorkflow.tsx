@@ -1,21 +1,6 @@
 import React, { useState } from 'react';
-import {
-  UserPlus,
-  Mail,
-  Key,
-  CheckCircle,
-  AlertCircle,
-  Copy,
-  Send,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  ArrowLeft,
-  User,
-  Shield,
-  Settings
-} from 'lucide-react';
-import { createNewUser } from '../../../lib/supabase';
+import { UserPlus, Mail, CheckCircle, AlertCircle, Copy, Send, Eye, EyeOff, ArrowRight, ArrowLeft, User, Shield, Settings } from 'lucide-react';
+import { createUser } from '../../../lib/crudOperations';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { EnhancedButton } from '../../Common/EnhancedButton';
 import { Modal } from '../../Common/Modal';
@@ -551,10 +536,10 @@ export const UserCreationWorkflow: React.FC<UserCreationWorkflowProps> = ({
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${index <= currentStep
-                  ? 'bg-indigo-600 border-indigo-600 text-white'
-                  : step.completed
-                    ? 'bg-green-600 border-green-600 text-white'
-                    : 'border-gray-300 text-gray-400'
+                ? 'bg-indigo-600 border-indigo-600 text-white'
+                : step.completed
+                  ? 'bg-green-600 border-green-600 text-white'
+                  : 'border-gray-300 text-gray-400'
                 }`}>
                 {step.completed && index !== currentStep ? (
                   <CheckCircle className="w-4 h-4" />

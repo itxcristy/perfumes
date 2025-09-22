@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, Image as ImageIcon, Link, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, X, Link, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StorageService, UploadProgress } from '../../services/storageService';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -54,12 +54,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (disabled) return;
 
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
-    
+
     if (imageFile) {
       handleFileUpload(imageFile);
     } else {
@@ -86,7 +86,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       const result = await StorageService.uploadImage(
         file,
         folder,
-        (progress) => setUploadProgress(progress)
+        (progress) => { setUploadProgress(progress); }
       );
 
       if (result.error) {
@@ -118,8 +118,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleUrlSubmit = () => {
-    if (urlInput.trim()) {
-      onChange(urlInput.trim());
+    const url = urlInput.trim();
+    if (url) {
+      onChange(url);
       setShowUrlField(false);
       showNotification({
         type: 'success',
@@ -159,10 +160,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               className="w-full h-full object-cover"
               style={{ maxWidth, maxHeight }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=No+Image';
               }}
             />
-            
+
             {/* Remove button */}
             {!disabled && (
               <button
@@ -202,8 +203,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             onDrop={handleDrop}
             className={`
               relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200
-              ${isDragging 
-                ? 'border-indigo-400 bg-indigo-50' 
+              ${isDragging
+                ? 'border-indigo-400 bg-indigo-50'
                 : 'border-gray-300 hover:border-gray-400'
               }
               ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -228,7 +229,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   {uploadProgress && (
                     <div className="mt-2 w-full max-w-xs">
                       <div className="bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress.percentage}%` }}
                         ></div>
@@ -308,7 +309,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           >
             <Upload className="h-4 w-4 animate-pulse" />
             <span>
-              Uploading... {uploadProgress.percentage}% 
+              Uploading... {uploadProgress.percentage}%
               ({Math.round(uploadProgress.loaded / 1024)}KB / {Math.round(uploadProgress.total / 1024)}KB)
             </span>
           </motion.div>

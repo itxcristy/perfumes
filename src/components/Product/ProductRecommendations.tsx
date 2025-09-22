@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ArrowRight, 
-  ShoppingCart, 
-  Heart, 
-  Star, 
+import {
+  ArrowRight,
+  ShoppingCart,
+  Heart,
+  Star,
   TrendingUp,
   Users,
   Package,
@@ -58,23 +58,23 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
     related: {
       calculateSimilarity: (product1: Product, product2: Product) => {
         let score = 0;
-        
+
         // Category similarity (highest weight)
         if (product1.category === product2.category) score += 40;
-        
+
         // Price similarity (within 30% range)
         const priceDiff = Math.abs(product1.price - product2.price) / Math.max(product1.price, product2.price);
         if (priceDiff <= 0.3) score += 25;
-        
+
         // Brand similarity - using seller name
         if (product1.sellerName && product2.sellerName && product1.sellerName === product2.sellerName) score += 20;
-        
+
         // Tag similarity
         if (product1.tags && product2.tags) {
           const commonTags = product1.tags.filter(tag => product2.tags!.includes(tag));
           score += (commonTags.length / Math.max(product1.tags.length, product2.tags.length)) * 15;
         }
-        
+
         return score;
       },
       getRecommendations: (currentProduct: Product, allProducts: Product[], maxItems: number) => {
@@ -89,12 +89,12 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           .map(item => item.product);
       }
     },
-    
+
     'frequently-bought': {
       calculateSimilarity: (product1: Product, product2: Product) => {
         // Simulate frequently bought together based on category and price complementarity
         let score = 0;
-        
+
         // Complementary categories get higher scores
         const complementaryCategories: Record<string, string[]> = {
           'Oudh Attars': ['Amber Attars', 'Sandalwood Attars'],
@@ -108,21 +108,21 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           'Seasonal Attars': ['Attar Blends', 'Floral Attars'],
           'Heritage Attars': ['Oudh Attars', 'Saffron Attars']
         };
-        
+
         if (product1.category && product2.category && complementaryCategories[product1.category]?.includes(product2.category)) {
           score += 50;
         } else if (product1.category === product2.category) {
           score += 30;
         }
-        
+
         // Price complementarity (accessories should be cheaper than main items)
         const priceRatio = product2.price / product1.price;
         if (priceRatio >= 0.1 && priceRatio <= 0.5) score += 30; // Good accessory price range
-        
+
         // Rating similarity
         const ratingDiff = Math.abs(product1.rating - product2.rating);
         if (ratingDiff <= 0.5) score += 20;
-        
+
         return score;
       },
       getRecommendations: (currentProduct: Product, allProducts: Product[], maxItems: number) => {
@@ -137,28 +137,28 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           .map(item => item.product);
       }
     },
-    
+
     'you-may-like': {
       calculateSimilarity: (product1: Product, product2: Product) => {
         // Personalized recommendations based on user behavior patterns
         let score = 0;
-        
+
         // High-rated products get priority
         score += product2.rating * 15;
-        
+
         // Featured products get boost
         if (product2.featured) score += 25;
-        
+
         // Category diversity (explore new categories)
         if (product1.category !== product2.category) score += 20;
-        
+
         // Price exploration (similar or slightly higher price points)
         const priceRatio = product2.price / product1.price;
         if (priceRatio >= 0.8 && priceRatio <= 1.5) score += 20;
-        
+
         // Trending products (simulate with random factor)
         score += Math.random() * 20;
-        
+
         return score;
       },
       getRecommendations: (currentProduct: Product, allProducts: Product[], maxItems: number) => {
@@ -173,7 +173,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           .map(item => item.product);
       }
     },
-    
+
     'recently-viewed': {
       calculateSimilarity: () => 0, // Not used for recently viewed
       getRecommendations: (currentProduct: Product, allProducts: Product[], maxItems: number) => {
@@ -294,10 +294,10 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
             </p>
           </div>
         </div>
-        
+
         {recommendedProducts.length > maxItems && (
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             className="flex items-center space-x-1.5 text-primary-600 hover:text-primary-700 transition-colors text-xs sm:text-sm touch-manipulation"
           >
             <span className="font-medium">View All</span>
@@ -327,7 +327,10 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                   {/* Product Image */}
                   <div className="aspect-square relative overflow-hidden">
                     <img
-                      src={product.images[0]}
+                      src={
+                        (product.images && product.images.length > 0 && product.images[0]) ||
+                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='
+                      }
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -335,11 +338,10 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                     {/* Wishlist Button */}
                     <button
                       onClick={(e) => handleWishlistToggle(product, e)}
-                      className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 p-1 rounded-full transition-all ${
-                        isInWishlist(product.id)
+                      className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 p-1 rounded-full transition-all ${isInWishlist(product.id)
                           ? 'bg-red-100 text-red-600'
                           : 'bg-white/80 text-neutral-600 hover:bg-white'
-                      } touch-manipulation`}
+                        } touch-manipulation`}
                     >
                       <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                     </button>
@@ -368,11 +370,10 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
-                              i < Math.floor(product.rating)
+                            className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-neutral-300'
-                            }`}
+                              }`}
                           />
                         ))}
                       </div>

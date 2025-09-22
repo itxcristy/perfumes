@@ -3,33 +3,8 @@ import { useProducts } from '../../../contexts/ProductContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { Modal } from '../../Common/Modal';
-import {
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  Tag,
-  Calendar,
-  Percent,
-  Hash,
-  Download,
-  RefreshCw,
-  CheckSquare,
-  Square,
-  Eye,
-  Copy,
-  Archive,
-  SortAsc,
-  SortDesc,
-  DollarSign,
-  Users,
-  BarChart3,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Edit, Trash2, Plus, Search, Tag, Percent, Hash, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { supabase } from '../../../lib/supabase';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
 import { AdminLoadingState, EmptyState } from '../../Common/EnhancedLoadingStates';

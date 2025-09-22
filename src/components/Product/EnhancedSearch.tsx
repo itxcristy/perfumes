@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  X, 
-  TrendingUp, 
-  Clock, 
-  Star,
-  ArrowRight,
-  Filter,
-  SlidersHorizontal
-} from 'lucide-react';
+import { Search, X, TrendingUp, Clock, Star, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Product, Category } from '../../types';
 import { useProducts } from '../../contexts/ProductContext';

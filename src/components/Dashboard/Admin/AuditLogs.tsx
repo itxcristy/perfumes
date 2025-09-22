@@ -1,29 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FileText,
-  Search,
-  Filter,
-  Download,
-  Eye,
-  Calendar,
-  User,
-  Activity,
-  Shield,
-  AlertTriangle,
-  Info,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Database,
-  Settings,
-  Users,
-  Package,
-  ShoppingCart,
-  CreditCard,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
+import { FileText, Search, Download, Eye, User, Activity, Shield, AlertTriangle, Info, CheckCircle, XCircle, Settings, Users, Package, ShoppingCart, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';

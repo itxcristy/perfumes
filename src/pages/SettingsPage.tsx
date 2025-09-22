@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, MapPin, Bell, Shield, CreditCard, Settings as SettingsIcon } from 'lucide-react';
+import { User, MapPin, Bell, Shield, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProfileSettings } from '../components/Settings/ProfileSettings';
 import { AddressManagement } from '../components/Address/AddressManagement';

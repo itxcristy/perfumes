@@ -6,30 +6,7 @@ import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { Modal } from '../../Common/Modal';
 import { ImageUpload } from '../../Common/ImageUpload';
 import { StorageService } from '../../../services/storageService';
-import {
-  Edit,
-  Trash2,
-  Plus,
-  Package,
-  Image,
-  ToggleLeft,
-  ToggleRight,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  CheckSquare,
-  Square,
-  Eye,
-  Copy,
-  Archive,
-  SortAsc,
-  SortDesc,
-  FolderTree,
-  Tag,
-  Users,
-  BarChart3
-} from 'lucide-react';
+import { Edit, Trash2, Plus, Package, Image, Search, Filter, Download, RefreshCw, CheckSquare, Square, Eye, Copy, SortAsc, SortDesc, FolderTree, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveTable } from '../../Common/ResponsiveTable';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
@@ -310,30 +287,37 @@ export const CategoryManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingCategory) {
-        // Update existing category
+        // Update existing category - map form fields to expected API fields
         await updateCategory({
           ...editingCategory,
-          ...formData
+          name: formData.name,
+          description: formData.description,
+          imageUrl: formData.image, // Map 'image' to 'imageUrl'
+          isActive: formData.isActive
         });
-        
+
         showNotification({
           type: 'success',
           title: 'Category Updated',
           message: `${formData.name} has been updated successfully.`
         });
       } else {
-        // Add new category
-        await addCategory(formData);
+        // Add new category - map form fields to expected API fields
+        await addCategory({
+          name: formData.name,
+          description: formData.description,
+          imageUrl: formData.image // Map 'image' to 'imageUrl'
+        });
         showNotification({
           type: 'success',
           title: 'Category Added',
           message: `${formData.name} has been added successfully.`
         });
       }
-      
+
       setIsModalOpen(false);
     } catch (error) {
       showNotification({
@@ -346,7 +330,7 @@ export const CategoryManagement: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     // Handle checkbox separately
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
       setFormData(prev => ({
@@ -549,11 +533,10 @@ export const CategoryManagement: React.FC = () => {
               e.stopPropagation();
               handleDeleteCategory(record);
             }}
-            className={`p-1 rounded hover:bg-red-50 ${
-              record.productCount && record.productCount > 0
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-red-600 hover:text-red-900'
-            }`}
+            className={`p-1 rounded hover:bg-red-50 ${record.productCount && record.productCount > 0
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-red-600 hover:text-red-900'
+              }`}
             title={record.productCount && record.productCount > 0 ? 'Cannot delete - has products' : 'Delete Category'}
             disabled={record.productCount && record.productCount > 0}
           >
@@ -874,11 +857,10 @@ export const CategoryManagement: React.FC = () => {
                           e.stopPropagation();
                           handleDeleteCategory(category);
                         }}
-                        className={`p-1 rounded hover:bg-red-50 ${
-                          category.productCount && category.productCount > 0
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-red-600 hover:text-red-900'
-                        }`}
+                        className={`p-1 rounded hover:bg-red-50 ${category.productCount && category.productCount > 0
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-red-600 hover:text-red-900'
+                          }`}
                         title={category.productCount && category.productCount > 0 ? 'Cannot delete - has products' : 'Delete Category'}
                         disabled={category.productCount && category.productCount > 0}
                       >
@@ -893,112 +875,112 @@ export const CategoryManagement: React.FC = () => {
         )}
 
         {/* Category Form Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingCategory ? "Edit Category" : "Add New Category"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Slug
-            </label>
-            <input
-              type="text"
-              name="slug"
-              value={formData.slug}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category Image
-            </label>
-            <ImageUpload
-              value={formData.image}
-              onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-              onPathChange={setImagePath}
-              folder="categories"
-              placeholder="Upload category image or enter URL"
-              aspectRatio="landscape"
-              maxWidth={400}
-              maxHeight={200}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={editingCategory ? "Edit Category" : "Add New Category"}
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sort Order
+                Name *
               </label>
               <input
-                type="number"
-                name="sortOrder"
-                value={formData.sortOrder}
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Slug
+              </label>
+              <input
+                type="text"
+                name="slug"
+                value={formData.slug}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                Active
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
               </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
-          </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {editingCategory ? 'Update Category' : 'Add Category'}
-            </button>
-          </div>
-        </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category Image
+              </label>
+              <ImageUpload
+                value={formData.image}
+                onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                onPathChange={setImagePath}
+                folder="categories"
+                placeholder="Upload category image or enter URL"
+                aspectRatio="landscape"
+                maxWidth={400}
+                maxHeight={200}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sort Order
+                </label>
+                <input
+                  type="number"
+                  name="sortOrder"
+                  value={formData.sortOrder}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                />
+                <label className="ml-2 block text-sm text-gray-900">
+                  Active
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {editingCategory ? 'Update Category' : 'Add Category'}
+              </button>
+            </div>
+          </form>
         </Modal>
       </div>
     </AdminErrorBoundary>

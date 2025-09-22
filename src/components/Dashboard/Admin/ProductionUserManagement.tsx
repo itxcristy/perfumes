@@ -1,42 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  RefreshCw,
-  Download,
-  Edit,
-  Trash2,
-  Check,
-  X,
-  UserCheck,
-  UserCog,
-  Mail,
-  Key,
-  Eye,
-  EyeOff,
-  ChevronDown,
-  MoreVertical,
-  Shield,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Send
-} from 'lucide-react';
+import { Users, UserPlus, Search, Filter, Download, Edit, X, CheckCircle, Clock } from 'lucide-react';
 import { ResponsiveContainer, useViewport, usePWAInstall } from '../../Common/ResponsiveContainer';
 import { useSecurity } from '../../Security/SecurityProvider';
 import { validateUser, validateEmail, sanitizeInput } from '../../../utils/validation';
 import {
   getAllUsers,
-  createNewUser,
-  updateUser,
-  deleteUser,
   deleteUsersBulk,
   updateUsersBulk,
   resendConfirmationEmail,
   confirmUserEmail
 } from '../../../lib/supabase';
+import { createUser, updateUser, deleteUser } from '../../../lib/crudOperations';
 import { User } from '../../../types';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { useNotification } from '../../../contexts/NotificationContext';

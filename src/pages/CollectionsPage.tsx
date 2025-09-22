@@ -1,22 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
-  ArrowRight,
-  Calendar,
-  Tag,
-  Star,
-  Crown,
-  Gift,
-  Zap,
-  Award,
-  Sparkles,
-  ChevronDown
-} from 'lucide-react';
+import { Search, Filter, Grid, List, ArrowRight, Calendar, Tag, Star, Crown, Gift, Zap, Award, Sparkles } from 'lucide-react';
 import { useCollections } from '../contexts/CollectionContext';
 import { Collection } from '../types';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';

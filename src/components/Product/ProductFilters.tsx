@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Filter, 
-  X, 
-  ChevronDown, 
-  ChevronUp, 
-  Star, 
-  DollarSign,
-  Package,
-  Tag,
-  Truck,
-  Shield,
-  Search
-} from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronUp, Star, DollarSign, Package, Tag, Shield } from 'lucide-react';
 import { Category } from '../../types';
 
 export interface FilterState {

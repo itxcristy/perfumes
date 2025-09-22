@@ -1,39 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Megaphone,
-  TrendingUp,
-  Users,
-  Mail,
-  MessageSquare,
-  Calendar,
-  Target,
-  BarChart3,
-  Plus,
-  Search,
-  Filter,
-  Download,
-  Edit,
-  Trash2,
-  Eye,
-  Play,
-  Pause,
-  Copy,
-  Settings,
-  DollarSign,
-  Percent,
-  Gift,
-  Tag,
-  Zap,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  RefreshCw
-} from 'lucide-react';
+import { Megaphone, TrendingUp, Target, BarChart3, Plus, Search, Edit, Trash2, Eye, Play, Pause, Copy, DollarSign, Gift, RefreshCw } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { EnhancedButton } from '../../Common/EnhancedButton';
 import { Modal } from '../../Common/Modal';
+import { ImageUpload } from '../../Common/ImageUpload';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
 
 interface Campaign {
@@ -403,12 +375,11 @@ export const MarketingManagement: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    campaign.status === 'active' ? 'bg-green-100 text-green-800' :
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${campaign.status === 'active' ? 'bg-green-100 text-green-800' :
                     campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                    campaign.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                      campaign.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                    }`}>
                     {campaign.status}
                   </span>
                 </td>
@@ -457,12 +428,11 @@ export const MarketingManagement: React.FC = () => {
           <div key={promotion.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900">{promotion.name}</h3>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                promotion.status === 'active' ? 'bg-green-100 text-green-800' :
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${promotion.status === 'active' ? 'bg-green-100 text-green-800' :
                 promotion.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                promotion.status === 'expired' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
+                  promotion.status === 'expired' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                }`}>
                 {promotion.status}
               </span>
             </div>
@@ -477,8 +447,8 @@ export const MarketingManagement: React.FC = () => {
                 <span className="text-sm text-gray-500">Discount:</span>
                 <span className="text-sm font-medium text-gray-900">
                   {promotion.discountType === 'percentage' ? `${promotion.discountValue}%` :
-                   promotion.discountType === 'fixed' ? `$${promotion.discountValue}` :
-                   'Free Shipping'}
+                    promotion.discountType === 'fixed' ? `$${promotion.discountValue}` :
+                      'Free Shipping'}
                 </span>
               </div>
 
@@ -583,7 +553,7 @@ export const MarketingManagement: React.FC = () => {
             </h1>
             <p className="text-gray-600 mt-1">Manage campaigns, promotions, and marketing analytics</p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <EnhancedButton
               onClick={() => setIsCreateCampaignModalOpen(true)}
@@ -608,11 +578,10 @@ export const MarketingManagement: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`${
-                  activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
+                className={`${activeTab === tab.id
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
               >
                 {tab.icon}
                 <span className="ml-2">{tab.name}</span>
@@ -680,12 +649,26 @@ export const MarketingManagement: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Budget ($)
+                Budget (₹)
               </label>
               <input
                 type="number"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="0.00"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Campaign Image
+              </label>
+              <ImageUpload
+                value=""
+                onChange={(url) => console.log('Campaign image:', url)}
+                folder="marketing"
+                placeholder="Upload campaign image or enter URL"
+                aspectRatio="landscape"
+                maxWidth={600}
+                maxHeight={300}
               />
             </div>
             <div className="flex justify-end space-x-3">

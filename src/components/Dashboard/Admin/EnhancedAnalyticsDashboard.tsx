@@ -1,20 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  Package,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Activity
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Package, Download, RefreshCw, BarChart3, Activity } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { EnhancedButton } from '../../Common/EnhancedButton';

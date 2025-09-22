@@ -1,30 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Package,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Search,
-  Filter,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  RefreshCw,
-  CheckSquare,
-  Square,
-  Calendar,
-  DollarSign,
-  User,
-  MapPin,
-  Truck,
-  MoreVertical,
-  FileText,
-  Mail,
-  Phone,
-  SortAsc,
-  SortDesc
-} from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, Search, Filter, Eye, Edit, Download, RefreshCw, CheckSquare, Square, Calendar, DollarSign, User, FileText, SortAsc, SortDesc } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { ResponsiveTable } from '../../Common/ResponsiveTable';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';

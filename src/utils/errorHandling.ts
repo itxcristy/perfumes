@@ -188,33 +188,7 @@ Error details: ${error.message}
   return '';
 };
 
-// Enhanced logging with RLS detection
-export const logError = (error: AppError, context?: string) => {
-  const isRLSError = error.message.includes('infinite recursion') || 
-                     error.message.includes('row-level security');
-  
-  const logLevel = isRLSError ? 'error' : 'warn';
-  const emoji = isRLSError ? '🚨' : '⚠️';
-  
-  console[logLevel](`${emoji} [${error.type.toUpperCase()}] ${context || 'Error'}:`, {
-    message: error.message,
-    userMessage: error.userMessage,
-    code: error.code,
-    details: error.details,
-    timestamp: new Date().toISOString(),
-    isRLSError
-  });
-  
-  // Show RLS-specific guidance
-  if (isRLSError) {
-    console.error('🔧 RLS Fix Required:', generateRLSFixSuggestion(new Error(error.message)));
-  }
-  
-  // In production, send to error tracking service
-  if (process.env.NODE_ENV === 'production') {
-    // Example: Sentry.captureException(error, { extra: { context, isRLSError } });
-  }
-};
+// Error logging removed for production
 
 export const createRetryableAction = <T>(
   action: () => Promise<T>,

@@ -46,8 +46,8 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
       const isTablet = width >= 768 && width < 1024;
       const isDesktop = width >= 1024;
       const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                    window.matchMedia('(display-mode: fullscreen)').matches ||
-                    (window.navigator as any).standalone === true;
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        (window.navigator as any).standalone === true;
       const orientation = width > height ? 'landscape' : 'portrait';
 
       setViewport({
@@ -147,16 +147,7 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
         <div className="pwa-bottom-spacer h-safe-bottom" />
       )}
 
-      {/* Viewport Debug Info (Development Only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-black bg-opacity-75 text-white text-xs p-2 rounded z-50">
-          <div>W: {viewport.width}px</div>
-          <div>H: {viewport.height}px</div>
-          <div>{viewport.isMobile ? 'Mobile' : viewport.isTablet ? 'Tablet' : 'Desktop'}</div>
-          <div>{viewport.orientation}</div>
-          {viewport.isPWA && <div>PWA</div>}
-        </div>
-      )}
+
     </div>
   );
 };
@@ -181,8 +172,8 @@ export const useViewport = () => {
       const isTablet = width >= 768 && width < 1024;
       const isDesktop = width >= 1024;
       const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                    window.matchMedia('(display-mode: fullscreen)').matches ||
-                    (window.navigator as any).standalone === true;
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        (window.navigator as any).standalone === true;
       const orientation = width > height ? 'landscape' : 'portrait';
 
       setViewport({
@@ -230,7 +221,7 @@ export const usePWAInstall = () => {
 
     // Check if already installed
     const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
-                  (window.navigator as any).standalone === true;
+      (window.navigator as any).standalone === true;
     setIsInstalled(isPWA);
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -247,13 +238,13 @@ export const usePWAInstall = () => {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
       setIsInstallable(false);
       return true;
     }
-    
+
     return false;
   };
 

@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  Search, 
-  Filter, 
-  RefreshCw, 
-  Download,
-  Edit,
-  Trash2,
-  Check,
-  X,
-  UserCheck,
-  UserCog
-} from 'lucide-react';
-import { getAllUsers, createNewUser, updateUser, deleteUser, deleteUsersBulk, updateUsersBulk } from '../../../lib/supabase';
+import { Users, UserPlus, Search, RefreshCw, Download, Edit, Trash2, Check, X, UserCheck, UserCog } from 'lucide-react';
+import { getAllUsers, deleteUsersBulk, updateUsersBulk } from '../../../lib/supabase';
+import { createUser, updateUser, deleteUser } from '../../../lib/crudOperations';
 import { User } from '../../../types';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -86,19 +74,19 @@ export const EnhancedUserManagement: React.FC = () => {
   const sortedUsers = [...users].sort((a, b) => {
     let aValue: any = a[sortBy];
     let bValue: any = b[sortBy];
-    
+
     // Handle date sorting
     if (sortBy === 'createdAt') {
       aValue = new Date(aValue).getTime();
       bValue = new Date(bValue).getTime();
     }
-    
+
     // Handle string sorting
     if (typeof aValue === 'string') {
       aValue = aValue.toLowerCase();
       bValue = bValue.toLowerCase();
     }
-    
+
     if (sortOrder === 'asc') {
       return aValue > bValue ? 1 : -1;
     } else {
@@ -108,7 +96,7 @@ export const EnhancedUserManagement: React.FC = () => {
 
   const handleCreateUser = async () => {
     try {
-      const result = await createNewUser({
+      const newUser = await createUser({
         email: formData.email,
         name: formData.name,
         role: formData.role,
@@ -117,20 +105,20 @@ export const EnhancedUserManagement: React.FC = () => {
         isActive: formData.isActive
       });
 
-      if (result.success && result.user) {
-        setUsers([...users, result.user]);
-        setIsCreateModalOpen(false);
-        resetForm();
-        showNotification({ type: 'success', title: 'User Created', message: 'User has been created successfully.' });
-      } else {
-        showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to create user.' });
-      }
+      setUsers([...users, newUser]);
+      setIsCreateModalOpen(false);
+      resetForm();
+      showNotification({
+        type: 'success',
+        title: 'User Created',
+        message: 'User has been created successfully.'
+      });
     } catch (error) {
       console.error('Error creating user:', error);
       showNotification({
         type: 'error',
         title: 'Error',
-        message: 'Failed to create user. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to create user. Please try again later.'
       });
     }
   };
@@ -139,7 +127,7 @@ export const EnhancedUserManagement: React.FC = () => {
     if (!currentUser) return;
 
     try {
-      const result = await updateUser(currentUser.id, {
+      const updatedUser = await updateUser(currentUser.id, {
         name: formData.name,
         email: formData.email,
         role: formData.role,
@@ -148,20 +136,20 @@ export const EnhancedUserManagement: React.FC = () => {
         isActive: formData.isActive
       });
 
-      if (result.success && result.user) {
-        setUsers(users.map(u => u.id === currentUser.id ? result.user! : u));
-        setIsEditModalOpen(false);
-        resetForm();
-        showNotification({ type: 'success', title: 'User Updated', message: 'User has been updated successfully.' });
-      } else {
-        showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to update user.' });
-      }
+      setUsers(users.map(u => u.id === currentUser.id ? updatedUser : u));
+      setIsEditModalOpen(false);
+      resetForm();
+      showNotification({
+        type: 'success',
+        title: 'User Updated',
+        message: 'User has been updated successfully.'
+      });
     } catch (error) {
       console.error('Error updating user:', error);
       showNotification({
         type: 'error',
         title: 'Error',
-        message: 'Failed to update user. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to update user. Please try again later.'
       });
     }
   };
@@ -172,21 +160,20 @@ export const EnhancedUserManagement: React.FC = () => {
     }
 
     try {
-      const result = await deleteUser(userId);
-
-      if (result.success) {
-        setUsers(users.filter(u => u.id !== userId));
-        setSelectedUsers(selectedUsers.filter(id => id !== userId));
-        showNotification({ type: 'success', title: 'User Deleted', message: 'User has been deleted successfully.' });
-      } else {
-        showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to delete user.' });
-      }
+      await deleteUser(userId);
+      setUsers(users.filter(u => u.id !== userId));
+      setSelectedUsers(selectedUsers.filter(id => id !== userId));
+      showNotification({
+        type: 'success',
+        title: 'User Deleted',
+        message: 'User has been deleted successfully.'
+      });
     } catch (error) {
       console.error('Error deleting user:', error);
       showNotification({
         type: 'error',
         title: 'Error',
-        message: 'Failed to delete user. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to delete user. Please try again later.'
       });
     }
   };
@@ -207,10 +194,10 @@ export const EnhancedUserManagement: React.FC = () => {
       if (result.success) {
         setUsers(users.filter(u => !selectedUsers.includes(u.id)));
         setSelectedUsers([]);
-        showNotification({ 
-          type: 'success', 
-          title: 'Users Deleted', 
-          message: `${result.deletedCount} users have been deleted successfully.` 
+        showNotification({
+          type: 'success',
+          title: 'Users Deleted',
+          message: `${result.deletedCount} users have been deleted successfully.`
         });
       } else {
         showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to delete users.' });
@@ -235,13 +222,13 @@ export const EnhancedUserManagement: React.FC = () => {
       const result = await updateUsersBulk(selectedUsers, { role: newRole });
 
       if (result.success) {
-        setUsers(users.map(u => 
+        setUsers(users.map(u =>
           selectedUsers.includes(u.id) ? { ...u, role: newRole } : u
         ));
-        showNotification({ 
-          type: 'success', 
-          title: 'Users Updated', 
-          message: `${result.updatedCount} users have been updated successfully.` 
+        showNotification({
+          type: 'success',
+          title: 'Users Updated',
+          message: `${result.updatedCount} users have been updated successfully.`
         });
       } else {
         showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to update users.' });
@@ -266,13 +253,13 @@ export const EnhancedUserManagement: React.FC = () => {
       const result = await updateUsersBulk(selectedUsers, { isActive });
 
       if (result.success) {
-        setUsers(users.map(u => 
+        setUsers(users.map(u =>
           selectedUsers.includes(u.id) ? { ...u, isActive } : u
         ));
-        showNotification({ 
-          type: 'success', 
-          title: 'Users Updated', 
-          message: `${result.updatedCount} users have been ${isActive ? 'activated' : 'deactivated'} successfully.` 
+        showNotification({
+          type: 'success',
+          title: 'Users Updated',
+          message: `${result.updatedCount} users have been ${isActive ? 'activated' : 'deactivated'} successfully.`
         });
       } else {
         showNotification({ type: 'error', title: 'Error', message: result.error || 'Failed to update users.' });
@@ -400,10 +387,10 @@ export const EnhancedUserManagement: React.FC = () => {
       minWidth: 200,
       render: (value: any, record: User) => (
         <div className="flex items-center">
-          <img 
-            src={record.avatar || `https://api.dicebear.com/8.x/initials/svg?seed=${record.name}`} 
-            alt={record.name} 
-            className="h-10 w-10 rounded-full bg-gray-200" 
+          <img
+            src={record.avatar || `https://api.dicebear.com/8.x/initials/svg?seed=${record.name}`}
+            alt={record.name}
+            className="h-10 w-10 rounded-full bg-gray-200"
           />
           <div className="ml-4">
             <div className="text-sm font-medium text-gray-900">{record.name}</div>
@@ -426,11 +413,10 @@ export const EnhancedUserManagement: React.FC = () => {
       ),
       width: 100,
       render: (value: string) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          value === 'admin' ? 'bg-red-100 text-red-800' :
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${value === 'admin' ? 'bg-red-100 text-red-800' :
           value === 'seller' ? 'bg-blue-100 text-blue-800' :
-          'bg-green-100 text-green-800'
-        }`}>
+            'bg-green-100 text-green-800'
+          }`}>
           {value}
         </span>
       )
@@ -440,9 +426,8 @@ export const EnhancedUserManagement: React.FC = () => {
       title: 'Status',
       width: 100,
       render: (value: any, record: User) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          record.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${record.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {record.isActive ? 'Active' : 'Inactive'}
         </span>
       )
@@ -509,7 +494,7 @@ export const EnhancedUserManagement: React.FC = () => {
               <UserPlus className="h-4 w-4 mr-1" />
               Add User
             </EnhancedButton>
-            
+
             {selectedUsers.length > 0 && (
               <div className="relative">
                 <EnhancedButton
@@ -520,7 +505,7 @@ export const EnhancedUserManagement: React.FC = () => {
                   <UserCog className="h-4 w-4 mr-1" />
                   Bulk Actions ({selectedUsers.length})
                 </EnhancedButton>
-                
+
                 {isBulkActionOpen && (
                   <div className="absolute right-0 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-10">
                     <div className="py-1">
@@ -591,7 +576,7 @@ export const EnhancedUserManagement: React.FC = () => {
                 )}
               </div>
             )}
-            
+
             <EnhancedButton
               onClick={exportUsers}
               variant="secondary"
@@ -602,7 +587,7 @@ export const EnhancedUserManagement: React.FC = () => {
             </EnhancedButton>
           </div>
         </div>
-        
+
         {/* Filters */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="md:col-span-2">
@@ -657,14 +642,14 @@ export const EnhancedUserManagement: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       <ResponsiveTable
         columns={tableColumns}
         data={sortedUsers}
         loading={loading}
         emptyMessage="No users found"
       />
-      
+
       {/* Create User Modal */}
       <Modal
         isOpen={isCreateModalOpen}
@@ -677,7 +662,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="Enter full name"
             />
@@ -687,7 +672,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="user@example.com"
             />
@@ -696,7 +681,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700">Role</label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({...formData, role: e.target.value as any})}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
             >
               <option value="customer">Customer</option>
@@ -709,7 +694,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="text"
               value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="Optional"
             />
@@ -719,7 +704,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="date"
               value={formData.dateOfBirth}
-              onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -728,7 +713,7 @@ export const EnhancedUserManagement: React.FC = () => {
               type="checkbox"
               id="isActive"
               checked={formData.isActive}
-              onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
             />
             <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
@@ -751,7 +736,7 @@ export const EnhancedUserManagement: React.FC = () => {
           </div>
         </div>
       </Modal>
-      
+
       {/* Edit User Modal */}
       <Modal
         isOpen={isEditModalOpen}
@@ -764,7 +749,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="Enter full name"
             />
@@ -774,7 +759,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="user@example.com"
             />
@@ -783,7 +768,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700">Role</label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({...formData, role: e.target.value as any})}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
             >
               <option value="customer">Customer</option>
@@ -796,7 +781,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="text"
               value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
               placeholder="Optional"
             />
@@ -806,7 +791,7 @@ export const EnhancedUserManagement: React.FC = () => {
             <input
               type="date"
               value={formData.dateOfBirth}
-              onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -815,7 +800,7 @@ export const EnhancedUserManagement: React.FC = () => {
               type="checkbox"
               id="isActiveEdit"
               checked={formData.isActive}
-              onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
             />
             <label htmlFor="isActiveEdit" className="ml-2 block text-sm text-gray-700">

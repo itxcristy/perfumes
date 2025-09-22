@@ -1,29 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FileText,
-  BarChart3,
-  TrendingUp,
-  Download,
-  Calendar,
-  Filter,
-  Settings,
-  Plus,
-  Play,
-  Pause,
-  Clock,
-  Mail,
-  Users,
-  Package,
-  ShoppingCart,
-  DollarSign,
-  Eye,
-  Edit,
-  Trash2,
-  Copy,
-  RefreshCw,
-  Save,
-  Search
-} from 'lucide-react';
+import { FileText, BarChart3, Download, Settings, Plus, Play, Eye, Edit, Trash2, Copy, RefreshCw, Save, Search } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';

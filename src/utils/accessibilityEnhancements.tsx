@@ -237,8 +237,8 @@ export const checkColorContrast = (foreground: string, background: string): {
   const fgLuminance = getLuminance(foreground);
   const bgLuminance = getLuminance(background);
 
-  const ratio = (Math.max(fgLuminance, bgLuminance) + 0.05) / 
-                (Math.min(fgLuminance, bgLuminance) + 0.05);
+  const ratio = (Math.max(fgLuminance, bgLuminance) + 0.05) /
+    (Math.min(fgLuminance, bgLuminance) + 0.05);
 
   return {
     ratio: Math.round(ratio * 100) / 100,
@@ -274,15 +274,15 @@ export const useHighContrastMode = (): boolean => {
     const checkHighContrast = () => {
       // Check for Windows High Contrast mode
       const isHighContrastWindows = window.matchMedia('(-ms-high-contrast: active)').matches;
-      
+
       // Check for forced colors (newer standard)
       const isForcedColors = window.matchMedia('(forced-colors: active)').matches;
-      
+
       setIsHighContrast(isHighContrastWindows || isForcedColors);
     };
 
     checkHighContrast();
-    
+
     // Listen for changes
     const mediaQueries = [
       window.matchMedia('(-ms-high-contrast: active)'),
@@ -290,9 +290,9 @@ export const useHighContrastMode = (): boolean => {
     ];
 
     const handleChange = () => checkHighContrast();
-    
+
     mediaQueries.forEach(mq => mq.addEventListener('change', handleChange));
-    
+
     return () => {
       mediaQueries.forEach(mq => mq.removeEventListener('change', handleChange));
     };
@@ -326,9 +326,9 @@ export const useAriaLiveRegion = () => {
 };
 
 // Skip Link Component
-export const SkipLink: React.FC<{ href: string; children: React.ReactNode }> = ({ 
-  href, 
-  children 
+export const SkipLink: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
+  children
 }) => {
   return (
     <a
@@ -364,10 +364,10 @@ export const auditAccessibility = (element: HTMLElement): {
   // Check for missing form labels
   const inputs = element.querySelectorAll('input, textarea, select');
   inputs.forEach(input => {
-    const hasLabel = input.getAttribute('aria-label') || 
-                    input.getAttribute('aria-labelledby') ||
-                    element.querySelector(`label[for="${input.id}"]`);
-    
+    const hasLabel = input.getAttribute('aria-label') ||
+      input.getAttribute('aria-labelledby') ||
+      element.querySelector(`label[for="${input.id}"]`);
+
     if (!hasLabel) {
       issues.push({
         type: 'missing-form-label',
@@ -383,7 +383,7 @@ export const auditAccessibility = (element: HTMLElement): {
     const styles = window.getComputedStyle(el);
     const color = styles.color;
     const backgroundColor = styles.backgroundColor;
-    
+
     if (color && backgroundColor && color !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'rgba(0, 0, 0, 0)') {
       // This is a simplified check - in practice, you'd need to convert colors and check contrast
       // For now, we'll skip this check as it requires more complex color parsing
@@ -413,15 +413,7 @@ export const auditAccessibility = (element: HTMLElement): {
 
 // Initialize accessibility features
 export const initializeAccessibility = () => {
-  // Add skip links if they don't exist
-  if (!document.querySelector('[data-skip-link]')) {
-    const skipLink = document.createElement('a');
-    skipLink.href = '#main-content';
-    skipLink.textContent = 'Skip to main content';
-    skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md';
-    skipLink.setAttribute('data-skip-link', 'true');
-    document.body.insertBefore(skipLink, document.body.firstChild);
-  }
+  // Skip link is handled by React component, no need to add programmatically
 
   // Add main landmark if it doesn't exist
   if (!document.querySelector('main')) {

@@ -13,16 +13,40 @@ export interface UploadProgress {
 }
 
 export class StorageService {
-  private static readonly BUCKET_NAME = 'images';
+  // Define all required buckets for the e-commerce platform
+  private static readonly BUCKETS = {
+    PRODUCTS: 'products',
+    CATEGORIES: 'categories',
+    COLLECTIONS: 'collections',
+    COLLECTION_BANNERS: 'collection-banners',
+    USERS: 'users',
+    MARKETING: 'marketing'
+  } as const;
+
   private static readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   private static readonly ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+  /**
+   * Get the appropriate bucket name based on folder
+   */
+  private static getBucketName(folder: string): string {
+    if (folder.startsWith('products')) return this.BUCKETS.PRODUCTS;
+    if (folder.startsWith('categories')) return this.BUCKETS.CATEGORIES;
+    if (folder.startsWith('collections/banners')) return this.BUCKETS.COLLECTION_BANNERS;
+    if (folder.startsWith('collections')) return this.BUCKETS.COLLECTIONS;
+    if (folder.startsWith('users')) return this.BUCKETS.USERS;
+    if (folder.startsWith('marketing')) return this.BUCKETS.MARKETING;
+
+    // Default to products bucket
+    return this.BUCKETS.PRODUCTS;
+  }
 
   /**
    * Upload an image file to Supabase storage
    */
   static async uploadImage(
     file: File,
-    folder: string = 'categories',
+    folder: string = 'products',
     onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadResult> {
     try {
@@ -32,157 +56,96 @@ export class StorageService {
         return { url: '', path: '', error: validation.error };
       }
 
+      // Get appropriate bucket name
+      const bucketName = this.getBucketName(folder);
+
+      // Ensure all buckets exist
+      await this.initializeAllBuckets();
+
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${folder}/${fileName}`;
 
-      // Create XMLHttpRequest for progress tracking
+      // Simulate progress if callback provided
       if (onProgress) {
-        return this.uploadWithProgress(file, filePath, onProgress);
+        onProgress({ loaded: 0, total: file.size, percentage: 0 });
       }
 
-      // Standard upload without progress
+      // Standard upload - simplified approach
       const { data, error } = await supabase.storage
-        .from(this.BUCKET_NAME)
+        .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });
 
       if (error) {
-        console.error('Upload error:', error);
+        // If bucket doesn't exist, try to create it and retry
+        if (error.message?.includes('Bucket not found') || (error as any).status === 400) {
+          await this.initializeAllBuckets();
+          const retryResult = await supabase.storage
+            .from(bucketName)
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (retryResult.error) {
+            return { url: '', path: '', error: retryResult.error.message };
+          }
+
+          const { data: urlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(retryResult.data.path);
+
+          return {
+            url: urlData.publicUrl,
+            path: retryResult.data.path,
+          };
+        }
         return { url: '', path: '', error: error.message };
+      }
+
+      // Simulate progress completion
+      if (onProgress) {
+        onProgress({ loaded: file.size, total: file.size, percentage: 100 });
       }
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from(this.BUCKET_NAME)
+        .from(bucketName)
         .getPublicUrl(data.path);
 
+      const result = { url: urlData.publicUrl, path: data.path };
+      return result;
+    } catch (error) {
       return {
-        url: urlData.publicUrl,
-        path: data.path,
-      };
-    } catch (error) {
-      console.error('Storage service error:', error);
-      return { 
-        url: '', 
-        path: '', 
-        error: error instanceof Error ? error.message : 'Upload failed' 
+        url: '',
+        path: '',
+        error: error instanceof Error ? error.message : 'Upload failed'
       };
     }
   }
 
-  /**
-   * Upload with progress tracking using XMLHttpRequest
-   */
-  private static async uploadWithProgress(
-    file: File,
-    filePath: string,
-    onProgress: (progress: UploadProgress) => void
-  ): Promise<UploadResult> {
-    return new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const progress: UploadProgress = {
-            loaded: event.loaded,
-            total: event.total,
-            percentage: Math.round((event.loaded / event.total) * 100)
-          };
-          onProgress(progress);
-        }
-      });
 
-      xhr.addEventListener('load', async () => {
-        if (xhr.status === 200) {
-          try {
-            // Get public URL after successful upload
-            const { data: urlData } = supabase.storage
-              .from(this.BUCKET_NAME)
-              .getPublicUrl(filePath);
-
-            resolve({
-              url: urlData.publicUrl,
-              path: filePath,
-            });
-          } catch (error) {
-            resolve({ 
-              url: '', 
-              path: '', 
-              error: 'Failed to get public URL' 
-            });
-          }
-        } else {
-          resolve({ 
-            url: '', 
-            path: '', 
-            error: `Upload failed with status ${xhr.status}` 
-          });
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        resolve({ 
-          url: '', 
-          path: '', 
-          error: 'Network error during upload' 
-        });
-      });
-
-      // Prepare form data
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Get upload URL from Supabase
-      this.getUploadUrl(filePath).then(uploadUrl => {
-        if (uploadUrl) {
-          xhr.open('POST', uploadUrl);
-          xhr.send(formData);
-        } else {
-          resolve({ 
-            url: '', 
-            path: '', 
-            error: 'Failed to get upload URL' 
-          });
-        }
-      });
-    });
-  }
-
-  /**
-   * Get upload URL for XMLHttpRequest
-   */
-  private static async getUploadUrl(filePath: string): Promise<string | null> {
-    try {
-      // For now, use the standard Supabase upload method
-      // In a real implementation, you might need to get a signed URL
-      return null; // Will fall back to standard upload
-    } catch (error) {
-      console.error('Failed to get upload URL:', error);
-      return null;
-    }
-  }
 
   /**
    * Delete an image from storage
    */
-  static async deleteImage(path: string): Promise<boolean> {
+  static async deleteImage(path: string, folder: string = 'products'): Promise<boolean> {
     try {
+      const bucketName = this.getBucketName(folder);
       const { error } = await supabase.storage
-        .from(this.BUCKET_NAME)
+        .from(bucketName)
         .remove([path]);
 
       if (error) {
-        console.error('Delete error:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Storage service delete error:', error);
       return false;
     }
   }
@@ -193,18 +156,14 @@ export class StorageService {
   private static validateFile(file: File): { isValid: boolean; error?: string } {
     // Check file size
     if (file.size > this.MAX_FILE_SIZE) {
-      return {
-        isValid: false,
-        error: `File size must be less than ${this.MAX_FILE_SIZE / 1024 / 1024}MB`
-      };
+      const msg = `File size must be less than ${this.MAX_FILE_SIZE / 1024 / 1024}MB`;
+      return { isValid: false, error: msg };
     }
 
     // Check file type
     if (!this.ALLOWED_TYPES.includes(file.type)) {
-      return {
-        isValid: false,
-        error: 'Only JPEG, PNG, and WebP images are allowed'
-      };
+      const msg = 'Only JPEG, PNG, and WebP images are allowed';
+      return { isValid: false, error: msg };
     }
 
     return { isValid: true };
@@ -214,7 +173,7 @@ export class StorageService {
    * Get optimized image URL with transformations
    */
   static getOptimizedImageUrl(
-    url: string, 
+    url: string,
     options: { width?: number; height?: number; quality?: number } = {}
   ): string {
     if (!url) return url;
@@ -222,7 +181,7 @@ export class StorageService {
     // If it's already a Supabase storage URL, we can add transformations
     if (url.includes('supabase')) {
       const params = new URLSearchParams();
-      
+
       if (options.width) params.append('width', options.width.toString());
       if (options.height) params.append('height', options.height.toString());
       if (options.quality) params.append('quality', options.quality.toString());
@@ -236,40 +195,63 @@ export class StorageService {
   }
 
   /**
-   * Create storage bucket if it doesn't exist
+   * Create a single storage bucket if it doesn't exist
    */
-  static async initializeBucket(): Promise<boolean> {
+  private static async createBucketIfNotExists(bucketName: string): Promise<boolean> {
     try {
       // Check if bucket exists
       const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-      
+
       if (listError) {
-        console.error('Error listing buckets:', listError);
         return false;
       }
 
-      const bucketExists = buckets?.some(bucket => bucket.name === this.BUCKET_NAME);
-      
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+
       if (!bucketExists) {
         // Create bucket
-        const { error: createError } = await supabase.storage.createBucket(this.BUCKET_NAME, {
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
           public: true,
           allowedMimeTypes: this.ALLOWED_TYPES,
           fileSizeLimit: this.MAX_FILE_SIZE
         });
 
         if (createError) {
-          console.error('Error creating bucket:', createError);
           return false;
         }
-
-        console.log(`Created storage bucket: ${this.BUCKET_NAME}`);
       }
 
       return true;
     } catch (error) {
-      console.error('Error initializing bucket:', error);
       return false;
     }
   }
+
+  /**
+   * Initialize all required storage buckets
+   */
+  static async initializeAllBuckets(): Promise<boolean> {
+    try {
+      const bucketNames = Object.values(this.BUCKETS);
+      const results = await Promise.all(
+        bucketNames.map(bucketName => this.createBucketIfNotExists(bucketName))
+      );
+
+      const allSuccessful = results.every(result => result);
+      return allSuccessful;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Legacy method for backward compatibility
+   */
+  static async initializeBucket(): Promise<boolean> {
+    return this.initializeAllBuckets();
+  }
 }
+
+
+// Expose for debugging in DevTools: window.__StorageService
+try { if (typeof window !== 'undefined') { (window as any).__StorageService = StorageService; } } catch {}

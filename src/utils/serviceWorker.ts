@@ -97,15 +97,13 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
     }
 
     if (!this.registration) {
-      console.warn('No service worker registration found');
       return;
     }
 
     try {
       await this.registration.update();
-      console.log('🔄 Service Worker update check completed');
     } catch (error) {
-      console.error('❌ Service Worker update failed:', error);
+      // Silent update failure
     }
   }
 

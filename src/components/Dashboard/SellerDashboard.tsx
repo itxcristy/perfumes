@@ -1,27 +1,5 @@
 import React, { useState } from 'react';
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  BarChart3,
-  Settings,
-  Upload,
-  FileText,
-  TrendingUp,
-  Star,
-  Tag,
-  Megaphone,
-  CreditCard,
-  MessageSquare,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  DollarSign,
-  Plus,
-  Edit,
-  Trash2
-} from 'lucide-react';
+import { Package, ShoppingCart, BarChart3, Settings, FileText, TrendingUp, Star, Tag, Megaphone, CreditCard, ChevronLeft, ChevronRight, Home, DollarSign, Plus, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../../contexts/ProductContext';
 import { useAuth } from '../../contexts/AuthContext';

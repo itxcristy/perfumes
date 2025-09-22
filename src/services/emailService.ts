@@ -147,7 +147,7 @@ If you didn't expect this email, please contact our support team immediately.
   }
 
   /**
-   * Send email using Supabase Edge Functions or external service
+   * Send email using Netlify Functions with SendGrid
    */
   private async sendEmail(
     to: string,
@@ -155,9 +155,13 @@ If you didn't expect this email, please contact our support team immediately.
     metadata?: Record<string, any>
   ): Promise<EmailServiceResponse> {
     try {
-      // Option 1: Use Supabase Edge Function for email sending
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        body: {
+      // Use Netlify function for email sending
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           to,
           from: this.fromEmail,
           fromName: this.fromName,
@@ -165,18 +169,23 @@ If you didn't expect this email, please contact our support team immediately.
           html: template.htmlContent,
           text: template.textContent,
           metadata
-        }
+        })
       });
 
-      if (error) {
-        console.error('Email sending error:', error);
-        return { success: false, error: error.message };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return { success: true, messageId: data?.messageId };
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Email sending failed');
+      }
+
+      return { success: true, messageId: result.messageId };
     } catch (error) {
       console.error('Email service error:', error);
-      
+
       // Fallback: Log email to console in development
       if (import.meta.env.DEV) {
         console.log('=== EMAIL WOULD BE SENT ===');
@@ -186,10 +195,10 @@ If you didn't expect this email, please contact our support team immediately.
         console.log('========================');
         return { success: true, messageId: 'dev-mode-' + Date.now() };
       }
-      
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown email error' 
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown email error'
       };
     }
   }
@@ -203,6 +212,72 @@ If you didn't expect this email, please contact our support team immediately.
       type: 'user_creation',
       role: data.role,
       hasConfirmation: !!data.confirmationUrl
+    });
+  }
+
+  /**
+   * Send order confirmation email
+   */
+  async sendOrderConfirmationEmail(data: {
+    email: string;
+    name: string;
+    orderId: string;
+    items: Array<{
+      name: string;
+      quantity: number;
+      price: number;
+      image?: string;
+    }>;
+    subtotal: number;
+    gst: number;
+    shipping: number;
+    total: number;
+    shippingAddress: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+    paymentMethod: string;
+  }): Promise<EmailServiceResponse> {
+    const template = this.generateOrderConfirmationTemplate(data);
+    return this.sendEmail(data.email, template, {
+      type: 'order_confirmation',
+      orderId: data.orderId,
+      total: data.total
+    });
+  }
+
+  /**
+   * Send order status update email
+   */
+  async sendOrderStatusUpdateEmail(data: {
+    email: string;
+    name: string;
+    orderId: string;
+    status: string;
+    trackingNumber?: string;
+  }): Promise<EmailServiceResponse> {
+    const template = this.generateOrderStatusTemplate(data);
+    return this.sendEmail(data.email, template, {
+      type: 'order_status_update',
+      orderId: data.orderId,
+      status: data.status
+    });
+  }
+
+  /**
+   * Send welcome email to new users
+   */
+  async sendWelcomeEmail(data: {
+    email: string;
+    name: string;
+  }): Promise<EmailServiceResponse> {
+    const template = this.generateWelcomeTemplate(data);
+    return this.sendEmail(data.email, template, {
+      type: 'welcome',
+      userEmail: data.email
     });
   }
 
@@ -286,6 +361,136 @@ The Sufi Essences Team
     return this.sendEmail(email, template, {
       type: 'password_reset'
     });
+  }
+
+  /**
+   * Generate order confirmation email template
+   */
+  private generateOrderConfirmationTemplate(data: any): EmailTemplate {
+    const itemsHtml = data.items.map((item: any) => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">
+          <div style="display: flex; align-items: center;">
+            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; border-radius: 4px;">` : ''}
+            <div>
+              <strong>${item.name}</strong><br>
+              <small>Quantity: ${item.quantity}</small>
+            </div>
+          </div>
+        </td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+          ₹${(item.price * item.quantity).toFixed(2)}
+        </td>
+      </tr>
+    `).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Order Confirmation - Sufi Essences</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #8B5A3C, #A0522D); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #ddd; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; }
+          .order-summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .total-row { font-weight: bold; font-size: 18px; color: #8B5A3C; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          .btn { background: #8B5A3C; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🌸 Order Confirmed!</h1>
+            <p>Thank you for your purchase from Sufi Essences</p>
+          </div>
+
+          <div class="content">
+            <p>Dear ${data.name},</p>
+
+            <p>Your order has been confirmed and is being prepared for shipment. Here are your order details:</p>
+
+            <div class="order-summary">
+              <h3>Order #${data.orderId}</h3>
+              <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
+              <p><strong>Shipping Address:</strong><br>
+                ${data.shippingAddress.street}<br>
+                ${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.zipCode}<br>
+                ${data.shippingAddress.country}
+              </p>
+            </div>
+
+            <h3>Order Items:</h3>
+            <table>
+              ${itemsHtml}
+              <tr>
+                <td style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+                <td style="padding: 10px; text-align: right;"><strong>₹${data.subtotal.toFixed(2)}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; text-align: right;">GST (18%):</td>
+                <td style="padding: 10px; text-align: right;">₹${data.gst.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; text-align: right;">Shipping:</td>
+                <td style="padding: 10px; text-align: right;">${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}</td>
+              </tr>
+              <tr class="total-row">
+                <td style="padding: 15px; text-align: right; border-top: 2px solid #8B5A3C;">Total:</td>
+                <td style="padding: 15px; text-align: right; border-top: 2px solid #8B5A3C;">₹${data.total.toFixed(2)}</td>
+              </tr>
+            </table>
+
+            <p>We'll send you another email with tracking information once your order ships.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${window.location.origin}/orders" class="btn">Track Your Order</a>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Thank you for choosing Sufi Essences - Premium Kashmiri Perfumes</p>
+            <p>If you have any questions, contact us at orders@sufiessences.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+Order Confirmation - Sufi Essences
+
+Dear ${data.name},
+
+Your order #${data.orderId} has been confirmed!
+
+Order Details:
+${data.items.map((item: any) => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+
+Subtotal: ₹${data.subtotal.toFixed(2)}
+GST (18%): ₹${data.gst.toFixed(2)}
+Shipping: ${data.shipping === 0 ? 'FREE' : '₹' + data.shipping.toFixed(2)}
+Total: ₹${data.total.toFixed(2)}
+
+Shipping Address:
+${data.shippingAddress.street}
+${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.zipCode}
+${data.shippingAddress.country}
+
+We'll send you tracking information once your order ships.
+
+Thank you for choosing Sufi Essences!
+    `;
+
+    return {
+      subject: `Order Confirmation #${data.orderId} - Sufi Essences`,
+      htmlContent,
+      textContent
+    };
   }
 }
 

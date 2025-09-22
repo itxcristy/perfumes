@@ -1,10 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Save, X, Upload, Image as ImageIcon, Video, Tag,
-  DollarSign, Package, Truck, Star, Info, AlertCircle,
-  Plus, Minus, Eye, EyeOff
-} from 'lucide-react';
+import { Save, X, Upload, Video, Tag, DollarSign, Package, Star, Info, Plus, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -179,10 +175,14 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
 
     try {
       setLoading(true);
+      const { StorageService } = await import('../../services/storageService');
+
       const uploadPromises = Array.from(files).map(async (file) => {
-        // In a real app, you'd upload to your storage service
-        // For now, we'll create a mock URL
-        return URL.createObjectURL(file);
+        const result = await StorageService.uploadImage(file, 'products');
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        return result.url;
       });
 
       const urls = await Promise.all(uploadPromises);
@@ -202,7 +202,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
       showNotification({
         type: 'error',
         title: 'Upload Failed',
-        message: 'Failed to upload images. Please try again.'
+        message: error instanceof Error ? error.message : 'Failed to upload images. Please try again.'
       });
     } finally {
       setLoading(false);

@@ -1,11 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Grid, List, X, AlertCircle, RefreshCw, Plus, Filter,
-  Search, SortAsc, SortDesc, Eye, Heart, ShoppingCart,
-  Star, TrendingUp, Package, Zap, Award, Clock
-} from 'lucide-react';
+import { Grid, List, X, RefreshCw, Plus, Filter, Search, SortAsc, SortDesc, Eye, Star, TrendingUp, Package, Zap, Award, Clock } from 'lucide-react';
 import { ProductCard } from '../components/Product/ProductCard';
 import { ProductListCard } from '../components/Product/ProductListCard';
 import { AttrFilters, AttrFilterState } from '../components/Product/AttrFilters';
@@ -229,6 +225,12 @@ export const ProductionProductsPage: React.FC = () => {
 
     setIsAddProductOpen(true);
   }, [user, showNotification]);
+
+  // Initial data fetching
+  useEffect(() => {
+    console.log('ProductsPage: Fetching products on mount');
+    fetchProducts();
+  }, [fetchProducts]);
 
   // PWA-specific effects
   useEffect(() => {
