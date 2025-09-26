@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, Check, X, GitCompare, Trash2 } from 'lucide-react';
 import { useCompare } from '../contexts/CompareContext';
 import { motion } from 'framer-motion';
+import ProductImage from '../components/Common/ProductImage';
 
 export const ComparePage: React.FC = () => {
   const { items, clearCompare, removeItem } = useCompare();
@@ -34,8 +35,8 @@ export const ComparePage: React.FC = () => {
     );
   }
 
-  const allSpecKeys = [...new Set(items.flatMap(item => Object.keys(item.specs || {})))];
-  
+  const allSpecKeys = [...new Set(items.flatMap(item => Object.keys(item.specifications || {})))];
+
   const mainFeatures = ['Price', 'Rating', 'Stock', ...allSpecKeys];
 
   return (
@@ -67,7 +68,12 @@ export const ComparePage: React.FC = () => {
                   >
                     <div className="relative">
                       <Link to={`/products/${item.id}`}>
-                        <img src={item.images[0]} alt={item.name} className="w-full h-40 object-cover rounded-lg mb-2" />
+                        <ProductImage
+                          product={{ id: item.id, name: item.name, images: item.images }}
+                          className="w-full h-40 object-cover rounded-lg mb-2"
+                          alt={item.name}
+                          size="medium"
+                        />
                         <h3 className="font-semibold text-gray-800 hover:text-indigo-600">{item.name}</h3>
                       </Link>
                       <button
@@ -107,7 +113,7 @@ export const ComparePage: React.FC = () => {
                           : <span className="text-red-600 flex items-center"><X className="h-5 w-5 mr-1" /> Out of Stock</span>;
                         break;
                       default:
-                        value = item.specs?.[feature] || <span className="text-gray-400">-</span>;
+                        value = item.specifications?.[feature] || <span className="text-gray-400">-</span>;
                     }
                     return (
                       <motion.td

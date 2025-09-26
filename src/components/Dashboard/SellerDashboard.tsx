@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Product } from '../../types';
 import { Modal } from '../Common/Modal';
 import { ProductForm } from '../Product/ProductForm';
+import ProductImage from '../Common/ProductImage';
 
 // Seller Overview Component
 const SellerOverview: React.FC = () => {
@@ -142,7 +143,12 @@ const SellerProductsManagement: React.FC = () => {
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <img src={product.images[0]} alt={product.name} className="h-10 w-10 rounded object-cover" />
+                      <ProductImage
+                        product={{ id: product.id, name: product.name, images: product.images }}
+                        className="h-10 w-10 rounded object-cover"
+                        alt={product.name}
+                        size="small"
+                      />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">{product.category}</div>
@@ -326,8 +332,8 @@ export const SellerDashboard: React.FC = () => {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === item.id
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -472,7 +478,12 @@ export const SellerDashboardBasic: React.FC = () => {
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <img src={product.images[0]} alt={product.name} className="h-10 w-10 rounded object-cover" />
+                      <ProductImage
+                        product={{ id: product.id, name: product.name, images: product.images }}
+                        className="h-10 w-10 rounded object-cover"
+                        alt={product.name}
+                        size="small"
+                      />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">{product.category}</div>

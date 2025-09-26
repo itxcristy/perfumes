@@ -5,6 +5,7 @@ import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useAddToCartWithAuth } from '../../hooks/useAddToCartWithAuth';
 import { useAddToWishlistWithAuth } from '../../hooks/useAddToWishlistWithAuth';
+import ProductImage from '../Common/ProductImage';
 
 interface ProductDetailsProps {
   product: Product;
@@ -70,7 +71,12 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                           className={`w-16 h-16 rounded border-2 overflow-hidden ${selectedImage === index ? 'border-indigo-500' : 'border-gray-200'
                             }`}
                         >
-                          <img src={image} alt="" className="w-full h-full object-cover" />
+                          <ProductImage
+                            product={{ id: product.id, name: product.name, images: [image] }}
+                            className="w-full h-full object-cover"
+                            alt=""
+                            size="small"
+                          />
                         </button>
                       ))}
                     </div>

@@ -1,8 +1,7 @@
 import React from 'react';
-import { useNetwork } from './NetworkStatusProvider';
 import { globalResourceManager } from '../../utils/resourceManager.tsx';
 import { RequestPriority } from '../../utils/networkResilience';
-import { useNetworkAdaptation } from './NetworkStatusProvider';
+import { useNetwork, useNetworkAdaptation } from '@/contexts/NetworkStatusContext';
 import { performanceMonitor } from '../../utils/performance';
 import { useImagePerformance } from '../../utils/performance';
 
@@ -39,13 +38,13 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     const getImageUrl = () => {
         if (product.images && product.images.length > 0) {
             // Check if we have a valid image URL (not just a placeholder)
-            const validImages = product.images.filter(img => 
-                img && 
-                img.trim() !== '' && 
+            const validImages = product.images.filter(img =>
+                img &&
+                img.trim() !== '' &&
                 !img.includes('placeholder') &&
                 (img.startsWith('http') || img.startsWith('/'))
             );
-            
+
             if (validImages.length > 0) {
                 return validImages[currentImage] || validImages[0];
             }
@@ -69,9 +68,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
 
         // Use first letter to determine color
         const normalizedIndex = Math.abs(firstLetter.charCodeAt(0)) % colors.length;
-        const color = normalizedIndex >= 0 && normalizedIndex < colors.length 
-          ? colors[normalizedIndex] 
-          : colors[0];
+        const color = normalizedIndex >= 0 && normalizedIndex < colors.length
+            ? colors[normalizedIndex]
+            : colors[0];
 
         // Size configurations
         const sizeConfig = {
@@ -84,7 +83,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
 
         const bgColor = color?.bg || '#E3F2FD';
         const textColor = color?.text || '#1976D2';
-        
+
         const svg = `
       <svg width="${config.width}" height="${config.height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="${bgColor}"/>
@@ -101,7 +100,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     // Preload image with resource manager
     const preloadImage = async (url: string) => {
         if (!url) return;
-        
+
         try {
             startLoading();
             // Use resource manager for prioritized loading

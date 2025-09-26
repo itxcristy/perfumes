@@ -14,6 +14,7 @@ import { ProductRecommendations } from '../components/Product/ProductRecommendat
 import { Modal } from '../components/Common/Modal';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 import { Review } from '../types';
+import ProductImage from '../components/Common/ProductImage';
 import {
   SocialProof,
   ReviewSummary,
@@ -85,7 +86,7 @@ export const ProductDetailPage: React.FC = () => {
       showNotification({ type: 'error', title: 'Login Required', message: 'You must be logged in to submit a review.' });
       return;
     }
-    await submitReview({ product_id: product.id, user_id: user.id, rating, comment });
+    await submitReview({ productId: product.id, userId: user.id, rating, comment });
     const updatedReviews = await fetchReviewsForProduct(product.id);
     setReviews(updatedReviews);
     showNotification({ type: 'success', title: 'Review Submitted', message: 'Thank you for your feedback!' });
@@ -110,17 +111,23 @@ export const ProductDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="aspect-square mb-4">
-              <img src={
-                (product.images && product.images.length > 0 && product.images[selectedImage]) ||
-                (product.images && product.images.length > 0 && product.images[0]) ||
-                'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='
-              } alt={product.name} className="w-full h-full object-cover rounded-xl shadow-lg" />
+              <ProductImage
+                product={{ id: product.id, name: product.name, images: product.images }}
+                className="w-full h-full object-cover rounded-xl shadow-lg"
+                alt={product.name}
+                size="large"
+              />
             </div>
             {product.images && product.images.length > 1 && (
               <div className="grid grid-cols-5 gap-4">
                 {product.images.map((image, index) => (
                   <button key={index} onClick={() => setSelectedImage(index)} className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-indigo-500 scale-105' : 'border-gray-200'}`}>
-                    <img src={image} alt="" className="w-full h-full object-cover" />
+                    <ProductImage
+                      product={{ id: product.id, name: product.name, images: [image] }}
+                      className="w-full h-full object-cover"
+                      alt=""
+                      size="small"
+                    />
                   </button>
                 ))}
               </div>
@@ -132,7 +139,7 @@ export const ProductDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
                 <div className="flex items-center space-x-2">
-                  <TrendingIndicator isHot={product.is_featured} salesIncrease={15} />
+                  <TrendingIndicator isHot={product.featured} salesIncrease={15} />
                   <MiniTrustIndicators
                     freeShipping={product.price >= 50}
                     warranty={true}

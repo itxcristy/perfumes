@@ -14,6 +14,7 @@ import { ThemeProvider } from './ThemeContext';
 import { AuthModalProvider } from './AuthModalContext';
 
 import { SecurityProvider } from '../components/Security/SecurityProvider';
+import { NetworkStatusProvider } from '../components/Common/NetworkStatusProvider';
 
 interface CombinedProviderProps {
     children: ReactNode;
@@ -39,7 +40,9 @@ export const CombinedProvider = memo<CombinedProviderProps>(({ children }) => {
                                                     <OrderProvider>
                                                         <AddressProvider>
                                                             <RecommendationsProvider>
-                                                                {children}
+                                                                <NetworkStatusProvider>
+                                                                    {children}
+                                                                </NetworkStatusProvider>
                                                             </RecommendationsProvider>
                                                         </AddressProvider>
                                                     </OrderProvider>
