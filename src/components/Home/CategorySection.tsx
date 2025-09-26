@@ -49,9 +49,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ categories }) 
                 <div className="card-interactive group relative h-48 sm:h-56 md:h-64 overflow-hidden rounded-lg sm:rounded-xl">
                   <div className="absolute inset-0">
                     <img
-                      src={category.image}
+                      src={category.image || '/placeholder-category.jpg'}
                       alt={category.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-category.jpg';
+                      }}
                     />
                   </div>
 

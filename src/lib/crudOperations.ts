@@ -1,5 +1,5 @@
-import { supabase } from './supabase';
-import { User, Product, Category, Order } from '../types';
+import { supabase } from './supabase.ts';
+import { User, Product, Category, Order } from '../types/index.ts';
 
 // ===== NEW CLEAN CRUD FUNCTIONS =====
 // These functions will replace the broken ones with proper error handling and validation
@@ -216,6 +216,9 @@ export const createProduct = async (productData: {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
+    // Prepare images array for database
+    const imagesArray = productData.imageUrl ? [productData.imageUrl] : [];
+
     const { data, error } = await supabase
       .from('products')
       .insert({
@@ -225,7 +228,7 @@ export const createProduct = async (productData: {
         category_id: productData.categoryId,
         seller_id: productData.sellerId || null,
         stock: productData.stock || 0,
-        image_url: productData.imageUrl || null,
+        images: imagesArray, // Use images array instead of image_url
         featured: productData.featured || false,
         slug: slug,
         is_active: true,
@@ -246,7 +249,7 @@ export const createProduct = async (productData: {
       sellerId: data.seller_id,
       sellerName: '', // Will be populated by join if needed
       stock: data.stock,
-      images: data.image_url ? [data.image_url] : [], // Convert single image to array
+      images: data.images || [], // Use images array directly from database
       tags: [], // Default empty array
       featured: data.featured,
       slug: data.slug,
@@ -280,7 +283,7 @@ export const updateProduct = async (productId: string, updates: Partial<Product>
     if (updates.price !== undefined) updateData.price = updates.price;
     if (updates.categoryId !== undefined) updateData.category_id = updates.categoryId;
     if (updates.stock !== undefined) updateData.stock = updates.stock;
-    if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl;
+    if (updates.imageUrl !== undefined) updateData.images = updates.imageUrl ? [updates.imageUrl] : []; // Convert to images array
     if (updates.featured !== undefined) updateData.featured = updates.featured;
     if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
 
@@ -302,7 +305,7 @@ export const updateProduct = async (productId: string, updates: Partial<Product>
       sellerId: data.seller_id,
       sellerName: '', // Will be populated by join if needed
       stock: data.stock,
-      images: data.image_url ? [data.image_url] : [], // Convert single image to array
+      images: data.images || [], // Use images array directly from database
       tags: [], // Default empty array
       featured: data.featured,
       slug: data.slug,
@@ -514,7 +517,7 @@ export const getProducts = async (): Promise<Product[]> => {
       categoryId: product.category_id,
       sellerId: product.seller_id,
       stock: product.stock,
-      images: product.image_url ? [product.image_url] : [],
+      images: product.images || [], // Use images array directly from database
       featured: product.featured,
       rating: product.rating || 0,
       reviewCount: product.review_count || 0,

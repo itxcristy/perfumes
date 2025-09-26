@@ -32,7 +32,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     setLoading(true);
 
     try {
-      const wishlistItems = await getWishlistItems();
+      const wishlistItems = await getWishlistItems(user.id);
       setItems(wishlistItems);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
@@ -53,10 +53,10 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const addItem = async (product: Product) => {
     if (!user) {
-      showNotification({ 
-        type: 'info', 
-        title: 'Authentication Required', 
-        message: 'Please log in or create an account to add items to your wishlist.' 
+      showNotification({
+        type: 'info',
+        title: 'Authentication Required',
+        message: 'Please log in or create an account to add items to your wishlist.'
       });
       return;
     }

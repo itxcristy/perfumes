@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ArrowRight, Gift, Clock, Truck, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -34,7 +33,7 @@ export const PromoBanner: React.FC = () => {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-bold mb-6"
           >
-            Free Shipping on All Orders
+            Fast Shipping on All Orders
           </motion.h2>
 
           <motion.p

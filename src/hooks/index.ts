@@ -2,3 +2,4 @@
 export { useAddToCartWithAuth } from './useAddToCartWithAuth';
 export { useAddToWishlistWithAuth } from './useAddToWishlistWithAuth';
 export { useAddToCompareWithAuth } from './useAddToCompareWithAuth';
+export * from './usePerformanceMonitoring';

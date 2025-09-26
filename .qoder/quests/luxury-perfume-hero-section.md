@@ -211,7 +211,7 @@ graph TB
     D --> I[Shop Collection Button]
     D --> J[Find Your Scent Button]
     
-    E --> K[Free Shipping • Authentic Products • 30-Day Returns]
+    E --> K[Fast Shipping • Authentic Products • 30-Day Returns]
 ```
 
 #### Mobile Layout (≤768px)
@@ -291,7 +291,7 @@ interface TrustIndicators {
   spacing: '2rem';
   indicators: [
     {
-      text: 'Free Shipping';
+      text: 'Fast Shipping';
       icon: 'truck';
       emphasis: 'shipping-threshold';
     },
@@ -807,7 +807,7 @@ graph TB
     D --> I[Shop Collection Button]
     D --> J[Find Your Scent Button]
     
-    E --> K[Free Shipping • Authentic Products • 30-Day Returns]
+    E --> K[Fast Shipping • Authentic Products • 30-Day Returns]
 ```
 
 #### Mobile Layout (≤768px)
@@ -887,7 +887,7 @@ interface TrustIndicators {
   spacing: '2rem';
   indicators: [
     {
-      text: 'Free Shipping';
+      text: 'Fast Shipping';
       icon: 'truck';
       emphasis: 'shipping-threshold';
     },

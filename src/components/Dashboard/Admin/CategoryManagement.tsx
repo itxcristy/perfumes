@@ -10,7 +10,7 @@ import { Edit, Trash2, Plus, Package, Image, Search, Filter, Download, RefreshCw
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveTable } from '../../Common/ResponsiveTable';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
-import { AdminLoadingState, EmptyState } from '../../Common/EnhancedLoadingStates';
+import { AdminLoadingState } from '../../Common/AdminLoadingState';
 
 export const CategoryManagement: React.FC = () => {
   const { categories, addCategory, updateCategory, deleteCategory, loading } = useProducts();
@@ -22,7 +22,7 @@ export const CategoryManagement: React.FC = () => {
     name: '',
     slug: '',
     description: '',
-    image: '',
+    imageUrl: '', // Changed from 'image' to 'imageUrl'
     isActive: true,
     sortOrder: 0
   });
@@ -104,7 +104,7 @@ export const CategoryManagement: React.FC = () => {
       name: '',
       slug: '',
       description: '',
-      image: '',
+      imageUrl: '', // Changed from 'image' to 'imageUrl'
       isActive: true,
       sortOrder: 0
     });
@@ -118,7 +118,7 @@ export const CategoryManagement: React.FC = () => {
       name: category.name,
       slug: category.slug || '',
       description: category.description || '',
-      image: category.image,
+      imageUrl: category.imageUrl, // Changed from 'image' to 'imageUrl'
       isActive: category.isActive || true,
       sortOrder: category.sortOrder || 0
     });
@@ -295,7 +295,7 @@ export const CategoryManagement: React.FC = () => {
           ...editingCategory,
           name: formData.name,
           description: formData.description,
-          imageUrl: formData.image, // Map 'image' to 'imageUrl'
+          imageUrl: formData.imageUrl, // Changed from 'image' to 'imageUrl'
           isActive: formData.isActive
         });
 
@@ -309,7 +309,7 @@ export const CategoryManagement: React.FC = () => {
         await addCategory({
           name: formData.name,
           description: formData.description,
-          imageUrl: formData.image // Map 'image' to 'imageUrl'
+          imageUrl: formData.imageUrl // Changed from 'image' to 'imageUrl'
         });
         showNotification({
           type: 'success',
@@ -394,9 +394,9 @@ export const CategoryManagement: React.FC = () => {
       minWidth: 200,
       render: (value: any, record: Category) => (
         <div className="flex items-center">
-          {record.image ? (
+          {record.imageUrl ? ( // Changed from 'image' to 'imageUrl'
             <img
-              src={record.image}
+              src={record.imageUrl} // Changed from 'image' to 'imageUrl'
               alt={record.name}
               className="h-12 w-12 rounded-lg object-cover border border-gray-200"
               onError={(e) => {
@@ -548,7 +548,7 @@ export const CategoryManagement: React.FC = () => {
   ];
 
   if (loading) {
-    return <AdminLoadingState type="products" message="Loading category data..." />;
+    return <AdminLoadingState title="Loading Categories" subtitle="Fetching category data..." />;
   }
 
   return (
@@ -769,9 +769,9 @@ export const CategoryManagement: React.FC = () => {
                 onClick={() => handleEditCategory(category)}
               >
                 <div className="relative">
-                  {category.image ? (
+                  {category.imageUrl ? ( // Changed from 'image' to 'imageUrl'
                     <img
-                      src={category.image}
+                      src={category.imageUrl} // Changed from 'image' to 'imageUrl'
                       alt={category.name}
                       className="w-full h-32 object-cover"
                       onError={(e) => {
@@ -926,8 +926,8 @@ export const CategoryManagement: React.FC = () => {
                 Category Image
               </label>
               <ImageUpload
-                value={formData.image}
-                onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                value={formData.imageUrl} // Changed from 'image' to 'imageUrl'
+                onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))} // Changed from 'image' to 'imageUrl'
                 onPathChange={setImagePath}
                 folder="categories"
                 placeholder="Upload category image or enter URL"

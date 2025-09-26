@@ -1,29 +1,29 @@
 import React, { Suspense, useEffect, lazy, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './styles/pwa-responsive.css';
-import { CombinedProvider } from './contexts/CombinedProvider';
-import { Layout } from './components/Layout/Layout';
-import { DatabaseErrorOverlay } from './components/Common/DatabaseErrorOverlay';
-import { ErrorBoundary } from './components/Common/ErrorBoundary';
-import { ScrollToTop } from './components/Common/ScrollToTop';
-import { PageLoader } from './components/Common/UniversalLoader';
-import { GlobalMediaErrorHandler } from './components/Common/MediaErrorHandler';
-import { SkipLink } from './utils/accessibilityEnhancements';
-import { initializeDatabase } from './utils/database/init';
+import '@/styles/pwa-responsive.css';
+import { CombinedProvider } from '@/contexts/CombinedProvider';
+import { Layout } from '@/components/Layout/Layout';
+import { DatabaseErrorOverlay } from '@/components/Common/DatabaseErrorOverlay';
+import { ErrorBoundary } from '@/components/Common/ErrorBoundary';
+import { ScrollToTop } from '@/components/Common/ScrollToTop';
+import { PageLoader } from '@/components/Common/UniversalLoader';
+import { GlobalMediaErrorHandler } from '@/components/Common/MediaErrorHandler';
+import { SkipLink } from '@/utils/accessibilityEnhancements';
+import { initializeDatabase } from '@/utils/database/init';
 
 // Lazy-loaded pages for code splitting - optimized for performance
-const HomePage = React.lazy(() => import('./pages/HomePage.tsx'));
-const ProductsPage = React.lazy(() => import('./pages/ProductsPage.tsx'));
-const ProductDetailPage = React.lazy(() => import('./pages/ProductDetailPage.tsx'));
-const SearchPage = React.lazy(() => import('./pages/SearchPage.tsx'));
-const WishlistPage = React.lazy(() => import('./pages/WishlistPage.tsx'));
-const ComparePage = React.lazy(() => import('./pages/ComparePage.tsx'));
-const NewArrivalsPage = React.lazy(() => import('./pages/NewArrivalsPage.tsx'));
-const DealsPage = React.lazy(() => import('./pages/DealsPage.tsx'));
-const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage.tsx'));
-const CollectionsPage = React.lazy(() => import('./pages/CollectionsPage.tsx'));
-const AuthPage = React.lazy(() => import('./pages/AuthPage.tsx'));
-const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.tsx'));
+const HomePage = React.lazy(() => import('@/pages/HomePage'));
+const ProductsPage = React.lazy(() => import('@/pages/ProductsPage'));
+const ProductDetailPage = React.lazy(() => import('@/pages/ProductDetailPage'));
+const SearchPage = React.lazy(() => import('@/pages/SearchPage'));
+const WishlistPage = React.lazy(() => import('@/pages/WishlistPage'));
+const ComparePage = React.lazy(() => import('@/pages/ComparePage'));
+const NewArrivalsPage = React.lazy(() => import('@/pages/NewArrivalsPage'));
+const DealsPage = React.lazy(() => import('@/pages/DealsPage'));
+const CategoriesPage = React.lazy(() => import('@/pages/CategoriesPage'));
+const CollectionsPage = React.lazy(() => import('@/pages/CollectionsPage'));
+const AuthPage = React.lazy(() => import('@/pages/AuthPage'));
+const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'));
 
 // Heavy admin/dashboard pages - loaded only when needed
 const DashboardPage = React.lazy(() =>
@@ -44,12 +44,25 @@ const SettingsPage = React.lazy(() =>
 
 
 
-// Universal loading fallback component
+// Universal optimized loading fallback component
 const PageLoadingFallback = memo(() => (
-  <PageLoader
-    text="Loading page..."
-    subText="Please wait while we load the content"
-  />
+  <div className="min-h-screen bg-white">
+    {/* Show immediate header skeleton */}
+    <div className="h-16 bg-white shadow-sm animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+        <div className="h-8 w-32 bg-gray-200 rounded"></div>
+        <div className="h-8 w-24 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+
+    {/* Show hero skeleton */}
+    <div className="min-h-[50vh] bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
+      <div className="text-center">
+        <div className="h-12 w-80 bg-white/20 rounded mb-4 mx-auto"></div>
+        <div className="h-6 w-60 bg-white/20 rounded mx-auto"></div>
+      </div>
+    </div>
+  </div>
 ));
 
 PageLoadingFallback.displayName = 'PageLoadingFallback';

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { CheckCircle, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
-import { AppError, handleSupabaseError } from '../utils/errorHandling';
+import { AppError, ErrorHandler } from '../utils/errorHandling';
 
 interface Notification {
   id: string;
@@ -116,12 +116,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   }, []);
 
   const showError = (error: Error | AppError, context?: string) => {
-    const appError = 'type' in error ? error : handleSupabaseError(error);
+    const appError = 'type' in error ? error : ErrorHandler.handle(error);
 
     showNotification({
       type: 'error',
       title: 'Oops! Something went wrong',
-      message: appError.userMessage,
+      message: appError.message,
       duration: 7000
     });
   };
@@ -311,7 +311,8 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
           top: '1rem',
           right: '1rem',
           maxHeight: 'calc(100vh - 2rem)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          zIndex: 9999
         }}
       >
         <div className="flex flex-col-reverse gap-3 max-w-sm w-full">

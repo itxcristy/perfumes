@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useNotification } from '../../contexts/NotificationContext';
 
 export const NewsletterSection: React.FC = () => {

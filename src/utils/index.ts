@@ -2,6 +2,9 @@
 
 // Performance utilities
 export * from './performance';
+export * from './resourceManager.tsx';
+export * from './metricsTracker';
+export * from './analytics';
 
 // Database utilities
 export * from './database';
@@ -10,12 +13,12 @@ export * from './database';
 export * from './auth';
 
 // Core utilities
-export { cacheManager } from './cache';
+export { cacheManager, AdvancedCacheManager, advancedCacheManager } from './cache';
 export {
   detectRLSRecursionError,
   generateRLSFixSuggestion,
   handleDatabaseError
 } from './errorHandling';
-export { validateUUID, generateUUID } from './uuidValidation';
+export { isValidUUID as validateUUID, generateUUID } from './uuidValidation';
 export { serviceWorkerManager } from './serviceWorker';
 export { withScrollToTop } from './withScrollToTop';

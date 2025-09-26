@@ -37,11 +37,11 @@ export const CACHE_CONFIGS: Record<string, CacheConfig> = {
     conflictResolution: 'server-wins'
   },
 
-  // Product catalog - can be stale
+  // Product catalog - can be stale but with longer TTL
   'products': {
     strategy: 'stale-while-revalidate',
-    ttl: 10 * 60 * 1000, // 10 minutes
-    maxAge: 60 * 60 * 1000, // 1 hour
+    ttl: 30 * 60 * 1000, // Increased from 10 to 30 minutes
+    maxAge: 2 * 60 * 60 * 1000, // Increased from 1 hour to 2 hours
     priority: 'high',
     tags: ['products', 'catalog'],
     compression: true,
@@ -49,10 +49,10 @@ export const CACHE_CONFIGS: Record<string, CacheConfig> = {
     conflictResolution: 'server-wins'
   },
 
-  // Categories - rarely change
+  // Categories - rarely change with much longer TTL
   'categories': {
-    strategy: 'cache-first',
-    ttl: 30 * 60 * 1000, // 30 minutes
+    strategy: 'stale-while-revalidate', // Changed from cache-first to stale-while-revalidate
+    ttl: 60 * 60 * 1000, // Increased from 30 minutes to 1 hour
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     priority: 'medium',
     tags: ['categories', 'catalog'],
@@ -74,11 +74,11 @@ export const CACHE_CONFIGS: Record<string, CacheConfig> = {
     conflictResolution: 'merge'
   },
 
-  // Orders - historical data
+  // Orders - historical data with longer cache
   'orders': {
-    strategy: 'cache-first',
-    ttl: 15 * 60 * 1000, // 15 minutes
-    maxAge: 2 * 60 * 60 * 1000, // 2 hours
+    strategy: 'stale-while-revalidate', // Changed from cache-first to stale-while-revalidate
+    ttl: 30 * 60 * 1000, // Increased from 15 to 30 minutes
+    maxAge: 2 * 60 * 60 * 1000, // Increased from 2 hours to 2 hours
     priority: 'high',
     tags: ['orders', 'user'],
     compression: true,
@@ -263,7 +263,7 @@ export class IntelligentCacheManager {
   }
 
   /**
-   * Stale-while-revalidate strategy implementation
+   * Stale-while-revalidate strategy implementation with enhanced background update
    */
   private async staleWhileRevalidateStrategy<T>(
     key: string,
@@ -275,8 +275,8 @@ export class IntelligentCacheManager {
     
     // Serve cached data immediately if available
     if (cached !== null) {
-      // Update in background
-      this.backgroundUpdate(key, fetchFn, config);
+      // Update in background with smarter retry logic
+      this.backgroundUpdateWithRetry(key, fetchFn, config);
       return config.encryption ? this.decrypt(cached) : cached;
     }
 
@@ -316,19 +316,35 @@ export class IntelligentCacheManager {
   }
 
   /**
-   * Background update for stale-while-revalidate
+   * Enhanced background update with retry mechanism
    */
-  private async backgroundUpdate<T>(
+  private async backgroundUpdateWithRetry<T>(
     key: string,
     fetchFn: () => Promise<T>,
-    config: CacheConfig
+    config: CacheConfig,
+    maxRetries: number = 3
   ): Promise<void> {
-    try {
-      const data = await fetchFn();
-      await this.set(key, data, this.getEntityTypeFromConfig(config));
-    } catch (error) {
-      console.warn(`Background update failed for ${key}:`, error);
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const data = await fetchFn();
+        await this.set(key, data, this.getEntityTypeFromConfig(config));
+        return;
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`Background update attempt ${attempt + 1} failed for ${key}:`, error);
+        
+        // Don't retry on last attempt
+        if (attempt < maxRetries) {
+          // Exponential backoff: 1s, 2s, 4s, etc.
+          const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
     }
+    
+    console.error(`Background update failed after ${maxRetries + 1} attempts for ${key}:`, lastError);
   }
 
   /**
@@ -395,29 +411,56 @@ export class IntelligentCacheManager {
   }
 
   /**
-   * Preload critical data
+   * Warm up cache with frequently accessed data
    */
-  private async preloadCriticalData(): Promise<void> {
-    const criticalKeys = [
-      'user-profile',
-      'cart',
-      'categories'
-    ];
-
-    for (const key of criticalKeys) {
-      if (!this.preloadQueue.has(key)) {
-        this.preloadQueue.add(key);
-        // Implement preloading logic
+  private async warmupCache(): Promise<void> {
+    console.log('Warming up cache...');
+    
+    // Warm up categories (most critical for navigation)
+    try {
+      const categoriesKey = generateCacheKey('categories');
+      if (!primaryCache.has(categoriesKey)) {
+        // In a real implementation, this would fetch from API
+        // For now, we'll just log that we're warming up
+        console.log('Warming up categories cache');
       }
+    } catch (error) {
+      console.warn('Failed to warm up categories cache:', error);
+    }
+    
+    // Warm up featured products
+    try {
+      const featuredKey = generateCacheKey('featured-products');
+      if (!primaryCache.has(featuredKey)) {
+        // In a real implementation, this would fetch from API
+        console.log('Warming up featured products cache');
+      }
+    } catch (error) {
+      console.warn('Failed to warm up featured products cache:', error);
     }
   }
 
   /**
-   * Warm up cache with frequently accessed data
+   * Preload critical data with priority
    */
-  private async warmupCache(): Promise<void> {
-    // Implement cache warming logic
-    console.log('Warming up cache...');
+  async preloadCriticalData(): Promise<void> {
+    console.log('Preloading critical data...');
+    
+    // Preload user profile if authenticated
+    try {
+      // In a real implementation, this would check auth state and preload user data
+      console.log('Preloading user profile data');
+    } catch (error) {
+      console.warn('Failed to preload user profile:', error);
+    }
+    
+    // Preload cart data
+    try {
+      // In a real implementation, this would preload cart data
+      console.log('Preloading cart data');
+    } catch (error) {
+      console.warn('Failed to preload cart data:', error);
+    }
   }
 
   /**

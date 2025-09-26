@@ -30,12 +30,12 @@ export const Footer: React.FC = () => {
           {/* Brand Section */}
           <div className="lg:col-span-2 xl:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
-              <img 
-                src={logo} 
-                alt="Logo" 
+              <img
+                src={logo}
+                alt="Logo"
                 className="w-8 h-8 object-contain"
               />
-              <h3 className="text-2xl font-semibold text-text-inverse font-luxury">S.Essences</h3>
+              <h3 className="text-2xl font-semibold text-text-inverse font-luxury">Aligarh Attar House</h3>
             </div>
             <p className="text-neutral-300 mb-8 leading-relaxed max-w-md">
               Your destination for curated excellence. We bring together the finest products with uncompromising quality and sophisticated design.
@@ -101,7 +101,7 @@ export const Footer: React.FC = () => {
         <div className="border-t border-neutral-800 mt-8 md:mt-12 pt-6 md:pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-neutral-400 text-sm">
-              © 2025 S.Essences. All rights reserved.
+              © 2025 Aligarh Attar House. All rights reserved.
             </p>
             <div className="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 text-sm">
               <a href="#" className="text-neutral-400 hover:text-text-inverse transition-colors duration-200">Privacy Policy</a>

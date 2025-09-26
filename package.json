@@ -5,9 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "build:analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview",
+    "clean": "rimraf dist",
+    "test": "vitest"
   },
   "dependencies": {
     "@sentry/browser": "^10.10.0",
@@ -16,6 +21,7 @@
     "@types/node": "^24.3.0",
     "@types/recharts": "^2.0.1",
     "axios": "^1.9.0",
+    "dotenv": "^17.2.2",
     "framer-motion": "^12.23.6",
     "logrocket": "^10.1.0",
     "lucide-react": "^0.511.0",
@@ -30,6 +36,7 @@
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.5.0",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.27.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -42,6 +49,7 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1",
     "vite": "^6.3.5",
-    "vite-plugin-image-optimizer": "^2.0.2"
+    "vite-plugin-image-optimizer": "^2.0.2",
+    "vitest": "^3.2.4"
   }
 }

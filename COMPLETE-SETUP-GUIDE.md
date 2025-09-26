@@ -87,7 +87,6 @@ After setup, you should have these tables:
 - ✅ **reviews** - Product reviews
 - ✅ **addresses** - User addresses
 - ✅ **payment_methods** - Payment info
-- ✅ **coupons** - Discount codes
 - ✅ **product_variants** - Product variations
 
 ### New Tables (Created by Setup)

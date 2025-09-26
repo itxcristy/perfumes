@@ -7,9 +7,24 @@ export { ErrorFallback } from './ErrorFallback';
 export { DatabaseErrorOverlay } from './DatabaseErrorOverlay';
 export { Modal } from './Modal';
 export { LazyImage } from './LazyImage';
-export { MediaErrorHandler } from './MediaErrorHandler';
+export { ResponsiveImage } from './ResponsiveImage';
+export { SafeImage, SafeVideo, GlobalMediaErrorHandler } from './MediaErrorHandler';
 export { ResponsiveTable } from './ResponsiveTable';
 export { ScrollToTop } from './ScrollToTop';
-export { EnhancedButton } from './EnhancedButton';
-export { AdminDesignSystem } from './AdminDesignSystem';
+export { Button } from './Button';
+export { 
+  AdminCard, 
+  AdminHeader, 
+  AdminMetricCard, 
+  DESIGN_TOKENS, 
+  useDebounce, 
+  useMemoizedCallback, 
+  ARIA_LABELS, 
+  getAriaLabel, 
+  BREAKPOINTS, 
+  useResponsive, 
+  ANIMATIONS, 
+  getAnimationClass 
+} from './AdminDesignSystem';
 export { ImageUpload } from './ImageUpload';
+export { PerformanceDashboard } from './PerformanceDashboard';

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  Truck, 
-  RotateCcw, 
-  Star, 
-  Users, 
+import {
+  Shield,
+  Truck,
+  RotateCcw,
+  Star,
+  Users,
   Eye,
   ShoppingBag,
   Clock,
@@ -17,8 +17,8 @@ interface ProductPageTrustSignalsProps {
   className?: string;
 }
 
-export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = ({ 
-  className = '' 
+export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = ({
+  className = ''
 }) => {
   const [currentViewers, setCurrentViewers] = useState(0);
   const [recentPurchases, setRecentPurchases] = useState(0);
@@ -28,14 +28,14 @@ export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = (
     const updateViewers = () => {
       setCurrentViewers(Math.floor(Math.random() * 50) + 15);
     };
-    
+
     const updatePurchases = () => {
       setRecentPurchases(Math.floor(Math.random() * 20) + 5);
     };
 
     updateViewers();
     updatePurchases();
-    
+
     const viewerInterval = setInterval(updateViewers, 8000);
     const purchaseInterval = setInterval(updatePurchases, 12000);
 
@@ -53,7 +53,7 @@ export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = (
     },
     {
       icon: Truck,
-      title: "Free Shipping",
+      title: "Fast Shipping",
       description: "On orders over $50"
     },
     {
@@ -95,7 +95,7 @@ export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = (
       <div className="bg-gradient-to-r from-neutral-50 to-white rounded-luxury-lg p-6 border border-neutral-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Current Viewers */}
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             key={currentViewers}
             initial={{ scale: 1 }}
@@ -114,7 +114,7 @@ export const ProductPageTrustSignals: React.FC<ProductPageTrustSignalsProps> = (
           </motion.div>
 
           {/* Recent Purchases */}
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             key={recentPurchases}
             initial={{ scale: 1 }}

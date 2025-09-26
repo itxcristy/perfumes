@@ -13,7 +13,7 @@ interface TrustSignal {
 const trustSignals: TrustSignal[] = [
   {
     icon: Truck,
-    title: 'Free Shipping',
+    title: 'Fast Shipping',
     description: 'On orders over $50',
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50'
@@ -195,9 +195,9 @@ export const HomepageTrustSection: React.FC<{ className?: string }> = ({ classNa
             We're committed to providing you with the best shopping experience possible.
           </motion.p>
         </div>
-        
+
         <TrustSignals variant="grid" className="mb-12" />
-        
+
         {/* Additional trust metrics */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -224,16 +224,16 @@ export const HomepageTrustSection: React.FC<{ className?: string }> = ({ classNa
 };
 
 // Mini trust indicators for product cards
-export const MiniTrustIndicators: React.FC<{ 
+export const MiniTrustIndicators: React.FC<{
   freeShipping?: boolean;
   warranty?: boolean;
   returns?: boolean;
   className?: string;
 }> = ({ freeShipping, warranty, returns, className = '' }) => {
   const indicators = [];
-  
+
   if (freeShipping) {
-    indicators.push({ icon: Truck, text: 'Free Shipping', color: 'text-blue-600' });
+    indicators.push({ icon: Truck, text: 'Fast Shipping', color: 'text-blue-600' });
   }
   if (warranty) {
     indicators.push({ icon: Shield, text: 'Warranty', color: 'text-green-600' });

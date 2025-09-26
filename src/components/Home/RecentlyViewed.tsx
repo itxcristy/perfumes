@@ -18,10 +18,10 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
   className = '',
   layout = 'horizontal'
 }) => {
-  const { 
-    recommendations, 
-    clearRecentlyViewed, 
-    getRecentlyViewed 
+  const {
+    recommendations,
+    clearRecentlyViewed,
+    getRecentlyViewed
   } = useRecommendations();
 
   const recentlyViewedProducts = getRecentlyViewed(maxItems);
@@ -49,7 +49,7 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2 sm:space-x-3">
             {showClearButton && (
               <button
@@ -60,10 +60,10 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
                 <span>Clear All</span>
               </button>
             )}
-            
+
             {recentlyViewedProducts.length > maxItems && (
-              <Link 
-                to="/products" 
+              <Link
+                to="/products"
                 className="flex items-center space-x-1 sm:space-x-1.5 text-primary-600 hover:text-primary-700 transition-colors text-[10px] sm:text-xs touch-manipulation"
               >
                 <span className="font-medium">View All</span>
@@ -85,6 +85,8 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
     </section>
   );
 };
+
+export default RecentlyViewed;
 
 // Compact version for sidebars or smaller spaces
 export const RecentlyViewedCompact: React.FC<{
@@ -119,8 +121,8 @@ export const RecentlyViewedCompact: React.FC<{
           <Eye className="h-5 w-5 text-neutral-600" />
           <h3 className="font-semibold text-neutral-900">Recently Viewed</h3>
         </div>
-        <Link 
-          to="/products" 
+        <Link
+          to="/products"
           className="text-primary-600 hover:text-primary-700 transition-colors"
         >
           <ArrowRight className="h-4 w-4" />
@@ -135,7 +137,7 @@ export const RecentlyViewedCompact: React.FC<{
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Link 
+            <Link
               to={`/products/${product.id}`}
               className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors"
             >
@@ -175,89 +177,6 @@ export const RecentlyViewedCompact: React.FC<{
           >
             View All Recently Viewed
           </Link>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Widget for dashboard or profile pages
-export const RecentlyViewedWidget: React.FC<{
-  className?: string;
-}> = ({ className = '' }) => {
-  const { getRecentlyViewed, getRecommendationAnalytics } = useRecommendations();
-  const recentlyViewedProducts = getRecentlyViewed(5);
-  const analytics = getRecommendationAnalytics();
-
-  return (
-    <div className={`bg-white rounded-xl border border-neutral-200 p-6 ${className}`}>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-primary-100 rounded-lg">
-            <Eye className="h-5 w-5 text-primary-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-neutral-900">Browsing Activity</h3>
-            <p className="text-neutral-600 text-sm">Your recent product views</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Analytics Summary */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="text-center p-3 bg-neutral-50 rounded-lg">
-          <p className="text-2xl font-bold text-neutral-900">
-            {analytics.recentlyViewed?.totalViewed || 0}
-          </p>
-          <p className="text-xs text-neutral-600">Total Views</p>
-        </div>
-        <div className="text-center p-3 bg-neutral-50 rounded-lg">
-          <p className="text-2xl font-bold text-neutral-900">
-            {analytics.recentlyViewed?.uniqueProducts || 0}
-          </p>
-          <p className="text-xs text-neutral-600">Unique Products</p>
-        </div>
-      </div>
-
-      {/* Recent Products */}
-      {recentlyViewedProducts.length > 0 ? (
-        <div className="space-y-3">
-          <h4 className="font-medium text-neutral-900 text-sm">Recent Products</h4>
-          {recentlyViewedProducts.slice(0, 3).map((product) => (
-            <Link
-              key={product.id}
-              to={`/products/${product.id}`}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
-            >
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-10 h-10 object-cover rounded-lg"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-neutral-900 text-sm truncate">
-                  {product.name}
-                </p>
-                <p className="text-primary-600 font-semibold text-xs">
-                  ₹{product.price.toLocaleString('en-IN')}
-                </p>
-              </div>
-            </Link>
-          ))}
-          
-          {recentlyViewedProducts.length > 3 && (
-            <Link
-              to="/products"
-              className="block text-center text-sm text-primary-600 hover:text-primary-700 transition-colors font-medium pt-2"
-            >
-              View {recentlyViewedProducts.length - 3} more
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="text-center py-6">
-          <Eye className="h-8 w-8 text-neutral-300 mx-auto mb-2" />
-          <p className="text-neutral-500 text-sm">No recent activity</p>
         </div>
       )}
     </div>

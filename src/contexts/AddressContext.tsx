@@ -32,7 +32,7 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     setLoading(true);
     try {
-      const addressesData = await getUserAddresses();
+      const addressesData = await getUserAddresses(user.id);
       setAddresses(addressesData);
     } catch (error) {
       console.error('Error fetching addresses:', error);

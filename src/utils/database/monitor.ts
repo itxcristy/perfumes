@@ -152,7 +152,6 @@ class DatabaseMonitor {
       'orders',
       'order_items',
       'addresses',
-      'coupons',
       'product_variants'
     ];
 

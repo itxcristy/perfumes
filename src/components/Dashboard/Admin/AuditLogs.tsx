@@ -3,7 +3,7 @@ import { FileText, Search, Download, Eye, User, Activity, Shield, AlertTriangle,
 import { supabase } from '../../../lib/supabase';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
-import { EnhancedButton } from '../../Common/EnhancedButton';
+import { Button } from '../../Common/Button';
 import { Modal } from '../../Common/Modal';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
 
@@ -284,22 +284,22 @@ export const AuditLogs: React.FC = () => {
               Track and monitor all system activities and user actions
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <EnhancedButton
+            <Button
               onClick={exportLogs}
               icon={Download}
-              variant="outline"
+              variant="secondary"
             >
               Export CSV
-            </EnhancedButton>
-            <EnhancedButton
+            </Button>
+            <Button
               onClick={fetchAuditLogs}
               icon={RefreshCw}
-              variant="outline"
+              variant="secondary"
             >
               Refresh
-            </EnhancedButton>
+            </Button>
           </div>
         </div>
 
@@ -315,7 +315,7 @@ export const AuditLogs: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
               <input
@@ -325,7 +325,7 @@ export const AuditLogs: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <select
@@ -338,7 +338,7 @@ export const AuditLogs: React.FC = () => {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
@@ -351,7 +351,7 @@ export const AuditLogs: React.FC = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
               <div className="relative">
@@ -596,12 +596,12 @@ export const AuditLogs: React.FC = () => {
               )}
 
               <div className="flex justify-end">
-                <EnhancedButton
+                <Button
                   onClick={() => setIsDetailModalOpen(false)}
-                  variant="outline"
+                  variant="secondary"
                 >
                   Close
-                </EnhancedButton>
+                </Button>
               </div>
             </div>
           )}

@@ -45,7 +45,7 @@ export const BulkProductImport: React.FC = () => {
     const sampleCSV = `"Name","Short Description","Description","Price","Original Price","Category","Stock","SKU","Weight (kg)","Tags","Featured","Image URLs"
 "Royal Oudh Supreme","Premium Cambodian oudh aged for 3 years with rose damascus","Aged Cambodian oudh with premium fragrance",12500.00,15000.00,"Oudh Attars",15,"OUDH001",0.012,"oudh,premium,aged,cambodian",true,"/images/products/royal-oud1.jpg,/images/products/royal-oud2.jpg"
 "Bulgarian Rose Attar","Steam-distilled Bulgarian rose petals with romantic fragrance","Pure Bulgarian rose attar",5800.00,7200.00,"Floral Attars",25,"ROSE001",0.010,"rose,floral,bulgarian,romantic",false,"/images/products/rose1.jpg"
-"White Musk Arabia","Pure white musk with soft, clean, and powdery notes","Premium white musk attar",3200.00,4000.00,"Musk Attars",30,"MUSK001",0.012,"musk,white,clean,soft",false,"/images/products/musk1.jpg"`;
+"White Musk Arabia","Pure white musk with soft, clean, and powdery notes","Premium white Nusk attar",3200.00,4000.00,"Musk Attars",30,"MUSK001",0.012,"musk,white,clean,soft",false,"/images/products/musk1.jpg"`;
     
     const blob = new Blob([sampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

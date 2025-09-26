@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { performanceMonitor } from '../../utils/performance';
+import { performanceMonitor, useImagePerformance } from '../../utils/performance';
 
 interface LazyImageProps {
   src: string;
@@ -10,6 +10,8 @@ interface LazyImageProps {
   height?: number;
   responsive?: boolean;
   sizes?: string;
+  srcSet?: string;
+  quality?: number;
   priority?: boolean;
   onLoad?: () => void;
   onError?: () => void;
@@ -20,15 +22,17 @@ interface ImageFormat {
   src: string;
 }
 
-export const LazyImage: React.FC<LazyImageProps> = ({ 
-  src, 
-  alt, 
-  className = '', 
+export const LazyImage: React.FC<LazyImageProps> = ({
+  src,
+  alt,
+  className = '',
   placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPgogIDx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjIwIiBmaWxsPSIjYWFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TG9hZGluZy4uLjwvdGV4dD4KPC9zdmc+',
   width,
   height,
   responsive = false,
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  srcSet,
+  quality = 80,
   priority = false,
   onLoad,
   onError
@@ -37,8 +41,10 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
   const [bestFormat, setBestFormat] = useState<string>(src);
+  const [imageSrcSet, setImageSrcSet] = useState<string>('');
   const imgRef = useRef<HTMLImageElement>(null);
   const intersectionRef = useRef<HTMLDivElement>(null);
+  const { startLoading, endLoading } = useImagePerformance(src);
 
   // Modern image format detection
   const supportsWebP = (): boolean => {
@@ -64,7 +70,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     }
 
     const formats: ImageFormat[] = [];
-    
+
     // Add AVIF if supported (best compression)
     if (supportsAVIF()) {
       formats.push({
@@ -72,7 +78,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         src: originalSrc.replace(/\.(jpg|jpeg|png|webp)$/i, '.avif')
       });
     }
-    
+
     // Add WebP if supported (good compression)
     if (supportsWebP()) {
       formats.push({
@@ -80,14 +86,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         src: originalSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp')
       });
     }
-    
+
     // Fallback to original
     formats.push({
       format: 'original',
       src: originalSrc
     });
 
-    return formats[0].src;
+    return formats.length > 0 && formats[0] ? formats[0].src : originalSrc;
   };
 
   // Generate responsive image sources
@@ -96,16 +102,42 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       return baseSrc;
     }
 
+    // If srcSet is provided, use it
+    if (srcSet) {
+      return baseSrc;
+    }
+
     const baseUrl = baseSrc.split('.').slice(0, -1).join('.');
-    const extension = baseSrc.split('.').pop();
-    
+
     // For now, return optimized format - in production you'd have different sizes
     return getOptimalImageFormat(baseSrc);
   };
 
+  // Generate srcSet for responsive images
+  const generateSrcSet = (baseSrc: string): string => {
+    if (baseSrc.startsWith('data:') || baseSrc.startsWith('blob:')) {
+      return '';
+    }
+
+    // If srcSet is provided, use it
+    if (srcSet) {
+      return srcSet;
+    }
+
+    // Generate different sizes for responsive images
+    const sizes = [100, 200, 400, 600, 800, 1200];
+    const baseUrl = baseSrc.split('.').slice(0, -1).join('.');
+    const extension = baseSrc.split('.').pop() || 'jpg';
+
+    return sizes.map(size =>
+      `${baseUrl}-${size}.${extension} ${size}w`
+    ).join(', ');
+  };
+
   useEffect(() => {
     setBestFormat(generateResponsiveSources(src));
-  }, [src, responsive]);
+    setImageSrcSet(generateSrcSet(src));
+  }, [src, responsive, srcSet]);
 
   useEffect(() => {
     if (priority) {
@@ -115,7 +147,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsInView(true);
           observer.disconnect();
         }
@@ -135,12 +167,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 
   const handleLoad = () => {
     performanceMonitor.endMeasure(`lazy-image-load-${src}`);
+    endLoading(true);
     setIsLoaded(true);
     onLoad?.();
   };
 
   const handleError = () => {
     performanceMonitor.endMeasure(`lazy-image-load-${src}`, false);
+    endLoading(false);
     setHasError(true);
     onError?.();
   };
@@ -149,8 +183,9 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   useEffect(() => {
     if (isInView && !isLoaded && !hasError) {
       performanceMonitor.startMeasure(`lazy-image-load-${src}`);
+      startLoading();
     }
-  }, [isInView, src, isLoaded, hasError]);
+  }, [isInView, src, isLoaded, hasError, startLoading]);
 
   // Safe fallback image
   const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4=';
@@ -159,8 +194,8 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const blurPlaceholder = !isLoaded && !hasError && isInView;
 
   return (
-    <div 
-      className={`relative overflow-hidden ${className}`} 
+    <div
+      className={`relative overflow-hidden ${className}`}
       ref={intersectionRef}
       style={{ aspectRatio: width && height ? `${width}/${height}` : undefined }}
     >
@@ -176,15 +211,15 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         <img
           ref={imgRef}
           src={hasError ? fallbackImage : bestFormat}
+          srcSet={imageSrcSet}
           alt={alt}
           width={width}
           height={height}
           sizes={responsive ? sizes : undefined}
-          className={`${className} transition-all duration-500 ease-out ${
-            isLoaded 
-              ? 'opacity-100 scale-100' 
-              : 'opacity-0 scale-105 blur-sm'
-          } ${blurPlaceholder ? 'filter blur-sm' : ''}`}
+          className={`${className} transition-all duration-500 ease-out ${isLoaded
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-105 blur-sm'
+            } ${blurPlaceholder ? 'filter blur-sm' : ''}`}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}

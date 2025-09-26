@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, AuthContextType } from '../types';
-import { supabase, getProfileForUser, updateUserProfile } from '../lib/supabase';
-import { createUser } from '../lib/crudOperations';
+import { supabase, getProfileForUser } from '../lib/supabase';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { useError } from './ErrorContext';
+import { NewUserService } from '../lib/services/NewUserService'; // Import new service
 
 import { MobileAuthView } from '../components/Auth/MobileAuthView';
+
+// Initialize the new user service
+const userService = new NewUserService();
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,16 +25,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  console.log('🔐 AuthProvider initialized!');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
   const [isMobileAuthOpen, setIsMobileAuthOpen] = useState(false);
   const [mobileAuthMode, setMobileAuthMode] = useState<'login' | 'signup' | 'profile'>('login');
   const { setError } = useError();
-
-
 
   // Initialize auth state with better error handling
   useEffect(() => {
@@ -40,7 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Add timeout for session retrieval
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Session retrieval timed out')), 10000);
+          setTimeout(() => reject(new Error('Session retrieval timed out')), 15000);
         });
 
         const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
@@ -76,8 +74,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     initializeAuth();
   }, []);
-
-
 
   // Handle auth state changes with better error handling
   useEffect(() => {
@@ -126,7 +122,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleUserSession = async (authUser: any) => {
     try {
-      const profileData = await getProfileForUser(authUser.id);
+      // Use the new service to get user profile
+      const profileData = await userService.getUserById(authUser.id);
 
       if (profileData) {
         const fullUser: User = {
@@ -136,13 +133,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(fullUser);
         setError(null);
       } else {
-        // Create profile if it doesn't exist
-        const newProfile = await createUser({
+        // Create profile if it doesn't exist using the new service
+        const newProfile = await userService.createUser({
           email: authUser.email!,
           name: authUser.user_metadata?.full_name || '',
           role: authUser.user_metadata?.role || 'customer',
           phone: authUser.user_metadata?.phone || '',
           dateOfBirth: authUser.user_metadata?.date_of_birth || '',
+          isActive: true
         });
 
         if (newProfile) {
@@ -175,8 +173,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
     }
   };
-
-
 
   // Standard Authentication Methods with timeout handling
   const signIn = async (email: string, password: string): Promise<void> => {
@@ -232,7 +228,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           full_name: additionalData?.fullName || '',
           phone: additionalData?.phone || '',
           date_of_birth: additionalData?.dateOfBirth || '',
-          address: additionalData?.address || '',
           subscribe_newsletter: additionalData?.subscribeNewsletter || false,
           role: 'customer' // Default role for new users
         }
@@ -289,14 +284,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         {
           fullName: userData.name,
           phone: userData.phone,
-          dateOfBirth: userData.dateOfBirth,
-          address: userData.address || ''
+          dateOfBirth: userData.dateOfBirth
         }
       );
       return true;
     } catch (error) {
       console.error('Registration error:', error);
       return false;
+    }
+  };
+
+  // Add a method to update user profile using the new service
+  const updateProfile = async (updates: Partial<User>): Promise<void> => {
+    try {
+      if (!user) {
+        throw new Error('No user is currently authenticated');
+      }
+
+      const updatedUser = await userService.updateUser(user.id, updates);
+      // Update the user state
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
     }
   };
 
@@ -310,21 +320,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsMobileAuthOpen(false);
   };
 
+  // Placeholder methods for required interface methods
+  const resetPassword = async (email: string): Promise<void> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw new Error(error.message);
+  };
+
+  const updatePassword = async (newPassword: string): Promise<void> => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw new Error(error.message);
+  };
+
+  const resendVerification = async (): Promise<void> => {
+    if (!user?.email) throw new Error('No email available');
+    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email });
+    if (error) throw new Error(error.message);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
-    loginAttempts,
-    isLocked,
+    login,
+    logout,
+    register,
     signIn,
     signUp,
-    logout,
     signOut,
-    login,
-    register,
-    resetPassword: async () => { },
-    updatePassword: async () => { },
-    resendVerification: async () => { },
-    updateProfile: async () => { },
+    resetPassword,
+    updatePassword,
+    resendVerification,
+    updateProfile, // Add the new updateProfile method
 
     openMobileAuth,
     closeMobileAuth,
@@ -335,11 +360,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
-      {/* Mobile Auth View */}
       <MobileAuthView
         isOpen={isMobileAuthOpen}
-        onClose={closeMobileAuth}
-        initialMode={mobileAuthMode}
+        onClose={() => setIsMobileAuthOpen(false)}
+        initialMode={mobileAuthMode === 'profile' ? 'login' : mobileAuthMode}
       />
     </AuthContext.Provider>
   );

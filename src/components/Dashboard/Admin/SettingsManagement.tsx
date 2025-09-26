@@ -21,7 +21,6 @@ interface SystemSettings {
   requireEmailVerification: boolean;
   enableReviews: boolean;
   enableWishlist: boolean;
-  enableCoupons: boolean;
   maintenanceMode: boolean;
   smtpHost: string;
   smtpPort: number;
@@ -45,7 +44,6 @@ export const SettingsManagement: React.FC = () => {
     requireEmailVerification: false,
     enableReviews: true,
     enableWishlist: true,
-    enableCoupons: true,
     maintenanceMode: false,
     smtpHost: '',
     smtpPort: 587,
@@ -241,7 +239,7 @@ export const SettingsManagement: React.FC = () => {
         requireEmailVerification: false,
         enableReviews: true,
         enableWishlist: true,
-        enableCoupons: true,
+
         maintenanceMode: false,
         smtpHost: '',
         smtpPort: 587,
@@ -391,7 +389,7 @@ export const SettingsManagement: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Free Shipping Threshold
+            Fast Shipping Threshold
           </label>
           <input
             type="number"
@@ -420,14 +418,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('allowGuestCheckout', !settings.allowGuestCheckout)}
-              className={`${
-                settings.allowGuestCheckout ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.allowGuestCheckout ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.allowGuestCheckout ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.allowGuestCheckout ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -440,14 +436,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('requireEmailVerification', !settings.requireEmailVerification)}
-              className={`${
-                settings.requireEmailVerification ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.requireEmailVerification ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.requireEmailVerification ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.requireEmailVerification ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -460,14 +454,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('enableReviews', !settings.enableReviews)}
-              className={`${
-                settings.enableReviews ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.enableReviews ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.enableReviews ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.enableReviews ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -484,34 +476,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('enableWishlist', !settings.enableWishlist)}
-              className={`${
-                settings.enableWishlist ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.enableWishlist ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.enableWishlist ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-              />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Enable Coupons</label>
-              <p className="text-sm text-gray-500">Allow discount coupons and promotional codes</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleInputChange('enableCoupons', !settings.enableCoupons)}
-              className={`${
-                settings.enableCoupons ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  settings.enableCoupons ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.enableWishlist ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -524,14 +494,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('maintenanceMode', !settings.maintenanceMode)}
-              className={`${
-                settings.maintenanceMode ? 'bg-red-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
+              className={`${settings.maintenanceMode ? 'bg-red-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.maintenanceMode ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.maintenanceMode ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -620,14 +588,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('smtpSecure', !settings.smtpSecure)}
-              className={`${
-                settings.smtpSecure ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.smtpSecure ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.smtpSecure ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.smtpSecure ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -662,14 +628,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('requireEmailVerification', !settings.requireEmailVerification)}
-              className={`${
-                settings.requireEmailVerification ? 'bg-indigo-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+              className={`${settings.requireEmailVerification ? 'bg-indigo-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.requireEmailVerification ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.requireEmailVerification ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -682,14 +646,12 @@ export const SettingsManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => handleInputChange('maintenanceMode', !settings.maintenanceMode)}
-              className={`${
-                settings.maintenanceMode ? 'bg-red-600' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
+              className={`${settings.maintenanceMode ? 'bg-red-600' : 'bg-gray-200'
+                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
             >
               <span
-                className={`${
-                  settings.maintenanceMode ? 'translate-x-5' : 'translate-x-0'
-                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                className={`${settings.maintenanceMode ? 'translate-x-5' : 'translate-x-0'
+                  } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
               />
             </button>
           </div>
@@ -788,25 +750,24 @@ export const SettingsManagement: React.FC = () => {
           </div>
         </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`${
-                activeTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
-            >
-              <tab.icon className="h-5 w-5" />
-              <span className="ml-2">{tab.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`${activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
+              >
+                <tab.icon className="h-5 w-5" />
+                <span className="ml-2">{tab.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
         {/* Tab Content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

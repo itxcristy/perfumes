@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Link, CheckCircle, Image as ImageIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+
 import { StorageService, UploadProgress } from '../../services/storageService';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -176,7 +177,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             )}
 
             {/* Upload overlay when uploading */}
-            <AnimatePresence>
+            <>
               {isUploading && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -194,7 +195,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+            </>
           </div>
         ) : (
           <div
@@ -299,7 +300,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       )}
 
       {/* Upload Status */}
-      <AnimatePresence>
+      <>
         {isUploading && uploadProgress && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -314,7 +315,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             </span>
           </motion.div>
         )}
-      </AnimatePresence>
+      </>
     </div>
   );
 };

@@ -74,7 +74,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (user) {
         // Fetch authenticated user's cart from database
-        const cartItems = await getCartItems();
+        const cartItems = await getCartItems(user.id);
         setItems(cartItems);
       } else {
         // Load guest cart from localStorage

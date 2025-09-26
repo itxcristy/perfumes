@@ -129,25 +129,53 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
+    <div
+      className="fixed inset-0 z-50 md:hidden"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999
+      }}
+    >
       {/* Background overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }}
       />
-      
+
       {/* Mobile auth panel */}
-      <div className="absolute inset-0 bg-white flex flex-col">
+      <div
+        className="absolute inset-0 bg-white flex flex-col"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'white',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4">
           <div className="flex items-center justify-between">
-            {mode !== 'login' && mode !== 'profile' && (
+            {(mode !== 'login' && mode !== 'profile') && (
               <button
                 onClick={() => {
                   if (mode === 'signup' && step === 2) {
                     setStep(1);
-                  } else if (mode === 'profile') {
-                    setMode('login');
                   } else {
                     setMode('login');
                   }
@@ -157,17 +185,17 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                 <ArrowLeft className="h-6 w-6" />
               </button>
             )}
-            
+
             <div className="flex-1 text-center">
               <h2 className="text-xl font-bold">
-                {mode === 'login' && 'Welcome to S.Essences'}
+                {mode === 'login' && 'Welcome to Aligarh Attar House'}
                 {mode === 'signup' && (step === 1 ? 'Create Account' : 'Complete Profile')}
                 {mode === 'forgot' && 'Reset Password'}
                 {mode === 'verify' && 'Verify Email'}
                 {mode === 'profile' && 'My Account'}
               </h2>
             </div>
-            
+
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-white hover:bg-opacity-20"
@@ -243,7 +271,7 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                   <Gift className="h-5 w-5 text-gray-500 mr-3" />
                   <span className="text-gray-700">My Orders</span>
                 </button>
-                <button 
+                <button
                   onClick={logout}
                   className="w-full flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 text-red-600"
                 >
@@ -263,8 +291,8 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                     <Crown className="h-4 w-4 text-amber-500" />
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
-                    {mode === 'login' 
-                      ? 'Sign in to discover premium attars' 
+                    {mode === 'login'
+                      ? 'Sign in to discover premium attars'
                       : 'Join our community of fragrance lovers'}
                   </p>
                 </div>
@@ -290,9 +318,8 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        errors.email ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.email ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your email"
                       disabled={loading}
                     />
@@ -307,7 +334,7 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
               )}
 
               {/* Password Field */}
-              {(mode === 'login' || mode === 'reset' || (mode === 'signup' && step === 1)) && (
+              {(mode === 'login' || mode === 'forgot' || (mode === 'signup' && step === 1)) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Password
@@ -318,9 +345,8 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        errors.password ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.password ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your password"
                       disabled={loading}
                     />
@@ -353,9 +379,8 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Confirm your password"
                       disabled={loading}
                     />
@@ -388,9 +413,8 @@ export const MobileAuthView: React.FC<MobileAuthViewProps> = ({
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        errors.fullName ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.fullName ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your full name"
                       disabled={loading}
                     />

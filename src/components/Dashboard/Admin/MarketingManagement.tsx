@@ -448,7 +448,7 @@ export const MarketingManagement: React.FC = () => {
                 <span className="text-sm font-medium text-gray-900">
                   {promotion.discountType === 'percentage' ? `${promotion.discountValue}%` :
                     promotion.discountType === 'fixed' ? `$${promotion.discountValue}` :
-                      'Free Shipping'}
+                      'Fast Shipping'}
                 </span>
               </div>
 
@@ -721,7 +721,7 @@ export const MarketingManagement: React.FC = () => {
                 <option value="bundle">Bundle Deal</option>
                 <option value="bogo">Buy One Get One</option>
                 <option value="discount">Discount</option>
-                <option value="free_shipping">Free Shipping</option>
+                <option value="free_shipping">Fast Shipping</option>
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -732,7 +732,7 @@ export const MarketingManagement: React.FC = () => {
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                   <option value="percentage">Percentage</option>
                   <option value="fixed">Fixed Amount</option>
-                  <option value="free_shipping">Free Shipping</option>
+                  <option value="free_shipping">Fast Shipping</option>
                 </select>
               </div>
               <div>

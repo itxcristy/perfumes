@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, Package, Search } from 'lucide-react';
 import { useProducts } from '../../../contexts/ProductContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Product } from '../../../types';
-import { EnhancedProductForm } from '../../Product/EnhancedProductForm';
+import { ProductForm } from '../../Product/ProductForm';
 
 export const ProductManager: React.FC = () => {
   const { products, loading, deleteProduct, fetchProducts } = useProducts();
@@ -45,7 +45,7 @@ export const ProductManager: React.FC = () => {
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.category || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -124,10 +124,10 @@ export const ProductManager: React.FC = () => {
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {product.image && (
+                        {product.images && product.images.length > 0 && (
                           <img
                             className="h-10 w-10 rounded-lg object-cover mr-3"
-                            src={product.image}
+                            src={product.images[0]}
                             alt={product.name}
                           />
                         )}
@@ -150,11 +150,10 @@ export const ProductManager: React.FC = () => {
                       ${product.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        product.stock > 10 ? 'bg-green-100 text-green-800' :
-                        product.stock > 0 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 10 ? 'bg-green-100 text-green-800' :
+                          product.stock > 0 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
                         {product.stock} units
                       </span>
                     </td>
@@ -184,7 +183,7 @@ export const ProductManager: React.FC = () => {
 
       {/* Product Form Modal */}
       {showForm && (
-        <EnhancedProductForm
+        <ProductForm
           product={editingProduct}
           onClose={handleFormClose}
         />

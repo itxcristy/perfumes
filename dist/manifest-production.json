@@ -1,6 +1,6 @@
 {
-  "name": "S.Essences - Premium E-Commerce Platform",
-  "short_name": "S.Essences",
+  "name": "Aligarh Attar House - Premium E-Commerce Platform",
+  "short_name": "Aligarh Attar House",
   "description": "Your destination for curated excellence. Premium products with uncompromising quality and sophisticated design.",
   "start_url": "/",
   "display": "standalone",
@@ -10,7 +10,11 @@
   "scope": "/",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["shopping", "lifestyle", "business"],
+  "categories": [
+    "shopping",
+    "lifestyle",
+    "business"
+  ],
   "screenshots": [
     {
       "src": "/screenshots/desktop-home.png",

@@ -20,8 +20,8 @@ export const TrustSignalsSection: React.FC = () => {
     },
     {
       icon: Truck,
-      title: "Fast & Free Shipping",
-      description: "Free shipping on orders over $50, express delivery available",
+      title: "Fast & Fast Shipping",
+      description: "Fast Shipping on orders over $50, express delivery available",
       stats: "2-Day Delivery",
       color: "purple"
     },
@@ -96,15 +96,15 @@ export const TrustSignalsSection: React.FC = () => {
               <div className={`w-16 h-16 bg-${feature.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
                 <feature.icon className={`h-8 w-8 text-${feature.color}-600`} />
               </div>
-              
+
               <div className={`inline-block bg-${feature.color}-50 text-${feature.color}-700 text-sm font-semibold px-3 py-1 rounded-full mb-4`}>
                 {feature.stats}
               </div>
-              
+
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 {feature.title}
               </h3>
-              
+
               <p className="text-gray-600 leading-relaxed">
                 {feature.description}
               </p>
@@ -154,7 +154,7 @@ export const TrustSignalsSection: React.FC = () => {
           className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-8 lg:p-12 text-white text-center mb-16"
         >
           <h3 className="text-3xl font-bold mb-8">Trusted by Millions</h3>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <div className="text-4xl font-bold mb-2">1M+</div>

@@ -20,6 +20,8 @@ import {
 } from '../lib/crudOperations';
 import { useError } from './ErrorContext';
 import { productCache, categoryCache, generateCacheKey, invalidateProductCache, invalidateCategoryCache } from '../utils/cache';
+import { mockProducts } from '../mocks/productMocks';
+import { mockCategories } from '../mocks/categoryMocks';
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
@@ -66,23 +68,31 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
   const fetchCategories = useCallback(async () => {
     console.log('🔥 fetchCategories called!');
     try {
-      // Check cache first
+      // Check cache first with stale-while-revalidate
       const cacheKey = generateCacheKey('categories');
       const cachedCategories = categoryCache.get(cacheKey);
 
       if (cachedCategories) {
         console.log('Using cached categories');
         setCategories(cachedCategories as Category[]);
-        return;
+        // Even with cached data, we'll refresh in background
       }
+
+      // Use timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Categories fetch timeout')), 3000)
+      );
 
       // Use working REST API approach instead of hanging Supabase client
       const { testDirectRestAPI } = await import('../lib/supabase');
-      const result = await testDirectRestAPI();
+      const result = await Promise.race([
+        testDirectRestAPI(),
+        timeoutPromise
+      ]) as any;
 
       if (result.success && result.data) {
         // Transform the REST API data to match our Category interface
-        const transformedCategories = result.data.map(cat => ({
+        const transformedCategories = result.data.map((cat: any) => ({
           id: cat.id,
           name: cat.name,
           slug: cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-'),
@@ -99,20 +109,20 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
         setCategories(transformedCategories);
         setIsUsingMockData(false);
 
-        // Cache the results
-        categoryCache.set(cacheKey, transformedCategories);
+        // Cache the results with longer TTL
+        categoryCache.set(cacheKey, transformedCategories, { ttl: 60 * 60 * 1000 }); // 1 hour
       } else {
         throw new Error(result.error || 'Failed to fetch categories');
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setError('Failed to load categories from database');
+      // Don't show error for categories, just use empty array
       setCategories([]);
       setIsUsingMockData(false);
     }
   }, [setError]);
 
-  const fetchFeaturedProducts = useCallback(async (limit: number = 8) => {
+  const fetchFeaturedProducts = useCallback(async (limit: number = 6) => { // Reduced from 8 to 6
     console.log('🔥 fetchFeaturedProducts called with limit:', limit);
     try {
       setFeaturedLoading(true);
@@ -122,19 +132,27 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
       if (cached) {
         console.log('Using cached featured products');
         setFeaturedProducts(cached as Product[]);
-        setFeaturedLoading(false);
-        return;
+        // Continue to refresh in background with stale-while-revalidate
       }
 
-      const featuredData = await getFeaturedProducts(limit);
+      // Use timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Featured products fetch timeout')), 15000)
+      );
+
+      const featuredData = await Promise.race([
+        getFeaturedProducts(limit),
+        timeoutPromise
+      ]) as Product[];
 
       console.log('Using database featured products:', featuredData.length);
       setFeaturedProducts(featuredData);
       setIsUsingMockData(false);
-      productCache.set(cacheKey, featuredData);
+      // Cache with longer TTL for featured products
+      productCache.set(cacheKey, featuredData, { ttl: 30 * 60 * 1000 }); // 30 minutes
     } catch (error) {
       console.error('Error fetching featured products:', error);
-      setError('Failed to load featured products from database');
+      // Don't show error for featured products, just use empty array
       setFeaturedProducts([]);
       setIsUsingMockData(false);
     } finally {
@@ -142,9 +160,12 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
     }
   }, [setError]);
 
-  // Optimized loading: fetch products and categories in parallel
+  // Optimized loading: fetch products and categories in parallel with staggered approach
   const fetchProducts = useCallback(async (forceRefresh = false) => {
-    setLoading(true);
+    // Only set full loading for force refresh
+    if (forceRefresh) {
+      setLoading(true);
+    }
     setBasicLoading(true);
 
     try {
@@ -155,7 +176,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
       const cachedProducts = !forceRefresh ? productCache.get(productCacheKey) : null;
       const cachedCategories = !forceRefresh ? categoryCache.get(categoryCacheKey) : null;
 
-      if (cachedProducts && cachedCategories) {
+      if (cachedProducts && cachedCategories && !forceRefresh) {
         console.log('Using cached products and categories');
         setProducts(cachedProducts as Product[]);
         setCategories(cachedCategories as Category[]);
@@ -164,55 +185,81 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
         return;
       }
 
-      // Try to fetch from database first
+      // Staggered loading: Load critical data first, then enhanced data
       try {
-        console.log('Attempting to fetch products from database');
-        const [productsResult, categoriesResult] = await Promise.all([
-          getProductsBasic({ limit: 50 }),
-          getCategories()
-        ]);
+        console.log('Loading critical data first...');
 
-        console.log('Database fetch results:', {
-          productsCount: productsResult.length,
-          categoriesCount: categoriesResult.length
-        });
-
-        // If we get data from database, use it
-        console.log('Using database products');
-        setProducts(productsResult);
-        productCache.set(productCacheKey, productsResult);
-        setIsUsingMockData(false);
-
-        console.log('Using database categories');
+        // Load categories immediately (critical for navigation)
+        const categoriesResult = await getCategories();
+        console.log('Categories loaded:', categoriesResult.length);
         setCategories(categoriesResult);
-        categoryCache.set(categoryCacheKey, categoriesResult);
-        setIsUsingMockData(false);
-      } catch (dbError) {
-        // If database fetch fails, show error but don't use mock data
-        console.log('Database error:', dbError);
-        setError('Failed to load data from database');
-        setProducts([]);
-        setCategories([]);
-        setIsUsingMockData(false);
-      }
+        // Cache categories with longer TTL
+        categoryCache.set(categoryCacheKey, categoriesResult, { ttl: 60 * 60 * 1000 }); // 1 hour
 
-      setBasicLoading(false);
-
-      // Optionally fetch full product details in background (non-blocking)
-      if (!forceRefresh) {
-        setDetailsLoading(true);
+        // Load basic products (non-blocking)
         setTimeout(async () => {
           try {
-            const fullProductsData = await getProducts({ limit: 50 });
-            console.log('Fetched full product details:', fullProductsData.length);
-            setProducts(fullProductsData);
-            productCache.set('products-full', fullProductsData);
-          } catch (detailError) {
-            console.warn('Failed to fetch full product details, using basic data:', detailError);
-          } finally {
-            setDetailsLoading(false);
+            const basicProductsResult = await getProductsBasic({ limit: 20 });
+            console.log('Basic products loaded:', basicProductsResult.length);
+
+            // Ensure all products have proper images array
+            const processedProducts = basicProductsResult.map(product => ({
+              ...product,
+              images: Array.isArray(product.images) ? product.images : [],
+              category: product.category || '',
+              categoryId: product.categoryId || ''
+            })) as Product[];
+
+            setProducts(processedProducts);
+            // Cache with longer TTL
+            productCache.set(productCacheKey, processedProducts, { ttl: 30 * 60 * 1000 }); // 30 minutes
+            const transformedProducts = (basicProductsResult as any[]).map((product: any) => ({
+              ...product,
+              categoryId: product.category_id || '',
+              images: product.image_url ? [product.image_url] : [],
+              rating: 0,
+              reviews: [],
+              sellerId: product.seller_id || '',
+              sellerName: '',
+              tags: product.tags || [],
+              reviewCount: 0,
+              createdAt: new Date(product.created_at || Date.now())
+            }));
+            setProducts(transformedProducts);
+            productCache.set(productCacheKey, basicProductsResult, { ttl: 30 * 60 * 1000 }); // 30 minutes
+            setIsUsingMockData(false);
+            setBasicLoading(false);
+
+            // Load additional products in background
+            setTimeout(async () => {
+              try {
+                const fullProductsResult = await getProducts({ limit: 50 });
+                console.log('Full products loaded:', fullProductsResult.length);
+                setProducts(fullProductsResult as Product[]);
+                productCache.set('products-full', fullProductsResult, { ttl: 30 * 60 * 1000 }); // 30 minutes
+              } catch (error) {
+                console.warn('Failed to load full products, using basic data:', error);
+              } finally {
+                setDetailsLoading(false);
+              }
+            }, 1000); // Load more products after 1 second
+
+          } catch (error) {
+            console.error('Failed to load basic products:', error);
+            setProducts([]);
+            setBasicLoading(false);
           }
-        }, 100); // Small delay to not block UI
+        }, 100); // Small delay to prevent blocking
+
+        setIsUsingMockData(false);
+      } catch (dbError) {
+        // If database fetch fails, use fallback/mock data
+        console.log('Database error:', dbError);
+        setError('Failed to load data from database - using fallback content');
+        setProducts(mockProducts);
+        setCategories(mockCategories);
+        setIsUsingMockData(true);
+        setBasicLoading(false);
       }
 
     } catch (error) {
@@ -220,10 +267,10 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
         setError('DATABASE SETUP ERROR: Your database security policies are causing an infinite loop. This is a common setup issue. Please run the provided SQL script in your Supabase SQL Editor to fix it.');
       } else {
         console.log('Database error');
-        setError('Failed to load data from database');
-        setProducts([]);
-        setCategories([]);
-        setIsUsingMockData(false);
+        setError('Failed to load data from database - using fallback content');
+        setProducts(mockProducts);
+        setCategories(mockCategories);
+        setIsUsingMockData(true);
       }
       console.error('Error fetching products:', error);
       setBasicLoading(false);
@@ -234,21 +281,28 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
 
 
 
-  // Auto-fetch products and featured products on context initialization
+  // Optimized initialization - staggered loading approach
   useEffect(() => {
-    console.log('ProductContext: Auto-fetching products on initialization');
-    fetchProducts();
-  }, [fetchProducts]);
+    console.log('ProductContext: Starting optimized data loading');
 
-  useEffect(() => {
-    console.log('ProductContext: Auto-fetching featured products on initialization');
-    fetchFeaturedProducts();
-  }, [fetchFeaturedProducts]);
-
-  useEffect(() => {
-    console.log('ProductContext: Auto-fetching categories on initialization');
+    // Start with categories (critical for navigation)
     fetchCategories();
-  }, [fetchCategories]);
+
+    // Load products with a small delay to prevent blocking
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 50);
+
+    // Load featured products even later
+    const featuredTimer = setTimeout(() => {
+      fetchFeaturedProducts();
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(featuredTimer);
+    };
+  }, [fetchProducts, fetchCategories, fetchFeaturedProducts]);
 
   // CRUD functions with new implementation
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt' | 'reviews' | 'rating' | 'reviewCount'>) => {
@@ -259,7 +313,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
         description: productData.description,
         price: productData.price,
         categoryId: productData.categoryId,
-        sellerId: sellerId,
+        sellerId: sellerId || '',
         stock: productData.stock,
         imageUrl: productData.images?.[0] || '', // Use first image from array
         featured: productData.featured
@@ -347,8 +401,8 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = memo(({ childr
     try {
       const newCategory = await createCategory({
         name: categoryData.name,
-        description: categoryData.description,
-        imageUrl: categoryData.imageUrl
+        description: categoryData.description || '',
+        imageUrl: (categoryData as any).image || ''
       });
 
       if (newCategory) {

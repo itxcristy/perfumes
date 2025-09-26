@@ -1,6 +1,5 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, WifiOff, Database, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface ErrorFallbackProps {
   error?: string | null;
@@ -131,7 +130,7 @@ export const ProductGridError: React.FC<ProductGridErrorProps> = ({
   return (
     <div className="col-span-full">
       <ErrorFallback
-        error={error}
+        error={error || null}
         onRetry={onRetry}
         type="database"
         size="large"
@@ -150,11 +149,7 @@ export const NetworkStatus: React.FC<NetworkStatusProps> = ({ isOnline, onRetry 
   if (isOnline) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -50 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed top-0 left-0 right-0 bg-red-500 text-white p-3 z-50"
-    >
+    <div className="fixed top-0 left-0 right-0 bg-red-500 text-white p-3 z-50 animate-fade-in-down">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <WifiOff className="h-5 w-5 mr-2" />
@@ -169,10 +164,8 @@ export const NetworkStatus: React.FC<NetworkStatusProps> = ({ isOnline, onRetry 
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
-
-
 
 export default ErrorFallback;

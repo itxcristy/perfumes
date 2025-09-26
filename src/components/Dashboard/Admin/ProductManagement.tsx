@@ -3,7 +3,7 @@ import { useProducts } from '../../../contexts/ProductContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Product } from '../../../types';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
-import { EnhancedProductForm } from '../../Product/EnhancedProductForm';
+import { ProductForm } from '../../Product/ProductForm';
 import { Modal } from '../../Common/Modal';
 import { Edit, Trash2, Plus, Package, Search, Filter, Download, CheckSquare, Square, Eye, Copy, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -755,7 +755,7 @@ export const ProductManagement: React.FC = () => {
           title={editingProduct ? "Edit Product" : "Add New Product"}
           size="xl"
         >
-          <EnhancedProductForm
+          <ProductForm
             product={editingProduct}
             onClose={() => setIsModalOpen(false)}
           />

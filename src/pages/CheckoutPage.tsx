@@ -766,7 +766,7 @@ export const CheckoutPage: React.FC = () => {
                 </div>
                 {shipping === 0 && (
                   <div className="text-xs text-green-600 text-right">
-                    Free shipping on orders ≥ ₹2,000
+                    Fast Shipping on orders ≥ ₹2,000
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-3">

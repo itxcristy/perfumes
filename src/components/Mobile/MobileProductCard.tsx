@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star, GitCompare } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
@@ -9,15 +9,16 @@ import { useCompare } from '../../contexts/CompareContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { MobileTouchButton, MobileIconButton } from './MobileTouchButton';
 import { useSwipeGesture } from '../../hooks/useMobileGestures';
+import ProductImage from '../Common/ProductImage';
 
 interface MobileProductCardProps {
   product: Product;
   variant?: 'default' | 'compact' | 'featured';
 }
 
-export const MobileProductCard: React.FC<MobileProductCardProps> = ({ 
-  product, 
-  variant = 'default' 
+export const MobileProductCard: React.FC<MobileProductCardProps> = ({
+  product,
+  variant = 'default'
 }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
@@ -29,14 +30,14 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
     onSwipeLeft: () => {
       if (product.images.length > 1) {
-        setCurrentImageIndex(prev => 
+        setCurrentImageIndex(prev =>
           prev === product.images.length - 1 ? 0 : prev + 1
         );
       }
     },
     onSwipeRight: () => {
       if (product.images.length > 1) {
-        setCurrentImageIndex(prev => 
+        setCurrentImageIndex(prev =>
           prev === 0 ? product.images.length - 1 : prev - 1
         );
       }
@@ -68,7 +69,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
     addToCompare(product);
   };
 
-  const discount = product.originalPrice 
+  const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
@@ -79,20 +80,18 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
 
   if (variant === 'compact') {
     return (
-      <motion.div
+      <div
         className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden"
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         <Link to={`/products/${product.id}`} className="block">
           <div className="flex">
             {/* Compact Image */}
             <div className="w-16 sm:w-20 h-16 sm:h-20 flex-shrink-0 relative">
-              <img
-                src={product.images[0]}
-                alt={product.name}
+              <ProductImage
+                product={product}
                 className="w-full h-full object-cover"
-                loading="lazy"
+                alt={product.name}
+                size="small"
               />
               {discount > 0 && (
                 <span className="absolute top-1 left-1 bg-red-500 text-white text-[10px] px-1 py-0.5 rounded font-bold">
@@ -100,7 +99,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
                 </span>
               )}
             </div>
-            
+
             {/* Compact Content */}
             <div className="flex-1 p-2.5 min-h-[64px] sm:min-h-[80px] flex flex-col justify-between">
               <div>
@@ -109,7 +108,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
                 </h3>
                 <p className="text-[10px] text-neutral-500 mt-1">{product.category}</p>
               </div>
-              
+
               <div className="flex items-center justify-between mt-1.5">
                 <div className="flex items-center space-x-1">
                   <span className="font-semibold text-neutral-900 text-xs">₹{product.price.toLocaleString('en-IN')}</span>
@@ -119,7 +118,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                   <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
                   <span className="text-[10px] text-neutral-600">{product.rating}</span>
@@ -128,33 +127,30 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
+    <div
       className="product-card bg-white overflow-hidden rounded-lg sm:rounded-xl shadow-sm border border-neutral-200"
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       {/* Mobile-Optimized Image Section */}
       <div className="relative">
         <Link to={`/products/${product.id}`} className="block">
-          <div 
+          <div
             className="aspect-square relative overflow-hidden"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            <img
-              key={currentImageIndex}
-              src={(product.images && product.images.length > 0 ? product.images[currentImageIndex] || product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
-              alt={product.name}
+            <ProductImage
+              product={product}
               className="w-full h-full object-cover transition-transform duration-300"
-              loading="lazy"
+              alt={product.name}
+              size="medium"
             />
-            
+
             {/* Image indicators for multiple images */}
             {product.images && product.images.length > 1 && (
               <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 flex space-x-1">
@@ -166,9 +162,8 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
                       e.stopPropagation();
                       setCurrentImageIndex(index);
                     }}
-                    className={`w-1 h-1 rounded-full transition-colors ${
-                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                    }`}
+                    className={`w-1 h-1 rounded-full transition-colors ${index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                      }`}
                     aria-label={`View image ${index + 1}`}
                   />
                 ))}
@@ -184,7 +179,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
               -{discount}%
             </span>
           )}
-          
+
           <span className={`${stockStatus.color} text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm flex items-center space-x-1`}>
             <div className={`w-1 h-1 rounded-full bg-white ${product.stock > 0 ? 'animate-pulse' : ''}`}></div>
             <span>{stockStatus.text}</span>
@@ -201,7 +196,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
             ariaLabel={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
             active={isInWishlist(product.id)}
           />
-          
+
           <MobileIconButton
             icon={GitCompare}
             onClick={handleCompareToggle}
@@ -225,7 +220,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
             </h3>
           </Link>
         </div>
-        
+
         {/* Price and Rating */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1.5">
@@ -236,13 +231,13 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
               </span>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-1">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
             <span className="text-xs text-neutral-600 font-medium">{product.rating}</span>
           </div>
         </div>
-        
+
         {/* Mobile Add to Cart Button */}
         <MobileTouchButton
           onClick={handleAddToCart}
@@ -256,6 +251,6 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
           {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
         </MobileTouchButton>
       </div>
-    </motion.div>
+    </div>
   );
 };

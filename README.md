@@ -117,8 +117,7 @@ The database schema has been organized into modular SQL scripts in the [supabase
 7. **[07-wishlist.sql](supabase-scripts/07-wishlist.sql)** - Wishlist functionality
 8. **[08-orders.sql](supabase-scripts/08-orders.sql)** - Order management
 9. **[09-reviews.sql](supabase-scripts/09-reviews.sql)** - Product reviews
-10. **[10-coupons.sql](supabase-scripts/10-coupons.sql)** - Coupon/discount system
-11. **[11-analytics.sql](supabase-scripts/11-analytics.sql)** - Analytics and reporting
+10. **[11-analytics.sql](supabase-scripts/11-analytics.sql)** - Analytics and reporting
 12. **[12-admin-functions.sql](supabase-scripts/12-admin-functions.sql)** - Administrative functions
 13. **[13-security-policies.sql](supabase-scripts/13-security-policies.sql)** - Row Level Security policies
 14. **[14-sample-data.sql](supabase-scripts/14-sample-data.sql)** - Sample data for testing
@@ -158,8 +157,6 @@ For production deployment, run the **[SECURITY-FIXES.sql](supabase-scripts/SECUR
 
 #### Reviews & Marketing
 - **`reviews`** - Product reviews and ratings system
-- **`coupons`** - Discount codes and promotional offers
-- **`coupon_usage`** - Tracking of coupon usage by users
 
 #### Additional Features
 - **`user_preferences`** - User notification and preference settings

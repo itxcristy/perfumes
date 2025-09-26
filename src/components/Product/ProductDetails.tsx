@@ -28,7 +28,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
   };
 
   const features = [
-    { icon: Truck, text: 'Free shipping on orders over $50' },
+    { icon: Truck, text: 'Fast Shipping on orders over $50' },
     { icon: RotateCcw, text: '30-day return policy' },
     { icon: Shield, text: '2-year warranty included' },
   ];
@@ -90,8 +90,8 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                           <Star
                             key={i}
                             className={`h-5 w-5 ${i < Math.floor(product.rating)
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300'
                               }`}
                           />
                         ))}

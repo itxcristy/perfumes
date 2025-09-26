@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 interface CartSidebarProps {
@@ -13,26 +12,23 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
   const { items, updateQuantity, removeItem, total, clearCart, loading, itemCount } = useCart();
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 bg-black bg-opacity-50 z-50"
             onClick={onClose}
           />
-          
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-xl z-50"
+
+          <div
+            className="fixed right-0 top-0 h-screen w-full max-w-md bg-white shadow-xl z-50 animate-slide-in-right"
             style={{
+              position: 'fixed',
               height: '100vh',
-              maxHeight: '100vh'
+              maxHeight: '100vh',
+              right: 0,
+              top: 0,
+              zIndex: 50
             }}
           >
             <div className="flex flex-col h-full max-h-screen">
@@ -62,28 +58,24 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <AnimatePresence>
+                    <>
                       {items.map((item) => (
-                        <motion.div
+                        <div
                           key={item.product.id}
-                          layout
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                          className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-fade-in"
                         >
                           <img
                             src={(item.product.images && item.product.images.length > 0 ? item.product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
                             alt={item.product.name}
                             className="w-16 h-16 object-cover rounded-lg"
                           />
-                          
+
                           <div className="flex-1 min-w-0">
                             <h3 className="font-medium text-gray-900 truncate">
                               {item.product.name}
                             </h3>
                             <p className="text-sm text-gray-500">₹{item.product.price.toLocaleString('en-IN')}</p>
-                            
+
                             <div className="flex items-center space-x-2 mt-2">
                               <button
                                 onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
@@ -105,7 +97,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                               </button>
                             </div>
                           </div>
-                          
+
                           <div className="text-right">
                             <p className="font-semibold text-gray-900">
                               ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
@@ -118,10 +110,10 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                               Remove
                             </button>
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
-                    </AnimatePresence>
-                    
+                    </>
+
                     {items.length > 0 && (
                       <button
                         onClick={clearCart}
@@ -144,13 +136,11 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
 
                   <div className="space-y-3">
                     <Link to="/checkout" onClick={onClose}>
-                      <motion.button
-                        className="w-full bg-neutral-900 text-white py-3.5 px-6 rounded-lg font-medium hover:bg-neutral-800 transition-colors duration-200 shadow-lg hover:shadow-xl"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
+                        className="w-full bg-neutral-900 text-white py-3.5 px-6 rounded-lg font-medium hover:bg-neutral-800 transition-colors duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                       >
                         Proceed to Checkout
-                      </motion.button>
+                      </button>
                     </Link>
                     <button
                       onClick={onClose}
@@ -162,9 +152,9 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 };

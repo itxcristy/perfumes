@@ -1,282 +1,282 @@
-import { PostgrestError } from '@supabase/supabase-js';
-
-export interface AppError {
-  type: 'network' | 'database' | 'validation' | 'authentication' | 'authorization' | 'unknown';
-  message: string;
-  userMessage: string;
-  code?: string;
-  details?: Record<string, unknown>;
+// Error types
+export enum ErrorCode {
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  DATABASE_ERROR = 'DATABASE_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+  AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
+  NOT_FOUND_ERROR = 'NOT_FOUND_ERROR',
+  CONFLICT_ERROR = 'CONFLICT_ERROR',
+  RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
+  INTERNAL_ERROR = 'INTERNAL_ERROR'
 }
 
-export const handleSupabaseError = (error: PostgrestError | Error): AppError => {
-  // Handle Supabase PostgrestError
-  if ('code' in error && 'details' in error) {
-    const pgError = error as PostgrestError;
+// Custom error class
+export class AppError extends Error {
+  constructor(
+    public code: ErrorCode,
+    message: string,
+    public details?: any,
+    public originalError?: Error
+  ) {
+    super(message);
+    this.name = 'AppError';
+  }
+}
+
+// Validation error class
+export class ValidationError extends AppError {
+  constructor(message: string, details?: any) {
+    super(ErrorCode.VALIDATION_ERROR, message, details);
+    this.name = 'ValidationError';
+  }
+}
+
+// Database error class
+export class DatabaseError extends AppError {
+  constructor(message: string, details?: any, originalError?: Error) {
+    super(ErrorCode.DATABASE_ERROR, message, details, originalError);
+    this.name = 'DatabaseError';
+  }
+}
+
+// Network error class
+export class NetworkError extends AppError {
+  constructor(message: string, details?: any, originalError?: Error) {
+    super(ErrorCode.NETWORK_ERROR, message, details, originalError);
+    this.name = 'NetworkError';
+  }
+}
+
+// Authentication error class
+export class AuthenticationError extends AppError {
+  constructor(message: string, details?: any) {
+    super(ErrorCode.AUTHENTICATION_ERROR, message, details);
+    this.name = 'AuthenticationError';
+  }
+}
+
+// Authorization error class
+export class AuthorizationError extends AppError {
+  constructor(message: string, details?: any) {
+    super(ErrorCode.AUTHORIZATION_ERROR, message, details);
+    this.name = 'AuthorizationError';
+  }
+}
+
+// Not found error class
+export class NotFoundError extends AppError {
+  constructor(message: string, details?: any) {
+    super(ErrorCode.NOT_FOUND_ERROR, message, details);
+    this.name = 'NotFoundError';
+  }
+}
+
+// Error handler utility
+export class ErrorHandler {
+  static handle(error: any): AppError {
+    // If it's already an AppError, return it
+    if (error instanceof AppError) {
+      return error;
+    }
+
+    // Handle different types of errors
+    if (error.name === 'ValidationError') {
+      return new ValidationError(error.message, error.details);
+    }
+
+    if (error.name === 'DatabaseError' || error.name === 'PostgrestError') {
+      return new DatabaseError(error.message, error.details, error);
+    }
+
+    if (error.name === 'NetworkError' || error.name === 'FetchError') {
+      return new NetworkError(error.message, error.details, error);
+    }
+
+    if (error.name === 'AuthError') {
+      return new AuthenticationError(error.message, error.details);
+    }
+
+    // Default to internal error
+    return new AppError(ErrorCode.INTERNAL_ERROR, error.message || 'An unexpected error occurred', undefined, error);
+  }
+
+  static formatError(error: AppError): { success: false; error: { code: string; message: string; details?: any } } {
+    return {
+      success: false,
+      error: {
+        code: error.code,
+        message: error.message,
+        details: error.details
+      }
+    };
+  }
+}
+
+// Validation utilities
+export class Validation {
+  // Validate required fields
+  static required(data: any, fields: string[]): void {
+    const missing = fields.filter(field => {
+      const value = this.getNestedValue(data, field);
+      return value === undefined || value === null || value === '';
+    });
     
-    switch (pgError.code) {
-      case 'PGRST116':
-        return {
-          type: 'database',
-          message: pgError.message,
-          userMessage: 'The requested resource was not found.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      case 'PGRST301':
-        return {
-          type: 'database',
-          message: pgError.message,
-          userMessage: 'Database connection failed. Please try again later.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      case '23505': // Unique constraint violation
-        return {
-          type: 'validation',
-          message: pgError.message,
-          userMessage: 'This item already exists. Please use a different value.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      case '23503': // Foreign key constraint violation
-        return {
-          type: 'validation',
-          message: pgError.message,
-          userMessage: 'Cannot complete this action due to related data.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      case '42501': // Insufficient privilege
-        return {
-          type: 'authorization',
-          message: pgError.message,
-          userMessage: 'You do not have permission to perform this action.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      case 'PGRST204': // RLS policy violation
-        return {
-          type: 'authorization',
-          message: pgError.message,
-          userMessage: 'Access denied. You do not have permission to access this resource.',
-          code: pgError.code,
-          details: pgError.details
-        };
-      
-      default:
-        return {
-          type: 'database',
-          message: pgError.message,
-          userMessage: 'A database error occurred. Please try again.',
-          code: pgError.code,
-          details: pgError.details
-        };
+    if (missing.length > 0) {
+      throw new ValidationError(`Required fields missing: ${missing.join(', ')}`, { missingFields: missing });
     }
   }
-  
-  // Handle network errors
-  if (error.message.includes('fetch') || error.message.includes('Network')) {
-    return {
-      type: 'network',
-      message: error.message,
-      userMessage: 'Network connection failed. Please check your internet connection and try again.'
-    };
-  }
-  
-  // Handle authentication errors
-  if (error.message.includes('JWT') || error.message.includes('auth') || error.message.includes('token')) {
-    return {
-      type: 'authentication',
-      message: error.message,
-      userMessage: 'Your session has expired. Please sign in again.'
-    };
-  }
-  
-  // Enhanced infinite recursion error detection
-  if (error.message.includes('infinite recursion') || 
-      error.message.includes('maximum recursion depth') ||
-      error.message.includes('stack depth limit') ||
-      error.message.includes('too much recursion')) {
-    return {
-      type: 'database',
-      message: error.message,
-      userMessage: 'Database configuration error detected. Row Level Security policies may have infinite recursion. Please run the RLS fixes script.'
-    };
-  }
-  
-  // Handle timeout errors
-  if (error.message.includes('timeout') || error.message.includes('timed out')) {
-    return {
-      type: 'network',
-      message: error.message,
-      userMessage: 'Request timed out. Please try again.'
-    };
-  }
-  
-  // Handle RLS policy errors
-  if (error.message.includes('row-level security') || 
-      error.message.includes('policy') ||
-      error.message.includes('RLS')) {
-    return {
-      type: 'authorization',
-      message: error.message,
-      userMessage: 'Access restricted by security policies. Please check your permissions.'
-    };
-  }
-  
-  // Default error handling
-  return {
-    type: 'unknown',
-    message: error.message,
-    userMessage: 'An unexpected error occurred. Please try again.'
-  };
-};
 
-// Enhanced RLS error detection and reporting
-export const detectRLSRecursionError = (error: Error): boolean => {
-  const errorPatterns = [
+  // Validate email format
+  static email(email: string): void {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new ValidationError('Invalid email format', { email });
+    }
+  }
+
+  // Validate that a value is a positive number
+  static positiveNumber(value: number, fieldName: string): void {
+    if (typeof value !== 'number' || value <= 0) {
+      throw new ValidationError(`${fieldName} must be a positive number`, { fieldName, value });
+    }
+  }
+
+  // Validate that a value is a non-negative number
+  static nonNegativeNumber(value: number, fieldName: string): void {
+    if (typeof value !== 'number' || value < 0) {
+      throw new ValidationError(`${fieldName} must be a non-negative number`, { fieldName, value });
+    }
+  }
+
+  // Validate string length
+  static stringLength(value: string, fieldName: string, min?: number, max?: number): void {
+    if (min !== undefined && value.length < min) {
+      throw new ValidationError(`${fieldName} must be at least ${min} characters long`, { fieldName, value, min });
+    }
+    
+    if (max !== undefined && value.length > max) {
+      throw new ValidationError(`${fieldName} must be no more than ${max} characters long`, { fieldName, value, max });
+    }
+  }
+
+  // Validate URL format
+  static url(url: string): void {
+    try {
+      new URL(url);
+    } catch (error) {
+      throw new ValidationError('Invalid URL format', { url });
+    }
+  }
+
+  // Validate array minimum length
+  static arrayMinLength(array: any[], fieldName: string, minLength: number): void {
+    if (!Array.isArray(array) || array.length < minLength) {
+      throw new ValidationError(`${fieldName} must have at least ${minLength} items`, { fieldName, arrayLength: array?.length, minLength });
+    }
+  }
+
+  // Validate enum value
+  static enumValue(value: string, fieldName: string, validValues: string[]): void {
+    if (!validValues.includes(value)) {
+      throw new ValidationError(`${fieldName} must be one of: ${validValues.join(', ')}`, { fieldName, value, validValues });
+    }
+  }
+
+  // Helper to get nested value from object
+  private static getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
+  }
+}
+
+// Retry utility for network operations
+export class Retry {
+  static async withBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        
+        // If this is the last attempt, throw the error
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Calculate delay with exponential backoff
+        const delay = baseDelay * Math.pow(2, attempt);
+        
+        // Add jitter to prevent thundering herd
+        const jitter = Math.random() * 0.1 * delay;
+        
+        await new Promise(resolve => setTimeout(resolve, delay + jitter));
+      }
+    }
+    
+    throw lastError;
+  }
+}
+
+/**
+ * Detect if an error is caused by RLS infinite recursion
+ * @param error The error to check
+ * @returns boolean indicating if this is an RLS recursion error
+ */
+export function detectRLSRecursionError(error: Error): boolean {
+  if (!error || !error.message) return false;
+  
+  const rlsRecursionIndicators = [
     'infinite recursion',
-    'maximum recursion depth',
-    'stack depth limit',
-    'too much recursion',
-    'recursive policy',
-    'circular dependency in policies'
+    'recursive reference',
+    'row-level security policy',
+    'rls recursion',
+    'policy recursion'
   ];
   
-  return errorPatterns.some(pattern => 
-    error.message.toLowerCase().includes(pattern.toLowerCase())
-  );
-};
+  const errorMessage = error.message.toLowerCase();
+  return rlsRecursionIndicators.some(indicator => errorMessage.includes(indicator));
+}
 
-// Function to suggest RLS fixes
-export const generateRLSFixSuggestion = (error: Error): string => {
+/**
+ * Generate a fix suggestion for RLS recursion errors
+ * @param error The error to analyze
+ * @returns A string with fix suggestions
+ */
+export function generateRLSFixSuggestion(error: Error): string {
+  if (!detectRLSRecursionError(error)) {
+    return 'Run the rls_policies_fix.sql script in your Supabase SQL Editor to fix Row Level Security policies.';
+  }
+  
+  return `RLS Infinite Recursion Detected:
+1. Run the rls_policies_fix.sql script in your Supabase SQL Editor
+2. This script replaces problematic policies with safe alternatives
+3. The fix includes role caching to prevent future recursion issues
+4. After running the script, refresh this page`;
+}
+
+/**
+ * Handle database errors with appropriate user-friendly messages
+ * @param error The database error
+ * @returns A user-friendly error message
+ */
+export function handleDatabaseError(error: Error): string {
   if (detectRLSRecursionError(error)) {
-    return `
-🔧 RLS Infinite Recursion Detected!
-
-This error is caused by Row Level Security policies that reference the same table they protect.
-
-To fix this:
-1. Run the 'rls_policies_fix.sql' script in your Supabase SQL Editor
-2. This will replace problematic policies with safe, non-recursive alternatives
-3. The fix includes role caching to prevent recursion
-
-The error occurred in: ${error.message.substring(0, 100)}...
-    `;
+    return 'Database security policy error detected. Please run the RLS fix script.';
+  }
+  
+  if (error.message.includes('connection') || error.message.includes('network')) {
+    return 'Database connection error. Please check your network connection and try again.';
   }
   
   if (error.message.includes('row-level security') || error.message.includes('policy')) {
-    return `
-🛡️ RLS Policy Issue Detected!
-
-This appears to be a Row Level Security policy restriction.
-
-To troubleshoot:
-1. Check if you have the correct role/permissions
-2. Verify RLS policies are properly configured
-3. Run 'rls_policies_fix.sql' to ensure policies are correct
-
-Error details: ${error.message}
-    `;
+    return 'Database security policy error. Please contact support or run the RLS fix script.';
   }
   
-  return '';
-};
-
-// Error logging removed for production
-
-export const createRetryableAction = <T>(
-  action: () => Promise<T>,
-  maxRetries: number = 3,
-  delay: number = 1000
-) => {
-  return async (): Promise<T> => {
-    let lastError: Error;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await action();
-      } catch (error) {
-        lastError = error as Error;
-        
-        if (attempt === maxRetries) {
-          throw lastError;
-        }
-        
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, delay * attempt));
-      }
-    }
-    
-    throw lastError!;
-  };
-};
-
-// Enhanced form validation with RLS awareness
-export const validateFormData = (data: Record<string, unknown>, rules: Record<string, any>): string[] => {
-  const errors: string[] = [];
-  
-  for (const [field, rule] of Object.entries(rules)) {
-    const value = data[field];
-    
-    if (rule.required && (!value || value.toString().trim() === '')) {
-      errors.push(`${field} is required`);
-      continue;
-    }
-    
-    if (value && rule.minLength && value.toString().length < rule.minLength) {
-      errors.push(`${field} must be at least ${rule.minLength} characters`);
-    }
-    
-    if (value && rule.maxLength && value.toString().length > rule.maxLength) {
-      errors.push(`${field} must be no more than ${rule.maxLength} characters`);
-    }
-    
-    if (value && rule.pattern && !rule.pattern.test(value.toString())) {
-      errors.push(`${field} format is invalid`);
-    }
-    
-    if (value && rule.min && Number(value) < rule.min) {
-      errors.push(`${field} must be at least ${rule.min}`);
-    }
-    
-    if (value && rule.max && Number(value) > rule.max) {
-      errors.push(`${field} must be no more than ${rule.max}`);
-    }
-    
-    // RLS-aware role validation
-    if (field === 'role' && value) {
-      const validRoles = ['admin', 'seller', 'customer'];
-      if (!validRoles.includes(value.toString())) {
-        errors.push(`${field} must be one of: ${validRoles.join(', ')}`);
-      }
-    }
-  }
-  
-  return errors;
-};
-
-export const sanitizeInput = (input: string): string => {
-  return input
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .trim();
-};
-
-export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-export const isValidUrl = (url: string): boolean => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
+  return 'A database error occurred. Please try again or contact support if the issue persists.';
+}

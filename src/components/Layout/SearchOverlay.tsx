@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, X, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 import { useProducts } from '../../contexts/ProductContext';
 
 import { Product } from '../../types';
@@ -33,19 +33,13 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
   return (
     <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl"
+        <div
+          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl animate-fade-in"
           onClick={onClose}
         >
           <div className="max-w-3xl mx-auto mt-24 px-6" onClick={(e) => e.stopPropagation()}>
-            <motion.div
-              initial={{ y: -30, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -30, opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+            <div
+              className="animate-slide-in-up"
             >
               <div className="relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-neutral-400" />
@@ -58,23 +52,17 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                   autoFocus
                 />
                 {/* Luxury close button */}
-                <motion.button
+                <button
                   onClick={onClose}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all duration-200"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-all duration-200 hover:scale-110 active:scale-90"
                 >
                   <X className="h-5 w-5" />
-                </motion.button>
+                </button>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-6 card-luxury p-6 shadow-2xl"
+            <div
+              className="mt-6 card-luxury p-6 shadow-2xl animate-slide-in-up animation-delay-100"
             >
               {suggestions.length > 0 ? (
                 <div className="space-y-3">
@@ -112,7 +100,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                   </div>
                 </div>
               )}
-            </motion.div>
+            </div>
           </div>
 
           <button
@@ -121,7 +109,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
           >
             <X className="h-8 w-8" />
           </button>
-        </motion.div>
+        </div>
       )}
     </>
   );

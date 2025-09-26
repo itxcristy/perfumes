@@ -65,42 +65,8 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
   // Fetch table schema
   const fetchTableSchema = useCallback(async () => {
     try {
-      // First try the RPC function
-      const { data: schemaData, error: rpcError } = await supabase.rpc('get_table_schema', {
-        table_name: tableName
-      });
-
-      if (!rpcError && schemaData && schemaData.length > 0) {
-        setColumns(schemaData);
-        return;
-      }
-
-      // If RPC fails, try direct query to information_schema
-      console.warn('RPC get_table_schema failed, trying fallback method:', rpcError?.message);
-
-      try {
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('information_schema.columns')
-          .select('column_name, data_type, is_nullable')
-          .eq('table_name', tableName)
-          .eq('table_schema', 'public');
-
-        if (!fallbackError && fallbackData && fallbackData.length > 0) {
-          const mappedColumns = fallbackData.map((col: ColumnInfo) => ({
-            name: col.column_name,
-            type: col.data_type,
-            nullable: col.is_nullable === 'YES',
-            displayName: formatColumnName(col.column_name)
-          }));
-          setColumns(mappedColumns);
-          return;
-        }
-      } catch (fallbackErr) {
-        console.warn('Fallback schema query failed:', fallbackErr);
-      }
-
-      // If both methods fail, try to infer schema from actual data
-      console.warn('Schema queries failed, inferring from data...');
+      // Try to infer schema from actual data first (more reliable)
+      console.log(`Fetching schema for table: ${tableName}`);
       const { data: sampleData, error: dataError } = await supabase
         .from(tableName)
         .select('*')
@@ -115,13 +81,17 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
           displayName: formatColumnName(key)
         }));
         setColumns(inferredColumns);
+        console.log(`Inferred schema for ${tableName}:`, inferredColumns);
         return;
       }
 
-      // Final fallback: use basic columns
-      console.warn('All schema detection methods failed, using basic columns');
+      // If no data exists, use basic columns as fallback
+      console.warn(`No data found in ${tableName}, using basic schema`);
       setColumns([
         { name: 'id', type: 'uuid', nullable: false, displayName: 'ID' },
+        { name: 'name', type: 'text', nullable: false, displayName: 'Name' },
+        { name: 'description', type: 'text', nullable: true, displayName: 'Description' },
+        { name: 'price', type: 'numeric', nullable: false, displayName: 'Price' },
         { name: 'created_at', type: 'timestamp', nullable: true, displayName: 'Created At' },
         { name: 'updated_at', type: 'timestamp', nullable: true, displayName: 'Updated At' }
       ]);
@@ -130,6 +100,9 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
       // Use basic columns as final fallback
       setColumns([
         { name: 'id', type: 'uuid', nullable: false, displayName: 'ID' },
+        { name: 'name', type: 'text', nullable: false, displayName: 'Name' },
+        { name: 'description', type: 'text', nullable: true, displayName: 'Description' },
+        { name: 'price', type: 'numeric', nullable: false, displayName: 'Price' },
         { name: 'created_at', type: 'timestamp', nullable: true, displayName: 'Created At' },
         { name: 'updated_at', type: 'timestamp', nullable: true, displayName: 'Updated At' }
       ]);
@@ -165,7 +138,7 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
   const fetchTableData = useCallback(async () => {
     try {
       setError(null);
-      
+
       // Get total count
       const { count, error: countError } = await supabase
         .from(tableName)
@@ -192,10 +165,10 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
       // Apply search if term exists
       if (searchTerm) {
         // Try to search in common text fields
-        const textColumns = columns.filter(col => 
+        const textColumns = columns.filter(col =>
           col.type.includes('text') || col.type.includes('varchar')
         );
-        
+
         if (textColumns.length > 0) {
           const searchConditions = textColumns
             .map(col => `${col.name}.ilike.%${searchTerm}%`)
@@ -242,7 +215,7 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
 
   const formatCellValue = (value: unknown, column: TableColumn): string => {
     if (value === null || value === undefined) return '-';
-    
+
     if (column.type.includes('timestamp') || column.type.includes('date')) {
       // Check if value is a valid date string or number
       if (typeof value === 'string' || typeof value === 'number') {
@@ -250,19 +223,19 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
       }
       return '-';
     }
-    
+
     if (column.type === 'boolean') {
       return value ? 'Yes' : 'No';
     }
-    
+
     if (Array.isArray(value)) {
       return value.length > 0 ? `[${value.length} items]` : '[]';
     }
-    
+
     if (typeof value === 'object') {
       return JSON.stringify(value).substring(0, 50) + (JSON.stringify(value).length > 50 ? '...' : '');
     }
-    
+
     return String(value);
   };
 
@@ -309,11 +282,11 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
 
   const handleBulkDelete = async () => {
     if (selectedRows.size === 0) return;
-    
+
     if (!window.confirm(`Are you sure you want to delete ${selectedRows.size} records? This action cannot be undone.`)) {
       return;
     }
-    
+
     try {
       const ids = Array.from(selectedRows);
       await bulkDeleteRecords(tableName, ids);
@@ -349,6 +322,33 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
     try {
       // Prepare the data for saving
       const saveData = { ...editFormData };
+
+      // Validate required fields
+      const requiredFields = columns.filter(col => !col.nullable && col.name !== 'id' && col.name !== 'created_at' && col.name !== 'updated_at');
+
+      for (const field of requiredFields) {
+        const fieldValue = saveData[field.name];
+        if (!fieldValue || fieldValue === '') {
+          throw new Error(`${field.displayName} is required`);
+        }
+
+        // Validate numeric fields
+        if ((field.type.includes('numeric') || field.type.includes('decimal') || field.type.includes('money')) && field.name === 'price') {
+          const numValue = parseFloat(String(fieldValue));
+          if (isNaN(numValue) || numValue <= 0) {
+            throw new Error(`${field.displayName} must be a valid positive number`);
+          }
+          saveData[field.name] = numValue;
+        }
+
+        // Validate UUID fields
+        if (field.type.includes('uuid') && field.name.endsWith('_id')) {
+          const uuidValue = String(fieldValue);
+          if (uuidValue && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuidValue)) {
+            throw new Error(`${field.displayName} must be a valid UUID format`);
+          }
+        }
+      }
 
       // Remove empty strings and convert them to null for optional fields
       Object.keys(saveData).forEach(key => {
@@ -564,7 +564,7 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
             Manage {displayName.toLowerCase()} data ({pagination.totalRecords} total records)
           </p>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
@@ -612,7 +612,7 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Filter className="h-4 w-4 text-gray-500" />
             <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -665,7 +665,7 @@ export const UniversalTableManager: React.FC<TableManagerProps> = ({
               loading={loading}
               emptyMessage={`No ${displayName.toLowerCase()} found`}
             />
-            
+
             {/* Pagination */}
             {pagination.totalPages > 1 && (
               <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">

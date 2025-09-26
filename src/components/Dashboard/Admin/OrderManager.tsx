@@ -3,12 +3,13 @@ import { Package, Clock, CheckCircle, XCircle, Search, Filter, Eye, Edit, Downlo
 import { supabase } from '../../../lib/supabase';
 import { ResponsiveTable } from '../../Common/ResponsiveTable';
 import { AdminErrorBoundary } from '../../Common/AdminErrorBoundary';
+import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { AdminLoadingState, EmptyState } from '../../Common/EnhancedLoadingStates';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Modal } from '../../Common/Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface Order {
+interface Order extends Record<string, unknown> {
   id: string;
   total: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
@@ -137,9 +138,9 @@ export const OrderManager: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Map the data to match our Order interface
-      const mappedOrders: Order[] = (data || []).map(order => ({
+      const mappedOrders: Order[] = (data || []).map((order: any) => ({
         id: order.id,
         total: order.total,
         status: order.status,
@@ -149,7 +150,7 @@ export const OrderManager: React.FC = () => {
           email: order.profiles?.email || '',
           name: order.profiles?.name || ''
         },
-        order_items: (order.order_items || []).map(item => ({
+        order_items: (order.order_items || []).map((item: any) => ({
           id: item.id,
           quantity: item.quantity,
           price: item.price,
@@ -159,7 +160,7 @@ export const OrderManager: React.FC = () => {
           }
         }))
       }));
-      
+
       setOrders(mappedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -371,20 +372,9 @@ export const OrderManager: React.FC = () => {
   const tableColumns = [
     {
       key: 'select',
-      title: (
-        <button
-          onClick={handleSelectAll}
-          className="flex items-center justify-center w-full"
-        >
-          {selectedOrders.length === filteredOrders.length && filteredOrders.length > 0 ? (
-            <CheckSquare className="h-4 w-4 text-indigo-600" />
-          ) : (
-            <Square className="h-4 w-4 text-gray-400" />
-          )}
-        </button>
-      ),
+      title: 'Select',
       width: 50,
-      render: (value: any, record: Order) => (
+      render: (value: unknown, record: Order) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -402,25 +392,15 @@ export const OrderManager: React.FC = () => {
     },
     {
       key: 'id',
-      title: (
-        <button
-          onClick={() => toggleSort('created_at')}
-          className="flex items-center space-x-1 hover:text-indigo-600"
-        >
-          <span>Order ID</span>
-          {sortBy === 'created_at' && (
-            sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
-          )}
-        </button>
-      ),
+      title: 'Order ID',
       width: 120,
-      render: (value: string) => <span className="font-medium">#{value.slice(0, 8)}</span>
+      render: (value: unknown, record: Order) => <span className="font-medium">#{String(record.id).slice(0, 8)}</span>
     },
     {
       key: 'customer',
       title: 'Customer',
       minWidth: 200,
-      render: (value: any, record: Order) => (
+      render: (value: unknown, record: Order) => (
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
             <User className="h-4 w-4 text-indigo-600" />
@@ -434,43 +414,23 @@ export const OrderManager: React.FC = () => {
     },
     {
       key: 'total',
-      title: (
-        <button
-          onClick={() => toggleSort('total')}
-          className="flex items-center space-x-1 hover:text-indigo-600"
-        >
-          <span>Total</span>
-          {sortBy === 'total' && (
-            sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
-          )}
-        </button>
-      ),
+      title: 'Total',
       width: 120,
-      render: (value: number) => (
+      render: (value: unknown, record: Order) => (
         <div className="flex items-center space-x-1">
           <DollarSign className="h-4 w-4 text-green-600" />
-          <span className="font-semibold text-gray-900">{formatCurrency(value)}</span>
+          <span className="font-semibold text-gray-900">{formatCurrency(record.total)}</span>
         </div>
       )
     },
     {
       key: 'status',
-      title: (
-        <button
-          onClick={() => toggleSort('status')}
-          className="flex items-center space-x-1 hover:text-indigo-600"
-        >
-          <span>Status</span>
-          {sortBy === 'status' && (
-            sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
-          )}
-        </button>
-      ),
+      title: 'Status',
       width: 140,
-      render: (value: string) => (
-        <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(value)}`}>
-          {getStatusIcon(value)}
-          <span className="capitalize">{value}</span>
+      render: (value: unknown, record: Order) => (
+        <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
+          {getStatusIcon(record.status)}
+          <span className="capitalize">{record.status}</span>
         </span>
       )
     },
@@ -478,10 +438,10 @@ export const OrderManager: React.FC = () => {
       key: 'created_at',
       title: 'Date',
       width: 150,
-      render: (value: string) => (
+      render: (value: unknown, record: Order) => (
         <div className="flex items-center space-x-1">
           <Calendar className="h-4 w-4 text-gray-400" />
-          <span className="text-gray-600">{formatDate(value)}</span>
+          <span className="text-gray-600">{formatDate(record.created_at)}</span>
         </div>
       )
     },
@@ -489,7 +449,7 @@ export const OrderManager: React.FC = () => {
       key: 'actions',
       title: 'Actions',
       width: 150,
-      render: (value: any, record: Order) => (
+      render: (value: unknown, record: Order) => (
         <div className="flex items-center space-x-1">
           <button
             onClick={(e) => {
@@ -557,7 +517,7 @@ export const OrderManager: React.FC = () => {
   ];
 
   if (loading) {
-    return <AdminLoadingState type="orders" message="Loading order data..." />;
+    return <AdminLoadingState title="Loading Orders" subtitle="Please wait while we load the order data..." />;
   }
 
   return (
@@ -754,19 +714,19 @@ export const OrderManager: React.FC = () => {
         {/* Orders Table */}
         {filteredOrders.length === 0 ? (
           <EmptyState
-            icon={<Package className="h-24 w-24" />}
+            icon={Package}
             title="No orders found"
             description="No orders match your current filters. Try adjusting your search criteria."
           />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <ResponsiveTable
+            <ResponsiveTable<Order>
               columns={tableColumns}
               data={filteredOrders}
               loading={loading}
               emptyMessage="No orders found"
               onRowClick={(record) => {
-                setSelectedOrder(record);
+                setSelectedOrder(record as Order);
                 setIsOrderDetailOpen(true);
               }}
             />

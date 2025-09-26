@@ -5,13 +5,13 @@ import { useProducts } from '../../contexts/ProductContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Product } from '../../types';
 import { Modal } from '../Common/Modal';
-import { EnhancedProductForm } from '../Product/EnhancedProductForm';
+import { ProductForm } from '../Product/ProductForm';
 
 // Seller Overview Component
 const SellerOverview: React.FC = () => {
   const { user } = useAuth();
   const { products } = useProducts();
-  
+
   const sellerProducts = products.filter(p => p.sellerId === user?.id);
 
   const stats = [
@@ -105,7 +105,7 @@ const SellerProductsManagement: React.FC = () => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
-  
+
   const handleDeleteProduct = (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       deleteProduct(productId);
@@ -152,19 +152,18 @@ const SellerProductsManagement: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 p-1">
-                        <Edit className="h-4 w-4"/>
+                        <Edit className="h-4 w-4" />
                       </button>
                       <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900 p-1">
-                        <Trash2 className="h-4 w-4"/>
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -181,7 +180,7 @@ const SellerProductsManagement: React.FC = () => {
         title={editingProduct ? 'Edit Product' : 'Add New Product'}
         size="xl"
       >
-        <EnhancedProductForm
+        <ProductForm
           product={editingProduct}
           onClose={() => setIsModalOpen(false)}
         />
@@ -326,11 +325,10 @@ export const SellerDashboard: React.FC = () => {
             <motion.button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                activeTab === item.id
+              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === item.id
                   ? 'bg-indigo-100 text-indigo-700'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
+                }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -392,7 +390,7 @@ export const SellerDashboardBasic: React.FC = () => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
-  
+
   const handleDeleteProduct = (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       deleteProduct(productId);
@@ -484,14 +482,14 @@ export const SellerDashboardBasic: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${ product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }`}>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 p-1"><Edit className="h-4 w-4"/></button>
-                      <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 className="h-4 w-4"/></button>
+                      <button onClick={() => handleEditProduct(product)} className="text-indigo-600 hover:text-indigo-900 p-1"><Edit className="h-4 w-4" /></button>
+                      <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -507,7 +505,7 @@ export const SellerDashboardBasic: React.FC = () => {
         title={editingProduct ? 'Edit Product' : 'Add New Product'}
         size="xl"
       >
-        <EnhancedProductForm
+        <ProductForm
           product={editingProduct}
           onClose={() => setIsModalOpen(false)}
         />

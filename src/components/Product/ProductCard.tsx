@@ -11,12 +11,15 @@ import { MiniTrustIndicators, TrendingIndicator } from '../Trust';
 import { useAddToCartWithAuth } from '../../hooks/useAddToCartWithAuth';
 import { useAddToWishlistWithAuth } from '../../hooks/useAddToWishlistWithAuth';
 import { useAddToCompareWithAuth } from '../../hooks/useAddToCompareWithAuth';
+import ProductImage from '../Common/ProductImage';
+import { usePerformanceMonitoring, useInteractionTracking } from '../../hooks/usePerformanceMonitoring';
 
 interface ProductCardProps {
   product: Product;
+  isListView?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = false }) => {
   const { isInWishlist } = useWishlist();
   const { isInCompare } = useCompare();
   const { showSuccess } = useNotification();
@@ -24,17 +27,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { handleAddToWishlist } = useAddToWishlistWithAuth();
   const { handleAddToCompare } = useAddToCompareWithAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Performance monitoring hooks
+  const { trackRenderTime } = usePerformanceMonitoring(`ProductCard_${product.id}`);
+  const { trackInteraction } = useInteractionTracking();
+
+  // Track component render time
+  React.useEffect(() => {
+    trackRenderTime();
+  });
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    const endTracking = trackInteraction('wishlist_toggle', product.id);
     handleAddToWishlist(product);
+    endTracking();
   };
-  
+
   const handleCompareToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    const endTracking = trackInteraction('compare_toggle', product.id);
     handleAddToCompare(product);
+    endTracking();
   };
 
   const discount = product.originalPrice
@@ -51,27 +67,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <div
-      className="product-card group flex flex-col h-full bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation"
+      className={`product-card group flex ${isListView ? 'flex-row' : 'flex-col'} h-full bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation`}
       onMouseEnter={() => {
         // Preload product details on hover
         dataPreloader.preloadProduct(product.id, { priority: 'high' });
       }}
     >
-      <div className="relative overflow-hidden group/image bg-gray-50">
+      <div className={`relative overflow-hidden group/image bg-gray-50 ${isListView ? 'w-32 h-32 flex-shrink-0' : ''}`}>
+
         <Link to={`/products/${product.id}`} className="block">
           {/* Amazon-style 4:3 aspect ratio for better grid display */}
-          <div className="aspect-[4/3] relative overflow-hidden">
-            <img
-              key={currentImageIndex}
-              src={(product.images && product.images.length > 0 ? product.images[currentImageIndex] || product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
-              alt={product.name}
+          <div className={`${isListView ? 'aspect-square' : 'aspect-[4/3]'} relative overflow-hidden`}>
+            <ProductImage
+              product={product}
               className="w-full h-full object-cover"
-              loading="lazy"
-              crossOrigin="anonymous"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4=';
-              }}
+              alt={product.name}
+              size="medium"
             />
 
             {/* Image Navigation - Amazon Style with mobile optimization */}
@@ -85,11 +96,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       e.stopPropagation();
                       setCurrentImageIndex(index);
                     }}
-                    className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-150 ${
-                      index === currentImageIndex
-                        ? 'bg-white shadow-md'
-                        : 'bg-white/70 hover:bg-white/90'
-                    }`}
+                    className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-150 ${index === currentImageIndex
+                      ? 'bg-white shadow-md'
+                      : 'bg-white/70 hover:bg-white/90'
+                      }`}
                     aria-label={`View image ${index + 1}`}
                   />
                 ))}
@@ -124,42 +134,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex flex-col space-y-1 sm:space-y-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleWishlistToggle}
-            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${
-              isInWishlist(product.id)
-                ? 'bg-red-50 text-red-600 border-red-200'
-                : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
-            } touch-manipulation`}
+            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${isInWishlist(product.id)
+              ? 'bg-red-50 text-red-600 border-red-200'
+              : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
+              } touch-manipulation`}
           >
             <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
           </button>
           <button
             onClick={handleCompareToggle}
-            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${
-              isInCompare(product.id)
-                ? 'bg-blue-50 text-blue-600 border-blue-200'
-                : 'bg-white text-gray-600 hover:text-blue-500 border-gray-200 hover:border-blue-200'
-            } touch-manipulation`}
+            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${isInCompare(product.id)
+              ? 'bg-blue-50 text-blue-600 border-blue-200'
+              : 'bg-white text-gray-600 hover:text-blue-500 border-gray-200 hover:border-blue-200'
+              } touch-manipulation`}
           >
             <GitCompare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </button>
         </div>
-        
+
         {/* Amazon-Style Add to Cart Button with mobile touch optimization */}
         <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-gradient-to-t from-white via-white/95 to-transparent">
           <button
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              const endTracking = trackInteraction('add_to_cart', product.id);
               if (product.stock > 0) {
                 handleAddToCart(product);
               }
+              endTracking();
             }}
             disabled={product.stock === 0}
-            className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${
-              product.stock === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
-            } touch-manipulation`}
+            className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${product.stock === 0
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
+              } touch-manipulation`}
           >
             <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             <span className="text-[10px] sm:text-xs font-medium">
@@ -170,13 +179,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Amazon-Style Product Information with mobile optimization */}
-      <div className="p-2.5 sm:p-3 flex flex-col flex-grow space-y-1.5 sm:space-y-2">
+      <div className={`p-2.5 sm:p-3 flex flex-col flex-grow space-y-1.5 sm:space-y-2 ${isListView ? 'ml-3' : ''}`}>
+
         <div className="space-y-1">
           <span className="text-[10px] sm:text-xs text-gray-600 uppercase tracking-wide font-medium">
             {product.category}
           </span>
           <Link to={`/products/${product.id}`}>
-            <h3 className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-2 leading-4 group-hover:text-blue-600 transition-colors duration-200">
+            <h3 className={`text-xs sm:text-sm font-medium text-gray-900 line-clamp-2 leading-4 group-hover:text-blue-600 transition-colors duration-200 ${isListView ? 'line-clamp-1' : 'line-clamp-2'}`}>
               {product.name}
             </h3>
           </Link>
@@ -190,11 +200,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={`${product.id}-star-${i}`}
-                className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
-                  i < Math.floor(product.rating)
-                    ? 'text-yellow-400 fill-current'
-                    : 'text-gray-300'
-                }`}
+                className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
+                  ? 'text-yellow-400 fill-current'
+                  : 'text-gray-300'
+                  }`}
               />
             ))}
             <span className="text-[10px] text-gray-600 ml-0.5">({product.rating})</span>
@@ -214,9 +223,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Stock Status */}
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-medium ${
-              product.stock > 0 ? 'text-green-600' : 'text-red-500'
-            }`}>
+            <span className={`text-[10px] font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'
+              }`}>
               {product.stock > 0 ? (product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`) : 'Out of stock'}
             </span>
             {discount > 0 && (

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { createRetryableAction } from '../utils/errorHandling';
 import { performanceMonitor } from '../utils/performance';
 import { validateSellerId, validateAndFixStoredUser } from '../utils/uuidValidation';
+import { Retry } from '../utils/errorHandling';
 import {
   User,
   Product,
@@ -52,14 +52,17 @@ function validateEnvironment() {
 // Enhanced database initialization with automatic fix application
 async function initializeDatabase() {
   try {
-    // Set development mode parameters
-    await supabase.rpc('set_config', {
-      setting_name: 'app.development_mode',
-      new_value: 'true',
-      is_local: false
-    }).catch(() => {
+    try {
+      // Set development mode parameters
+      await supabase.rpc('set_config', {
+        setting_name: 'app.development_mode',
+        new_value: 'true',
+        is_local: false
+      });
+    } catch (error) {
       // Ignore errors if function doesn't exist
-    });
+      console.warn('Failed to set development mode config:', error);
+    }
 
     // Test basic connectivity
     const { data, error } = await supabase
@@ -104,29 +107,54 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false // Disable to prevent issues
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'sufi-essences-dashboard',
+      'Access-Control-Allow-Origin': 'http://localhost:5174'
+    }
+  },
+  db: {
+    schema: 'public'
+  },
+  // Add better error handling for CORS issues
+  fetch: {
+    // Add credentials for CORS requests
+    credentials: 'omit',
+    // Add timeout for requests
+    timeout: 30000
   }
 });
 
-// Direct REST API function for fetching categories
+// Direct REST API function for fetching categories with better error handling
 export const testDirectRestAPI = async () => {
   try {
-    const response = await fetch(`${supabaseUrl}/rest/v1/categories?select=*&eq.is_active.true&order=sort_order.asc`, {
-      method: 'GET',
-      headers: {
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${supabaseAnonKey}`,
-        'Content-Type': 'application/json'
+    // Use retry mechanism for better resilience
+    const response = await Retry.withBackoff(async () => {
+      const res = await fetch(`${supabaseUrl}/rest/v1/categories?select=*&eq.active.true&order=sort_order.asc`, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        // Add credentials handling for CORS
+        credentials: 'omit'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+      
+      return res;
+    }, 3, 1000);
 
     const data = await response.json();
     return { success: true, data, count: data.length };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error('Direct REST API Error:', error);
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -164,7 +192,7 @@ export const checkDatabaseConnection = async (): Promise<{ healthy: boolean; lat
     connectionHealthy = false;
     return { 
       healthy: false, 
-      error: error instanceof Error ? error.message : 'Unknown connection error' 
+      error: error instanceof Error ? error.message : String(error) 
     };
   }
 };
@@ -184,7 +212,7 @@ const productToDB = (product: any) => {
     category_id: product.categoryId || product.category_id,
     seller_id: product.sellerId || product.seller_id,
     stock: product.stock,
-    is_active: product.isActive !== undefined ? product.isActive : true,
+    active: product.isActive !== undefined ? product.isActive : true,
     featured: product.featured || false,
     slug: product.slug,
     meta_title: product.metaTitle || product.meta_title,
@@ -198,7 +226,7 @@ const categoryToDB = (category: any) => {
     slug: category.slug,
     description: category.description,
     image_url: category.imageUrl || category.image_url,
-    is_active: category.isActive !== undefined ? category.isActive : true,
+    active: category.isActive !== undefined ? category.isActive : true,
     created_at: category.createdAt?.toISOString() || new Date().toISOString(),
     updated_at: category.updatedAt?.toISOString() || new Date().toISOString()
   };
@@ -253,7 +281,28 @@ export const getProducts = async (filters?: {
 
     if (error) throw error;
 
-    return data || [];
+    // Transform database results to match Product interface
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug || '',
+      description: item.description || '',
+      price: parseFloat(item.price) || 0,
+      originalPrice: item.original_price ? parseFloat(item.original_price) : undefined,
+      categoryId: item.category_id,
+      category: item.categories?.name || '',
+      images: item.images || [], // Use the images array directly from database
+      stock: item.stock || 0,
+      rating: parseFloat(item.rating) || 0,
+      reviewCount: item.review_count || 0,
+      reviews: [],
+      sellerId: item.seller_id || '',
+      sellerName: '',
+      tags: item.tags || [],
+      featured: item.featured || false,
+      isActive: item.active,
+      createdAt: new Date(item.created_at)
+    }));
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -315,7 +364,21 @@ export const getCategories = async () => {
       .order('name', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    
+    // Transform the data to match our Category interface
+    return (data || []).map((cat: any) => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description,
+      image: cat.image_url || '', // Map image_url to image
+      parentId: cat.parent_id,
+      isActive: cat.is_active,
+      sortOrder: cat.sort_order,
+      productCount: 0, // Will be calculated separately if needed
+      createdAt: new Date(cat.created_at),
+      updatedAt: new Date(cat.updated_at)
+    }));
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -357,8 +420,18 @@ export const getProfileForUser = async (userId: string) => {
 };
 
 // Enhanced cart items fetching with all details (for when needed)
-export const getCartItems = async (userId: string) => {
+export const getCartItems = async (userId?: string) => {
   try {
+    // Get user ID if not provided
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('No authenticated user found for cart items');
+        return [];
+      }
+      userId = user.id;
+    }
+
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
@@ -443,8 +516,18 @@ export const clearCart = async (userId: string): Promise<boolean> => {
 // ===== WISHLIST FUNCTIONS =====
 
 // Get wishlist items
-export const getWishlistItems = async (userId: string) => {
+export const getWishlistItems = async (userId?: string) => {
   try {
+    // Get user ID if not provided
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('No authenticated user found for wishlist items');
+        return [];
+      }
+      userId = user.id;
+    }
+
     const { data, error } = await supabase
       .from('wishlist_items')
       .select(`
@@ -548,7 +631,7 @@ export const createOrder = async (orderData: {
     // Calculate totals
     const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const taxAmount = subtotal * 0.18; // 18% GST for India
-    const shippingAmount = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
+    const shippingAmount = subtotal > 500 ? 0 : 50; // Fast Shipping over ₹500
     const totalAmount = subtotal + taxAmount + shippingAmount;
 
     // Generate order number
@@ -610,7 +693,7 @@ export const createGuestOrder = async (orderData: {
     // Calculate totals
     const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const taxAmount = subtotal * 0.18; // 18% GST for India
-    const shippingAmount = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
+    const shippingAmount = subtotal > 500 ? 0 : 50; // Fast Shipping over ₹500
     const totalAmount = subtotal + taxAmount + shippingAmount;
 
     // Generate order number
@@ -821,8 +904,18 @@ export const confirmUserEmail = async (userId: string): Promise<{ success: boole
 // ===== ADDRESS FUNCTIONS =====
 
 // Get user addresses
-export const getUserAddresses = async (userId: string) => {
+export const getUserAddresses = async (userId?: string) => {
   try {
+    // Get user ID if not provided
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('No authenticated user found for addresses');
+        return [];
+      }
+      userId = user.id;
+    }
+
     const { data, error } = await supabase
       .from('addresses')
       .select('*')
@@ -986,10 +1079,13 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
       totalRevenue: 0,
       totalOrders: 0,
       totalProducts: 0,
-      totalCustomers: 0,
+      totalUsers: 0,
+      pendingOrders: 0,
+      lowStockProducts: 0,
       recentOrders: [],
       topProducts: [],
-      salesData: []
+      salesTrends: [],
+      categoryPerformance: []
     };
 
     if (role === 'admin') {
@@ -1002,7 +1098,7 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
 
       data.totalRevenue = ordersResult.data?.reduce((sum, order) => sum + parseFloat(order.total_amount), 0) || 0;
       data.totalProducts = productsResult.data?.length || 0;
-      data.totalCustomers = customersResult.data?.length || 0;
+      data.totalUsers = customersResult.data?.length || 0;
     } else if (role === 'seller') {
       // Seller gets only their data
       const [ordersResult, productsResult] = await Promise.all([
@@ -1027,7 +1123,20 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
       .order('created_at', { ascending: false })
       .limit(5);
 
-    data.recentOrders = recentOrders || [];
+    data.recentOrders = (recentOrders || []).map((order: any) => ({
+      id: order.id,
+      orderNumber: order.order_number || '',
+      userId: order.user_id || '',
+      items: [],
+      total: parseFloat(order.total_amount) || 0,
+      subtotal: 0,
+      taxAmount: 0,
+      shippingAmount: 0,
+      status: order.status,
+      paymentStatus: 'pending',
+      shippingAddress: {} as Address,
+      createdAt: new Date(order.created_at)
+    }));
 
     // Get top products
     const { data: topProducts } = await supabase
@@ -1036,7 +1145,37 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
       .order('sales_count', { ascending: false })
       .limit(5);
 
-    data.topProducts = topProducts || [];
+    data.topProducts = (topProducts || []).map((product: any) => {
+      const baseProduct = {
+        id: product.id,
+        name: product.name,
+        slug: product.slug || '',
+        description: '',
+        price: product.price,
+        categoryId: '',
+        category: '',
+        images: [product.image_url || ''],
+        stock: 0,
+        rating: 0,
+        reviewCount: 0,
+        reviews: [],
+        sellerId: '',
+        sellerName: '',
+        tags: [],
+        featured: false,
+        createdAt: new Date()
+      };
+      
+      // Only add originalPrice if it exists
+      if (product.original_price) {
+        return {
+          ...baseProduct,
+          originalPrice: parseFloat(product.original_price)
+        };
+      }
+      
+      return baseProduct;
+    });
 
     // Get sales data
     const { data: salesData } = await supabase
@@ -1045,7 +1184,11 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
       .order('date', { ascending: true })
       .limit(30);
 
-    data.salesData = salesData || [];
+    data.salesTrends = (salesData || []).map((item: any) => ({
+      date: item.date,
+      sales: item.sales || 0,
+      orders: item.orders || 0
+    }));
 
     return data;
   } catch (error) {
@@ -1054,10 +1197,13 @@ export const getDashboardAnalytics = async (userId: string, role: string) => {
       totalRevenue: 0,
       totalOrders: 0,
       totalProducts: 0,
-      totalCustomers: 0,
+      totalUsers: 0,
+      pendingOrders: 0,
+      lowStockProducts: 0,
       recentOrders: [],
       topProducts: [],
-      salesData: []
+      salesTrends: [],
+      categoryPerformance: []
     };
   }
 };
@@ -1071,9 +1217,13 @@ export const getFeaturedProducts = async (limit: number = 8) => {
         id,
         name,
         price,
-        image_url,
+        original_price,
+        images,
         slug,
         description,
+        rating,
+        review_count,
+        stock,
         categories(name, slug)
       `)
       .eq('featured', true)
@@ -1082,7 +1232,39 @@ export const getFeaturedProducts = async (limit: number = 8) => {
 
     if (error) throw error;
 
-    return data || [];
+    // Transform database results to match Product interface
+    return (data || []).map((item: any) => {
+      const baseProduct = {
+        id: item.id,
+        name: item.name,
+        slug: item.slug || '',
+        description: item.description || '',
+        price: parseFloat(item.price) || 0,
+        categoryId: '',
+        category: item.categories?.name || '',
+        images: item.images || [], // Use the images array directly from database
+        stock: item.stock || 0,
+        rating: parseFloat(item.rating) || 0,
+        reviewCount: item.review_count || 0,
+        reviews: [],
+        sellerId: '',
+        sellerName: '',
+        tags: [],
+        featured: true,
+        createdAt: new Date()
+      };
+      
+      // Only add originalPrice if it exists
+      if (item.original_price) {
+        return {
+          ...baseProduct,
+          originalPrice: parseFloat(item.original_price)
+        };
+      }
+      
+      return baseProduct;
+    });
+
   } catch (error) {
     console.error('Error fetching featured products:', error);
     return [];
@@ -1105,10 +1287,13 @@ export const getProductsBasic = async (filters?: {
         id,
         name,
         price,
-        image_url,
+        original_price,
+        images,
         slug,
         description,
         stock,
+        rating,
+        review_count,
         featured,
         categories(name, slug)
       `)
@@ -1142,7 +1327,27 @@ export const getProductsBasic = async (filters?: {
 
     if (error) throw error;
 
-    return data || [];
+    // Transform database results to match Product interface
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug || '',
+      description: item.description || '',
+      price: parseFloat(item.price) || 0,
+      originalPrice: item.original_price ? parseFloat(item.original_price) : undefined,
+      categoryId: '',
+      category: item.categories?.name || '',
+      images: item.images || [], // Use the images array directly from database
+      stock: item.stock || 0,
+      rating: parseFloat(item.rating) || 0,
+      reviewCount: item.review_count || 0,
+      reviews: [],
+      sellerId: '',
+      sellerName: '',
+      tags: [],
+      featured: item.featured || false,
+      createdAt: new Date()
+    }));
   } catch (error) {
     console.error('Error fetching basic products:', error);
     return [];
@@ -1158,7 +1363,7 @@ export const getProductsMinimal = async (limit?: number) => {
         id,
         name,
         price,
-        image_url,
+        images,
         slug
       `)
       .eq('active', true);
@@ -1171,7 +1376,26 @@ export const getProductsMinimal = async (limit?: number) => {
 
     if (error) throw error;
 
-    return data || [];
+    // Transform database results to match Product interface
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug || '',
+      description: '',
+      price: parseFloat(item.price) || 0,
+      categoryId: '',
+      category: '',
+      images: item.images || [], // Use the images array directly from database
+      stock: 0,
+      rating: 0,
+      reviewCount: 0,
+      reviews: [],
+      sellerId: '',
+      sellerName: '',
+      tags: [],
+      featured: false,
+      createdAt: new Date()
+    }));
   } catch (error) {
     console.error('Error fetching minimal products:', error);
     return [];
@@ -1216,15 +1440,10 @@ export const getUserPreferences = async (userId: string) => {
 // Enhanced user security settings fetching with all details (for when needed)
 export const getUserSecuritySettings = async (userId: string) => {
   try {
-    const { data, error } = await supabase
-      .from('user_security_settings')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error; // Ignore "not found" errors
-
-    return data;
+    // For now, return null since the table doesn't exist yet
+    // This prevents 404 errors in the console
+    console.warn('user_security_settings table not found - feature not implemented yet');
+    return null;
   } catch (error) {
     console.error('Error fetching user security settings:', error);
     return null;
@@ -1274,19 +1493,9 @@ export const updateUserPreferences = async (userId: string, preferences: any) =>
 // Enhanced user security settings updating
 export const updateUserSecuritySettings = async (userId: string, settings: any) => {
   try {
-    const { data, error } = await supabase
-      .from('user_security_settings')
-      .upsert({
-        user_id: userId,
-        ...settings,
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data;
+    // For now, return null since the table doesn't exist yet
+    console.warn('user_security_settings table not found - feature not implemented yet');
+    return null;
   } catch (error) {
     console.error('Error updating user security settings:', error);
     return null;

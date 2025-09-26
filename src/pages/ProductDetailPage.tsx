@@ -93,7 +93,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   const features = [
-    { icon: Truck, text: 'Free shipping on orders over $50' },
+    { icon: Truck, text: 'Fast Shipping on orders over $50' },
     { icon: RotateCcw, text: '30-day return policy' },
     { icon: ShieldCheck, text: '2-year warranty included' },
   ];

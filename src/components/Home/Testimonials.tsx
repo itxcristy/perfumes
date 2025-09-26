@@ -79,9 +79,9 @@ const testimonialsData = [
 ];
 
 // Testimonial Card Component
-const TestimonialCard: React.FC<{ testimonial: typeof testimonialsData[0], isFeatured?: boolean }> = ({ 
-  testimonial, 
-  isFeatured = false 
+const TestimonialCard: React.FC<{ testimonial: typeof testimonialsData[0], isFeatured?: boolean }> = ({
+  testimonial,
+  isFeatured = false
 }) => {
   return (
     <div className={`bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-3 sm:p-4 border border-gray-100 hover:border-blue-200 touch-manipulation ${isFeatured ? 'sm:p-5 md:p-6' : ''}`}>
@@ -98,11 +98,11 @@ const TestimonialCard: React.FC<{ testimonial: typeof testimonialsData[0], isFea
           </div>
         )}
       </div>
-      
+
       <blockquote className={`text-gray-700 leading-relaxed flex-grow ${isFeatured ? 'text-base sm:text-lg md:text-xl font-medium mb-4 sm:mb-6' : 'text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-4'}`}>
         "{testimonial.quote}"
       </blockquote>
-      
+
       <div className={`border-t border-gray-100 pt-2.5 sm:pt-3 ${isFeatured ? 'sm:pt-4' : ''}`}>
         <div className="flex items-center">
           <SafeImage
@@ -130,43 +130,43 @@ const TestimonialCard: React.FC<{ testimonial: typeof testimonialsData[0], isFea
 const TestimonialCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const autoPlayRef = useRef<NodeJS.Timeout>();
-  
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+
   // Auto-play functionality
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {
       setCurrentIndex(prev => (prev >= testimonialsData.length - 1 ? 0 : prev + 1));
     }, 5000);
-    
+
     return () => {
       if (autoPlayRef.current) {
         clearInterval(autoPlayRef.current);
       }
     };
   }, []);
-  
+
   // Pause auto-play on user interaction
   const pauseAutoPlay = () => {
     if (autoPlayRef.current) {
       clearInterval(autoPlayRef.current);
     }
   };
-  
+
   const goToNext = () => {
     pauseAutoPlay();
     setCurrentIndex(prev => (prev >= testimonialsData.length - 1 ? 0 : prev + 1));
   };
-  
+
   const goToPrevious = () => {
     pauseAutoPlay();
     setCurrentIndex(prev => (prev <= 0 ? testimonialsData.length - 1 : prev - 1));
   };
-  
+
   const goToSlide = (index: number) => {
     pauseAutoPlay();
     setCurrentIndex(index);
   };
-  
+
   // Swipe gesture support
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
     onSwipeLeft: goToNext,
@@ -175,15 +175,15 @@ const TestimonialCarousel: React.FC = () => {
     minSwipeDistance: 50,
     preventDefaultTouchmove: false,
   });
-  
+
   // Calculate item width and translateX for carousel
   const itemWidth = 100; // 100% for 1 item per view
   const translateX = -(currentIndex * itemWidth);
-  
+
   return (
     <div className="relative">
       {/* Carousel Container */}
-      <div 
+      <div
         ref={carouselRef}
         className="relative overflow-hidden"
         onTouchStart={onTouchStart}
@@ -192,7 +192,7 @@ const TestimonialCarousel: React.FC = () => {
       >
         <div
           className="flex transition-transform duration-500 ease-out"
-          style={{ 
+          style={{
             transform: `translateX(${translateX}%)`,
             width: `${testimonialsData.length * 100}%`
           }}
@@ -207,7 +207,7 @@ const TestimonialCarousel: React.FC = () => {
           ))}
         </div>
       </div>
-      
+
       {/* Navigation Arrows */}
       <button
         onClick={goToPrevious}
@@ -216,7 +216,7 @@ const TestimonialCarousel: React.FC = () => {
       >
         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700" />
       </button>
-      
+
       <button
         onClick={goToNext}
         className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full p-1.5 sm:p-2 shadow-md z-10 active:bg-white/80 touch-manipulation hidden sm:flex items-center justify-center"
@@ -224,7 +224,7 @@ const TestimonialCarousel: React.FC = () => {
       >
         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700" />
       </button>
-      
+
       {/* Mobile Navigation Arrows */}
       <button
         onClick={goToPrevious}
@@ -233,7 +233,7 @@ const TestimonialCarousel: React.FC = () => {
       >
         <ChevronLeft className="w-3 h-3 text-neutral-700" />
       </button>
-      
+
       <button
         onClick={goToNext}
         className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md z-10 active:bg-white/80 touch-manipulation sm:hidden flex items-center justify-center"
@@ -241,18 +241,17 @@ const TestimonialCarousel: React.FC = () => {
       >
         <ChevronRight className="w-3 h-3 text-neutral-700" />
       </button>
-      
+
       {/* Indicators */}
       <div className="flex justify-center mt-4 space-x-1.5">
         {testimonialsData.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-              index === currentIndex 
-                ? 'bg-blue-600' 
+            className={`w-2 h-2 rounded-full transition-colors duration-200 ${index === currentIndex
+                ? 'bg-blue-600'
                 : 'bg-gray-300 hover:bg-gray-400'
-            } touch-manipulation`}
+              } touch-manipulation`}
             aria-label={`Go to testimonial ${index + 1}`}
           />
         ))}
@@ -275,7 +274,7 @@ export const Testimonials: React.FC = () => {
             <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" />
             <span className="font-medium text-[10px] sm:text-xs">5.0 Average Rating</span>
           </motion.div>
-          
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -286,7 +285,7 @@ export const Testimonials: React.FC = () => {
             Loved by Thousands
             <span className="block text-blue-600">of Happy Customers</span>
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -309,27 +308,27 @@ export const Testimonials: React.FC = () => {
           <div className="relative bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-white">
             <Quote className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 text-blue-200 mb-3 sm:mb-4 md:mb-6" />
             <blockquote className="text-base sm:text-lg md:text-xl font-medium leading-relaxed mb-4 sm:mb-6">
-              "{testimonialsData[0].quote}"
+              "{testimonialsData[0]?.quote}"
             </blockquote>
             <div className="flex items-center">
               <SafeImage
-                src={testimonialsData[0].avatar}
-                alt={testimonialsData[0].name}
+                src={testimonialsData[0]?.avatar || ''}
+                alt={testimonialsData[0]?.name || 'Customer'}
                 className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full border-2 sm:border-4 border-white/20 object-cover"
                 width={56}
                 height={56}
               />
               <div className="ml-2.5 sm:ml-3 md:ml-4">
                 <div className="flex items-center space-x-1.5 mb-0.5 sm:mb-1">
-                  <p className="font-bold text-sm sm:text-base md:text-lg">{testimonialsData[0].name}</p>
+                  <p className="font-bold text-sm sm:text-base md:text-lg">{testimonialsData[0]?.name}</p>
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full"></div>
                   <span className="text-[10px] sm:text-xs text-blue-200">Verified Buyer</span>
                 </div>
-                <p className="text-[10px] sm:text-xs text-blue-200">{testimonialsData[0].role} • {testimonialsData[0].location}</p>
-                <p className="text-[10px] text-blue-100 mt-1 line-clamp-1">Purchased: {testimonialsData[0].product}</p>
+                <p className="text-[10px] sm:text-xs text-blue-200">{testimonialsData[0]?.role} • {testimonialsData[0]?.location}</p>
+                <p className="text-[10px] text-blue-100 mt-1 line-clamp-1">Purchased: {testimonialsData[0]?.product}</p>
               </div>
             </div>
-            
+
             {/* Decorative elements */}
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex space-x-0.5 sm:space-x-1">
               {[...Array(5)].map((_, i) => (
@@ -343,7 +342,7 @@ export const Testimonials: React.FC = () => {
         <div className="mb-6 sm:mb-8 md:mb-10">
           <TestimonialCarousel />
         </div>
-        
+
         {/* Stats Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -372,3 +371,5 @@ export const Testimonials: React.FC = () => {
     </section>
   );
 };
+
+export default Testimonials;

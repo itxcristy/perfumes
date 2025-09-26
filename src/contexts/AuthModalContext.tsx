@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Product } from '../types';
-import { EnhancedAuthModal } from '../components/Auth/EnhancedAuthModal';
+import { AuthModal } from '../components/Auth/AuthModal';
 
 interface AuthModalContextType {
   showAuthModal: (product: Product, action: 'cart' | 'wishlist' | 'compare') => void;
@@ -58,7 +58,7 @@ export const AuthModalProvider: React.FC<AuthModalProviderProps> = ({ children }
     <AuthModalContext.Provider value={value}>
       {children}
       {isModalOpen && selectedProduct && createPortal(
-        <EnhancedAuthModal
+        <AuthModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
           initialMode="login"

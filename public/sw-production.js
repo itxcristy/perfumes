@@ -1,4 +1,4 @@
-// Production Service Worker for S.Essences E-Commerce PWA
+// Production Service Worker for Aligarh Attar House E-Commerce PWA
 const CACHE_NAME = 'sessences-v1.0.0';
 const STATIC_CACHE = 'sessences-static-v1.0.0';
 const DYNAMIC_CACHE = 'sessences-dynamic-v1.0.0';
@@ -28,7 +28,7 @@ const API_ENDPOINTS = [
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
-  
+
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE).then((cache) => {
@@ -49,14 +49,14 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
-  
+
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== STATIC_CACHE && 
-              cacheName !== DYNAMIC_CACHE && 
-              cacheName !== API_CACHE) {
+          if (cacheName !== STATIC_CACHE &&
+            cacheName !== DYNAMIC_CACHE &&
+            cacheName !== API_CACHE) {
             console.log('Service Worker: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -97,28 +97,28 @@ async function handleApiRequest(request) {
   try {
     // Try network first
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache successful responses
       const cache = await caches.open(API_CACHE);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('Service Worker: Network failed, trying cache for:', request.url);
-    
+
     // Fallback to cache
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Return offline response for API calls
     return new Response(
-      JSON.stringify({ 
-        error: 'Offline', 
-        message: 'This feature is not available offline' 
+      JSON.stringify({
+        error: 'Offline',
+        message: 'This feature is not available offline'
       }),
       {
         status: 503,
@@ -132,19 +132,19 @@ async function handleApiRequest(request) {
 // Handle static assets with Cache First strategy
 async function handleStaticAssets(request) {
   const cachedResponse = await caches.match(request);
-  
+
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   try {
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('Service Worker: Failed to fetch asset:', request.url);
@@ -156,22 +156,22 @@ async function handleStaticAssets(request) {
 async function handlePageRequest(request) {
   try {
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('Service Worker: Network failed, trying cache for:', request.url);
-    
+
     // Try cache first
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Fallback to offline page
     const offlineResponse = await caches.match('/offline.html');
     return offlineResponse || new Response('Offline', { status: 503 });
@@ -181,7 +181,7 @@ async function handlePageRequest(request) {
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
   console.log('Service Worker: Background sync triggered:', event.tag);
-  
+
   if (event.tag === 'background-sync-products') {
     event.waitUntil(syncProducts());
   } else if (event.tag === 'background-sync-cart') {
@@ -196,11 +196,11 @@ async function syncProducts() {
   try {
     console.log('Service Worker: Syncing products...');
     const response = await fetch('/api/products');
-    
+
     if (response.ok) {
       const cache = await caches.open(API_CACHE);
       cache.put('/api/products', response.clone());
-      
+
       // Notify clients about successful sync
       const clients = await self.clients.matchAll();
       clients.forEach(client => {
@@ -238,9 +238,9 @@ async function syncWishlist() {
 // Push notifications
 self.addEventListener('push', (event) => {
   console.log('Service Worker: Push notification received');
-  
+
   const options = {
-    body: event.data ? event.data.text() : 'New notification from S.Essences',
+    body: event.data ? event.data.text() : 'New notification from Aligarh Attar House',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-72x72.png',
     vibrate: [100, 50, 100],
@@ -261,18 +261,18 @@ self.addEventListener('push', (event) => {
       }
     ]
   };
-  
+
   event.waitUntil(
-    self.registration.showNotification('S.Essences', options)
+    self.registration.showNotification('Aligarh Attar House', options)
   );
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
   console.log('Service Worker: Notification clicked');
-  
+
   event.notification.close();
-  
+
   if (event.action === 'explore') {
     event.waitUntil(
       clients.openWindow('/products')
@@ -290,7 +290,7 @@ self.addEventListener('notificationclick', (event) => {
 // Message handling from main thread
 self.addEventListener('message', (event) => {
   console.log('Service Worker: Message received:', event.data);
-  
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

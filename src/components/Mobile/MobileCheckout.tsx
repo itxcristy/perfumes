@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { ArrowLeft, ArrowRight, CreditCard, CheckCircle, Lock, Smartphone, Apple } from 'lucide-react';
 import { MobileTouchButton } from './MobileTouchButton';
 import { useMobileDetection } from '../../hooks/useMobileGestures';
@@ -50,7 +50,7 @@ export const MobileCheckoutLayout: React.FC<MobileCheckoutProps> = ({
               {currentStep}/{totalSteps}
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="w-full bg-neutral-200 rounded-full h-1.5 sm:h-2">
             <motion.div
@@ -110,7 +110,7 @@ export const MobileFormInput: React.FC<MobileFormInputProps> = ({
 
   return (
     <div className="space-y-2">
-      <label 
+      <label
         htmlFor={inputId}
         className="block text-sm font-medium text-neutral-900"
       >
@@ -266,7 +266,7 @@ export const MobileStepNavigation: React.FC<MobileStepNavigationProps> = ({
             Back
           </MobileTouchButton>
         )}
-        
+
         {onNext && (
           <MobileTouchButton
             onClick={onNext}

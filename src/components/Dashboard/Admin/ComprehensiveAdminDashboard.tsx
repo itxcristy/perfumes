@@ -4,7 +4,6 @@ import { supabase } from '../../../lib/supabase';
 import { LoadingSpinner } from '../../Common/LoadingSpinner';
 import { ErrorFallback } from '../../Common/ErrorFallback';
 import { UniversalTableManager } from './UniversalTableManager';
-import { AdvancedAnalytics } from './AdvancedAnalytics';
 import { DatabaseSchemaViewer } from './DatabaseSchemaViewer';
 import {
   useAdvancedMemo,
@@ -38,6 +37,9 @@ interface DashboardMetrics {
   ordersToday: number;
   revenueToday: number;
   conversionRate: number;
+  topProducts?: any[];
+  recentOrders?: any[];
+  lowStockProductsList?: any[];
 }
 
 interface KPIMetric {
@@ -161,13 +163,6 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
       description: 'Customer payment information',
       color: 'bg-indigo-500'
     },
-    coupons: {
-      name: 'coupons',
-      displayName: 'Coupons',
-      icon: <Tag className="h-5 w-5" />,
-      description: 'Discount coupons and promotions',
-      color: 'bg-emerald-500'
-    },
     product_variants: {
       name: 'product_variants',
       displayName: 'Product Variants',
@@ -197,15 +192,44 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
       // Batch requests for better performance
       const countPromises = tableNames.map(async (tableName) => {
         try {
+          // Check if table exists by trying to get a small sample
           const { count, error } = await supabase
             .from(tableName)
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .limit(1);
 
           if (error) {
-            console.warn(`Error fetching count for ${tableName}:`, error.message);
+            // If it's a 404 or table doesn't exist error, skip it
+            if (error.message.includes('not found') || error.message.includes('does not exist')) {
+              console.warn(`Table ${tableName} does not exist, skipping`);
+              return { tableName, count: 0 };
+            }
+            
+            // For other errors, still try to get count
+            console.warn(`Error accessing table ${tableName}:`, error.message);
+            const { count: countResult, error: countError } = await supabase
+              .from(tableName)
+              .select('id', { count: 'exact', head: true });
+              
+            if (countError) {
+              console.warn(`Error fetching count for ${tableName}:`, countError.message);
+              return { tableName, count: 0 };
+            }
+            
+            return { tableName, count: countResult || 0 };
+          }
+          
+          // If we got data, get the actual count
+          const { count: actualCount, error: countError } = await supabase
+            .from(tableName)
+            .select('id', { count: 'exact', head: true });
+            
+          if (countError) {
+            console.warn(`Error fetching count for ${tableName}:`, countError.message);
             return { tableName, count: 0 };
           }
-          return { tableName, count: count || 0 };
+          
+          return { tableName, count: actualCount || 0 };
         } catch (err) {
           console.warn(`Error fetching count for ${tableName}:`, err);
           return { tableName, count: 0 };
@@ -223,10 +247,19 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
         }
       });
 
-      const tables: TableInfo[] = tableNames.map(name => ({
-        ...tableConfigs[name],
-        count: tableCounts[name] || 0
-      }));
+      const tables: TableInfo[] = tableNames
+        .filter(name => tableConfigs[name]) // Filter out undefined configs
+        .map(name => {
+          const config = tableConfigs[name];
+          return {
+            name: config.name || name,
+            displayName: config.displayName || name,
+            icon: config.icon || <Database className="h-6 w-6" />,
+            description: config.description || 'Unknown table',
+            color: config.color || 'bg-gray-500',
+            count: tableCounts[name] || 0
+          };
+        });
 
       setStats({
         totalTables: tableNames.length,
@@ -260,9 +293,9 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
 
       // Fetch basic metrics from tables directly with optimized queries
       const [ordersResult, usersResult, productsResult] = await Promise.all([
-        supabase.from('orders').select('id, total_amount, status, created_at'),
-        supabase.from('profiles').select('id, created_at'),
-        supabase.from('products').select('id')
+        supabase.from('orders').select('id, total_amount, status, created_at').limit(100),
+        supabase.from('profiles').select('id, full_name, created_at').limit(100),
+        supabase.from('products').select('id').limit(100)
       ]);
 
       if (ordersResult.error || usersResult.error || productsResult.error) {
@@ -420,7 +453,7 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
         const [ordersResult, usersResult, productsResult] = await Promise.all([
           supabase
             .from('orders')
-            .select('id, total, status, created_at, user_id')
+            .select('id, total_amount, status, created_at, user_id')
             .gte('created_at', startDate.toISOString())
             .lte('created_at', endDate.toISOString()),
           supabase
@@ -532,7 +565,7 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
   }
 
   if (currentView === 'analytics') {
-    return <AdvancedAnalytics />;
+    return <div>Analytics view not implemented yet</div>;
   }
 
   if (currentView === 'schema') {
@@ -871,8 +904,8 @@ export const ComprehensiveAdminDashboard: React.FC = memo(() => {
             </div>
             <div className="space-y-3">
               {/* Display real low stock data */}
-              {metrics && metrics.lowStockProducts && metrics.lowStockProducts.length > 0 ? (
-                metrics.lowStockProducts.slice(0, 3).map((product: any, index: number) => (
+              {metrics && metrics.lowStockProductsList && metrics.lowStockProductsList.length > 0 ? (
+                metrics.lowStockProductsList.slice(0, 3).map((product: any, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <div>
                       <span className="text-sm font-medium text-gray-900">

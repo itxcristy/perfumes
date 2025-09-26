@@ -140,6 +140,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         aria-modal="true"
         aria-labelledby="mobile-nav-title"
         aria-hidden={!isOpen}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          height: '100vh',
+          zIndex: 50
+        }}
       >
         {/* Header with close button */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -259,8 +266,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     <button
                       onClick={() => toggleDropdown(item.name)}
                       className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium ${isActiveLink(item.href)
-                          ? 'text-purple-600 bg-purple-50'
-                          : 'text-gray-700 hover:bg-gray-50'
+                        ? 'text-purple-600 bg-purple-50'
+                        : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       aria-expanded={activeDropdown === item.name}
                     >
@@ -282,8 +289,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                             to={dropdownItem.href}
                             onClick={onClose}
                             className={`block px-12 py-3 text-sm ${isActiveLink(dropdownItem.href)
-                                ? 'text-purple-600 bg-purple-50'
-                                : 'text-gray-600 hover:bg-gray-100'
+                              ? 'text-purple-600 bg-purple-50'
+                              : 'text-gray-600 hover:bg-gray-100'
                               }`}
                           >
                             {dropdownItem.name}
@@ -297,8 +304,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     to={item.href}
                     onClick={onClose}
                     className={`flex items-center px-4 py-3 text-base font-medium ${isActiveLink(item.href)
-                        ? 'text-purple-600 bg-purple-50'
-                        : 'text-gray-700 hover:bg-gray-50'
+                      ? 'text-purple-600 bg-purple-50'
+                      : 'text-gray-700 hover:bg-gray-50'
                       }`}
                   >
                     <span className="mr-3 text-gray-500">{item.icon}</span>

@@ -56,8 +56,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const createOrder = async (
     items: CartItem[],
     shippingAddress: Address,
-    billingAddress?: Address,
-    paymentMethod: string = 'cash_on_delivery'
+    paymentMethod: string,
+    total: number
   ): Promise<string | null> => {
     if (!user) {
       showNotification({
@@ -74,7 +74,7 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const orderId = await createOrderDB({
         items,
         shippingAddress,
-        billingAddress,
+        billingAddress: undefined, // Set to undefined since it's not passed in this signature
         paymentMethod
       });
 
@@ -107,9 +107,9 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+  const updateOrderStatus = async (orderId: string, status: string): Promise<boolean> => {
     try {
-      const success = await updateOrderStatusDB(orderId, status);
+      const success = await updateOrderStatusDB(orderId, status as Order['status']);
       if (success) {
         await fetchUserOrders(); // Refresh orders
         showNotification({
@@ -117,12 +117,14 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           title: 'Status Updated',
           message: `Order status updated to ${status}`
         });
+        return true;
       } else {
         showNotification({
           type: 'error',
           title: 'Update Failed',
           message: 'Failed to update order status'
         });
+        return false;
       }
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -131,6 +133,7 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         title: 'Update Failed',
         message: 'Failed to update order status. Please try again later.'
       });
+      return false;
     }
   };
 

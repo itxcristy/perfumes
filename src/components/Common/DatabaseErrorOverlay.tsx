@@ -8,12 +8,17 @@ export const DatabaseErrorOverlay: React.FC = () => {
 
   if (!error) return null;
 
+  // In direct login mode, we don't need to show database errors
+  if (import.meta.env.VITE_DIRECT_LOGIN_ENABLED === 'true') {
+    return null;
+  }
+
   // Detect specific error types
   const errorObj = new Error(error);
   const isRLSRecursion = detectRLSRecursionError(errorObj);
   const isRLSIssue = error.includes('row-level security') || error.includes('policy');
   const isConnectionIssue = error.includes('connection') || error.includes('network');
-  
+
   // Generate appropriate guidance
   const getErrorGuidance = () => {
     if (isRLSRecursion) {
@@ -30,7 +35,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
         severity: 'critical'
       };
     }
-    
+
     if (isRLSIssue) {
       return {
         title: 'Row Level Security Policy Issue',
@@ -45,7 +50,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
         severity: 'high'
       };
     }
-    
+
     if (isConnectionIssue) {
       return {
         title: 'Database Connection Error',
@@ -60,7 +65,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
         severity: 'medium'
       };
     }
-    
+
     return {
       title: 'Database Configuration Required',
       description: 'A critical database setup error has been detected. Your database needs proper configuration.',
@@ -74,9 +79,9 @@ export const DatabaseErrorOverlay: React.FC = () => {
       severity: 'critical'
     };
   };
-  
+
   const guidance = getErrorGuidance();
-  
+
   const getSeverityColor = () => {
     switch (guidance.severity) {
       case 'critical': return 'bg-red-900/95';
@@ -85,7 +90,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
       default: return 'bg-red-900/95';
     }
   };
-  
+
   const getSeverityIcon = () => {
     switch (guidance.severity) {
       case 'critical': return AlertTriangle;
@@ -94,7 +99,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
       default: return AlertTriangle;
     }
   };
-  
+
   const SeverityIcon = getSeverityIcon();
 
   return (
@@ -105,13 +110,13 @@ export const DatabaseErrorOverlay: React.FC = () => {
         <p className="text-xl text-red-100 mb-8">
           {guidance.description}
         </p>
-        
+
         {/* Error Details */}
         <div className="bg-black/30 p-6 rounded-lg text-left font-mono text-sm mb-8 max-h-32 overflow-y-auto">
           <p className="font-bold text-yellow-300 mb-2">&gt; Error Details:</p>
           <p className="break-words">{error}</p>
         </div>
-        
+
         {/* Solution Steps */}
         <div className="bg-black/20 p-6 rounded-lg text-left mb-8">
           <h3 className="font-bold text-yellow-300 mb-4 text-lg">🔧 How to Fix This:</h3>
@@ -120,7 +125,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
               <li key={index} className="leading-relaxed">{step}</li>
             ))}
           </ol>
-          
+
           {guidance.scriptFile && (
             <div className="mt-4 p-3 bg-blue-900/30 rounded border border-blue-500">
               <p className="text-blue-200 text-sm">
@@ -129,19 +134,19 @@ export const DatabaseErrorOverlay: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* RLS-specific additional help */}
         {isRLSRecursion && (
           <div className="bg-purple-900/20 border border-purple-500 p-4 rounded-lg mb-8 text-left">
             <h4 className="font-bold text-purple-300 mb-2">💡 Understanding RLS Recursion:</h4>
             <p className="text-purple-100 text-sm leading-relaxed">
-              Row Level Security (RLS) infinite recursion occurs when a security policy on a table references the same table 
-              in its condition. For example, checking if a user is an admin by querying the profiles table from within a 
+              Row Level Security (RLS) infinite recursion occurs when a security policy on a table references the same table
+              in its condition. For example, checking if a user is an admin by querying the profiles table from within a
               profiles table policy creates a loop. Our fix uses safe role caching to avoid this issue.
             </p>
           </div>
         )}
-        
+
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4">
           <button
@@ -151,7 +156,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
             <X className="mr-2 h-5 w-5" />
             I will fix this (Dismiss)
           </button>
-          
+
           <button
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-500 transition-colors flex items-center"
@@ -160,7 +165,7 @@ export const DatabaseErrorOverlay: React.FC = () => {
             Refresh Page
           </button>
         </div>
-        
+
         {/* Additional Resources */}
         <div className="mt-8 text-sm text-red-200">
           <p>Need help? Check the project documentation or contact support.</p>

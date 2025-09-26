@@ -4,6 +4,14 @@ import { Category } from '../../types';
 import { ArrowRight } from 'lucide-react';
 import { useMobileDetection } from '../../hooks/useMobileGestures';
 
+// Import category images
+import attarBlendsImg from '../../assets/images/categories/attar-blends.jpg';
+import booksCollectionImg from '../../assets/images/categories/books-collection.jpg';
+import hijabCollectionImg from '../../assets/images/categories/hijab-collection.jpg';
+import muskAttarsImg from '../../assets/images/categories/musk-attars.jpg';
+import oudhAttarsImg from '../../assets/images/categories/oudh-attars.jpg';
+import quranCollectionImg from '../../assets/images/categories/quran-collection.jpg';
+
 interface CategoryDisplayCardProps {
   category: Category;
 }
@@ -11,16 +19,29 @@ interface CategoryDisplayCardProps {
 export const CategoryDisplayCard: React.FC<CategoryDisplayCardProps> = ({ category }) => {
   const { isMobile } = useMobileDetection();
 
+  // Map category names to specific images
+  const categoryImages: Record<string, string> = {
+    "Attar Blends": attarBlendsImg,
+    "Islamic Books": booksCollectionImg,
+    "Hijab Collection": hijabCollectionImg,
+    "Musk Attars": muskAttarsImg,
+    "Oudh Attars": oudhAttarsImg,
+    "Quran Collection": quranCollectionImg,
+  };
+
+  // Use specific image if available, otherwise fallback to category.image
+  const categoryImage = categoryImages[category.name] || category.image;
+
   // Mobile-specific styling
-  const cardClasses = isMobile 
+  const cardClasses = isMobile
     ? "group relative bg-white rounded-xl shadow-md overflow-hidden cursor-pointer h-64 flex flex-col justify-end touch-manipulation"
     : "group relative bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer h-80 flex flex-col justify-end";
 
-  const textClasses = isMobile 
+  const textClasses = isMobile
     ? "text-lg font-bold mb-1 text-white drop-shadow-lg"
     : "text-2xl font-bold mb-2 text-white drop-shadow-lg";
 
-  const countClasses = isMobile 
+  const countClasses = isMobile
     ? "text-xs font-semibold"
     : "text-sm font-semibold";
 
@@ -28,7 +49,7 @@ export const CategoryDisplayCard: React.FC<CategoryDisplayCardProps> = ({ catego
     <Link to={`/categories/${category.slug}`}>
       <div className={cardClasses}>
         <img
-          src={category.image}
+          src={categoryImage}
           alt={category.name}
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />

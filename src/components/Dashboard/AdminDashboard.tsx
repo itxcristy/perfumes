@@ -20,7 +20,7 @@ import {
   Palette
 } from 'lucide-react';
 import { AdminErrorBoundary } from '../Common/AdminErrorBoundary';
-import { AdminLoadingState } from '../Common/EnhancedLoadingStates';
+import { LoadingSpinner } from '../Common/LoadingSpinner';
 
 // Lazy-loaded admin components for code splitting and performance optimization
 const ComprehensiveAdminDashboard = lazy(() =>
@@ -57,27 +57,21 @@ const CollectionManagement = lazy(() =>
   }))
 );
 
-const CouponManagement = lazy(() =>
-  import('./Admin/CouponManagement').then(module => ({
-    default: module.CouponManagement
-  }))
-);
-
 const SettingsManagement = lazy(() =>
   import('./Admin/SettingsManagement').then(module => ({
     default: module.SettingsManagement
   }))
 );
 
-const EnhancedAnalyticsDashboard = lazy(() =>
-  import('./Admin/EnhancedAnalyticsDashboard').then(module => ({
-    default: module.EnhancedAnalyticsDashboard
+const AnalyticsDashboard = lazy(() =>
+  import('./Admin/AnalyticsDashboard').then(module => ({
+    default: module.AnalyticsDashboard
   }))
 );
 
-const DedicatedAnalyticsDashboard = lazy(() =>
-  import('./Admin/DedicatedAnalyticsDashboard').then(module => ({
-    default: module.DedicatedAnalyticsDashboard
+const AdvancedReports = lazy(() =>
+  import('./Admin/AdvancedReports').then(module => ({
+    default: module.AdvancedReports
   }))
 );
 
@@ -92,12 +86,6 @@ const MarketingManagement = lazy(() =>
 const AuditLogs = lazy(() =>
   import('./Admin/AuditLogs').then(module => ({
     default: module.AuditLogs
-  }))
-);
-
-const AdvancedReports = lazy(() =>
-  import('./Admin/AdvancedReports').then(module => ({
-    default: module.AdvancedReports
   }))
 );
 
@@ -152,12 +140,7 @@ const ComponentRenderer = memo<{
   if (!isActive) return null;
 
   return (
-    <Suspense fallback={
-      <AdminLoadingState
-        type="dashboard"
-        message="Loading component..."
-      />
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <Component />
     </Suspense>
   );
@@ -242,11 +225,6 @@ export const AdminDashboard: React.FC = memo(() => {
       component: CollectionManagement
     },
     {
-      name: 'Coupons',
-      icon: <Tag className="h-5 w-5" />,
-      component: CouponManagement
-    },
-    {
       name: 'Marketing',
       icon: <TrendingUp className="h-5 w-5" />,
       component: MarketingManagement
@@ -254,7 +232,7 @@ export const AdminDashboard: React.FC = memo(() => {
     {
       name: 'Analytics',
       icon: <BarChart3 className="h-5 w-5" />,
-      component: DedicatedAnalyticsDashboard
+      component: AnalyticsDashboard
     },
     {
       name: 'Reports',
@@ -485,10 +463,7 @@ export const AdminDashboard: React.FC = memo(() => {
             <div className="max-w-7xl mx-auto h-full">
               <AdminErrorBoundary>
                 {isLoading ? (
-                  <AdminLoadingState
-                    type={activeTab as any}
-                    message={`Loading ${activeNavItem?.name || 'content'}...`}
-                  />
+                  <LoadingSpinner />
                 ) : activeNavItem ? (
                   <ComponentRenderer
                     component={activeNavItem.component}

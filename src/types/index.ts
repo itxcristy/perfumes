@@ -49,7 +49,7 @@ export interface Category {
   name: string;
   slug?: string; // New field from DB
   description?: string; // New field from DB
-  image: string; // Maps to image_url in DB
+  imageUrl: string; // Maps to image_url in DB (changed from 'image' to 'imageUrl')
   parentId?: string; // Maps to parent_id in DB
   isActive?: boolean; // Maps to is_active in DB
   sortOrder?: number; // Maps to sort_order in DB

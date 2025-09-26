@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   Mail, Lock, ArrowLeft, CheckCircle, AlertCircle, Loader2,
   Eye, EyeOff, Shield, Clock, RefreshCw
@@ -31,7 +31,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  
+
   const { showNotification } = useNotification();
 
   const [resetData, setResetData] = useState<ResetData>({
@@ -79,7 +79,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
     if (!/[a-z]/.test(password)) errors.push('One lowercase letter');
     if (!/\d/.test(password)) errors.push('One number');
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push('One special character');
-    
+
     return { isValid: errors.length === 0, errors };
   };
 
@@ -101,7 +101,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
       // Import the resetPassword function from AuthContext
       const { resetPassword } = await import('../../contexts/AuthContext');
       await resetPassword(resetData.email);
-      
+
       showNotification('Password reset link sent to your email!', 'success');
       setStep('verify');
       setResendTimer(60); // 60 seconds cooldown
@@ -130,7 +130,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Simulate code verification
       if (resetData.verificationCode === '123456') {
         setStep('reset');
@@ -175,7 +175,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
       // Import the updatePassword function from AuthContext
       const { updatePassword } = await import('../../contexts/AuthContext');
       await updatePassword(resetData.newPassword);
-      
+
       setStep('success');
       showNotification('Password reset successfully!', 'success');
     } catch (error: unknown) {
@@ -193,7 +193,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       showNotification('New verification code sent!', 'success');
       setResendTimer(60);
     } catch {
@@ -206,7 +206,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
   const getPasswordStrength = (password: string): { strength: number; label: string; color: string } => {
     const validation = validatePassword(password);
     const strength = Math.max(0, 5 - validation.errors.length);
-    
+
     if (strength === 0) return { strength: 0, label: 'Very Weak', color: 'bg-red-500' };
     if (strength <= 2) return { strength: strength * 20, label: 'Weak', color: 'bg-orange-500' };
     if (strength <= 3) return { strength: strength * 20, label: 'Fair', color: 'bg-yellow-500' };
@@ -217,7 +217,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
+    <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -288,9 +288,8 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
                       type="email"
                       value={resetData.email}
                       onChange={(e) => setResetData(prev => ({ ...prev, email: e.target.value }))}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your email address"
                       disabled={loading}
                     />
@@ -339,9 +338,8 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
                       const value = e.target.value.replace(/\D/g, '').slice(0, 6);
                       setResetData(prev => ({ ...prev, verificationCode: value }));
                     }}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-center text-2xl font-mono tracking-widest ${
-                      errors.verificationCode ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-center text-2xl font-mono tracking-widest ${errors.verificationCode ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder="000000"
                     maxLength={6}
                     disabled={loading}
@@ -403,9 +401,8 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
                       type={showPassword ? 'text' : 'password'}
                       value={resetData.newPassword}
                       onChange={(e) => setResetData(prev => ({ ...prev, newPassword: e.target.value }))}
-                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                        errors.newPassword ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.newPassword ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter new password"
                       disabled={loading}
                     />
@@ -423,7 +420,7 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
                       {errors.newPassword}
                     </p>
                   )}
-                  
+
                   {/* Password Strength Indicator */}
                   {resetData.newPassword && (
                     <div className="mt-2">
@@ -460,9 +457,8 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={resetData.confirmPassword}
                       onChange={(e) => setResetData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Confirm new password"
                       disabled={loading}
                     />
@@ -518,6 +514,6 @@ export const PasswordResetFlow: React.FC<PasswordResetFlowProps> = ({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </>
   );
 };

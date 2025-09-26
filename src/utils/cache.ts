@@ -405,27 +405,27 @@ class EnhancedCache {
 
 // Cache instances for different use cases
 export const primaryCache = new EnhancedCache({
-  maxSize: 25 * 1024 * 1024, // 25MB
-  maxEntries: 500,
-  defaultTTL: 5 * 60 * 1000, // 5 minutes
+  maxSize: 50 * 1024 * 1024, // 50MB
+  maxEntries: 1000,
+  defaultTTL: 15 * 60 * 1000, // Increased from 5 to 15 minutes
 });
 
 export const imageCache = new EnhancedCache({
-  maxSize: 100 * 1024 * 1024, // 100MB for images
-  maxEntries: 200,
-  defaultTTL: 30 * 60 * 1000, // 30 minutes
+  maxSize: 150 * 1024 * 1024, // Increased from 100 to 150MB for images
+  maxEntries: 300,
+  defaultTTL: 60 * 60 * 1000, // Increased from 30 minutes to 1 hour
 });
 
 export const apiCache = new EnhancedCache({
-  maxSize: 10 * 1024 * 1024, // 10MB for API responses
-  maxEntries: 300,
-  defaultTTL: 2 * 60 * 1000, // 2 minutes
+  maxSize: 20 * 1024 * 1024, // Increased from 10 to 20MB for API responses
+  maxEntries: 500,
+  defaultTTL: 10 * 60 * 1000, // Increased from 2 to 10 minutes
 });
 
 export const userCache = new EnhancedCache({
-  maxSize: 5 * 1024 * 1024, // 5MB for user data
-  maxEntries: 100,
-  defaultTTL: 15 * 60 * 1000, // 15 minutes
+  maxSize: 10 * 1024 * 1024, // Increased from 5 to 10MB for user data
+  maxEntries: 200,
+  defaultTTL: 30 * 60 * 1000, // Increased from 15 to 30 minutes
 });
 
 // Legacy cache classes for backward compatibility
@@ -620,4 +620,5 @@ class Cache<T> {
   }
 }
 
+export { AdvancedCacheManager, advancedCacheManager } from './advancedCaching';
 export default Cache;

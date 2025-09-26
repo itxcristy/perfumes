@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { WifiOff, Wifi, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useNetworkStatus, useGracefulDegradation } from '../../utils/networkResilience';
 
@@ -126,7 +126,7 @@ export const NetworkStatusProvider: React.FC<NetworkStatusProviderProps> = ({
       {children}
 
       {showStatusBar && (
-        <AnimatePresence>
+        <>
           {showNotification && (
             <NetworkStatusBar
               config={getNotificationConfig()}
@@ -135,7 +135,7 @@ export const NetworkStatusProvider: React.FC<NetworkStatusProviderProps> = ({
               showRetry={notificationType === 'offline'}
             />
           )}
-        </AnimatePresence>
+        </>
       )}
     </NetworkContext.Provider>
   );
