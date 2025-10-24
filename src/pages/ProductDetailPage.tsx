@@ -12,7 +12,7 @@ import { ReviewForm } from '../components/Product/ReviewForm';
 import { ProductRecommendations } from '../components/Product/ProductRecommendations';
 import { Modal } from '../components/Common/Modal';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
-import { Review } from '../types';
+import { Review, Product } from '../types';
 import ProductImage from '../components/Common/ProductImage';
 import {
   SocialProof,
@@ -26,9 +26,10 @@ import {
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { products, loading: productsLoading, fetchReviewsForProduct, submitReview } = useProducts();
+  const { getProductById, fetchReviewsForProduct, submitReview } = useProducts();
   const { user } = useAuth();
-  const product = products.find(p => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
@@ -41,6 +42,39 @@ export const ProductDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
+  // Fetch product by ID
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) {
+        console.log('No product ID provided');
+        return;
+      }
+
+      console.log('Fetching product with ID:', id);
+      setLoading(true);
+      try {
+        const productData = await getProductById(id);
+        console.log('Product data received:', productData);
+
+        if (productData && productData.data) {
+          console.log('Setting product:', productData.data);
+          setProduct(productData.data);
+        } else {
+          console.log('No product data in response');
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id, getProductById]);
+
+  // Fetch reviews when product is loaded
   useEffect(() => {
     if (product) {
       const getReviews = async () => {
@@ -53,7 +87,7 @@ export const ProductDetailPage: React.FC = () => {
     }
   }, [product, fetchReviewsForProduct]);
 
-  if (productsLoading) {
+  if (loading) {
     return <div className="min-h-screen"><LoadingSpinner /></div>;
   }
 

@@ -26,8 +26,8 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     setLoading(true);
     try {
-      const addressesData = await getUserAddresses(user.id);
-      setAddresses(addressesData);
+      const response = await apiClient.getAddresses();
+      setAddresses(response.data || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
       showNotification({
@@ -55,21 +55,13 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
 
     try {
-      const success = await addAddressDB(address);
-      if (success) {
-        await fetchAddresses();
-        showNotification({
-          type: 'success',
-          title: 'Address Added',
-          message: 'Your address has been added successfully'
-        });
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to add address'
-        });
-      }
+      await apiClient.createAddress(address);
+      await fetchAddresses();
+      showNotification({
+        type: 'success',
+        title: 'Address Added',
+        message: 'Your address has been added successfully'
+      });
     } catch (error) {
       console.error('Error adding address:', error);
       showNotification({
@@ -82,21 +74,13 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const updateAddress = async (address: Address) => {
     try {
-      const success = await updateAddressDB(address);
-      if (success) {
-        await fetchAddresses();
-        showNotification({
-          type: 'success',
-          title: 'Address Updated',
-          message: 'Your address has been updated successfully'
-        });
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to update address'
-        });
-      }
+      await apiClient.updateAddress(address.id, address);
+      await fetchAddresses();
+      showNotification({
+        type: 'success',
+        title: 'Address Updated',
+        message: 'Your address has been updated successfully'
+      });
     } catch (error) {
       console.error('Error updating address:', error);
       showNotification({
@@ -109,21 +93,13 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const deleteAddress = async (addressId: string) => {
     try {
-      const success = await deleteAddressDB(addressId);
-      if (success) {
-        await fetchAddresses();
-        showNotification({
-          type: 'success',
-          title: 'Address Deleted',
-          message: 'Your address has been deleted successfully'
-        });
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to delete address'
-        });
-      }
+      await apiClient.deleteAddress(addressId);
+      await fetchAddresses();
+      showNotification({
+        type: 'success',
+        title: 'Address Deleted',
+        message: 'Your address has been deleted successfully'
+      });
     } catch (error) {
       console.error('Error deleting address:', error);
       showNotification({
@@ -136,21 +112,13 @@ export const AddressProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const setDefaultAddress = async (addressId: string, type: 'shipping' | 'billing') => {
     try {
-      const success = await setDefaultAddressDB(addressId, type);
-      if (success) {
-        await fetchAddresses();
-        showNotification({
-          type: 'success',
-          title: 'Default Address Set',
-          message: `Default ${type} address has been updated`
-        });
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to set default address'
-        });
-      }
+      await apiClient.setDefaultAddress(addressId);
+      await fetchAddresses();
+      showNotification({
+        type: 'success',
+        title: 'Default Address Set',
+        message: `Default ${type} address has been updated`
+      });
     } catch (error) {
       console.error('Error setting default address:', error);
       showNotification({

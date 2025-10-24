@@ -27,8 +27,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setLoading(true);
 
     try {
-      const ordersData = await getOrders(user.id);
-      setOrders(ordersData);
+      const response = await apiClient.getOrders();
+      setOrders(response.data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       showNotification({
@@ -66,21 +66,22 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setLoading(true);
 
     try {
-      const orderId = await createOrderDB({
+      const response = await apiClient.createOrder({
         items,
         shippingAddress,
-        billingAddress: undefined, // Set to undefined since it's not passed in this signature
-        paymentMethod
+        billingAddress: undefined,
+        paymentMethod,
+        total
       });
 
-      if (orderId) {
+      if (response.data?.id) {
         showNotification({
           type: 'success',
           title: 'Order Placed',
           message: 'Your order has been placed successfully!'
         });
-        await fetchUserOrders(); // Refresh orders
-        return orderId;
+        await fetchUserOrders();
+        return response.data.id;
       } else {
         showNotification({
           type: 'error',
@@ -104,23 +105,14 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updateOrderStatus = async (orderId: string, status: string): Promise<boolean> => {
     try {
-      const success = await updateOrderStatusDB(orderId, status as Order['status']);
-      if (success) {
-        await fetchUserOrders(); // Refresh orders
-        showNotification({
-          type: 'success',
-          title: 'Status Updated',
-          message: `Order status updated to ${status}`
-        });
-        return true;
-      } else {
-        showNotification({
-          type: 'error',
-          title: 'Update Failed',
-          message: 'Failed to update order status'
-        });
-        return false;
-      }
+      await apiClient.updateOrderStatus(orderId, status);
+      await fetchUserOrders();
+      showNotification({
+        type: 'success',
+        title: 'Status Updated',
+        message: `Order status updated to ${status}`
+      });
+      return true;
     } catch (error) {
       console.error('Error updating order status:', error);
       showNotification({

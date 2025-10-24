@@ -171,8 +171,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user, showNotification]);
 
-  // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  // Calculate totals with null checks
+  const subtotal = items.reduce((sum, item) => {
+    if (item.product && typeof item.product.price === 'number') {
+      return sum + (item.product.price * item.quantity);
+    }
+    return sum;
+  }, 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   // Wrapper functions to match type definitions

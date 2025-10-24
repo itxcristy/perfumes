@@ -59,59 +59,66 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                 ) : (
                   <div className="space-y-4">
                     <>
-                      {items.map((item) => (
-                        <div
-                          key={item.product.id}
-                          className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-fade-in"
-                        >
-                          <img
-                            src={(item.product.images && item.product.images.length > 0 ? item.product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
-                            alt={item.product.name}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
+                      {items.map((item) => {
+                        // Skip items with missing product data
+                        if (!item.product) {
+                          return null;
+                        }
 
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">
-                              {item.product.name}
-                            </h3>
-                            <p className="text-sm text-gray-500">₹{item.product.price.toLocaleString('en-IN')}</p>
+                        return (
+                          <div
+                            key={item.product.id}
+                            className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-fade-in"
+                          >
+                            <img
+                              src={(item.product.images && item.product.images.length > 0 ? item.product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
+                              alt={item.product.name}
+                              className="w-16 h-16 object-cover rounded-lg"
+                            />
 
-                            <div className="flex items-center space-x-2 mt-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-gray-900 truncate">
+                                {item.product.name}
+                              </h3>
+                              <p className="text-sm text-gray-500">₹{item.product.price.toLocaleString('en-IN')}</p>
+
+                              <div className="flex items-center space-x-2 mt-2">
+                                <button
+                                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                                  className="p-1 hover:bg-gray-100 rounded"
+                                  aria-label={`Decrease quantity of ${item.product.name}`}
+                                  disabled={item.quantity <= 1}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </button>
+                                <span className="px-2 py-1 bg-gray-100 rounded text-sm min-w-[40px] text-center">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                  className="p-1 hover:bg-gray-100 rounded"
+                                  aria-label={`Increase quantity of ${item.product.name}`}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="font-semibold text-gray-900">
+                                ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
+                              </p>
                               <button
-                                onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                                className="p-1 hover:bg-gray-100 rounded"
-                                aria-label={`Decrease quantity of ${item.product.name}`}
-                                disabled={item.quantity <= 1}
+                                onClick={() => removeItem(item.product.id)}
+                                className="text-red-500 text-sm hover:text-red-700 mt-1"
+                                aria-label={`Remove ${item.product.name} from cart`}
                               >
-                                <Minus className="h-4 w-4" />
-                              </button>
-                              <span className="px-2 py-1 bg-gray-100 rounded text-sm min-w-[40px] text-center">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                                className="p-1 hover:bg-gray-100 rounded"
-                                aria-label={`Increase quantity of ${item.product.name}`}
-                              >
-                                <Plus className="h-4 w-4" />
+                                Remove
                               </button>
                             </div>
                           </div>
-
-                          <div className="text-right">
-                            <p className="font-semibold text-gray-900">
-                              ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
-                            </p>
-                            <button
-                              onClick={() => removeItem(item.product.id)}
-                              className="text-red-500 text-sm hover:text-red-700 mt-1"
-                              aria-label={`Remove ${item.product.name} from cart`}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </>
 
                     {items.length > 0 && (

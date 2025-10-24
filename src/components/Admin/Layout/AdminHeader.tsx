@@ -86,7 +86,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ onMenuClick, sidebarOp
               </div>
               <div className="hidden md:block text-left">
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.fullName || user?.email || 'Admin'}
+                  {user?.fullName || user?.name || user?.email?.split('@')[0] || 'Admin'}
                 </p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role || 'admin'}</p>
               </div>

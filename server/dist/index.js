@@ -18,11 +18,13 @@ const products_1 = __importDefault(require("./routes/products"));
 const categories_1 = __importDefault(require("./routes/categories"));
 const cart_1 = __importDefault(require("./routes/cart"));
 const wishlist_1 = __importDefault(require("./routes/wishlist"));
+const addresses_1 = __importDefault(require("./routes/addresses"));
+const orders_1 = __importDefault(require("./routes/orders"));
 // Import admin routes
 const analytics_1 = __importDefault(require("./routes/admin/analytics"));
 const products_2 = __importDefault(require("./routes/admin/products"));
 const users_1 = __importDefault(require("./routes/admin/users"));
-const orders_1 = __importDefault(require("./routes/admin/orders"));
+const orders_2 = __importDefault(require("./routes/admin/orders"));
 // Get __dirname equivalent in ES modules
 const __filename = (0, url_1.fileURLToPath)(import.meta.url);
 const __dirname = path_1.default.dirname(__filename);
@@ -49,11 +51,13 @@ app.use('/api/products', products_1.default);
 app.use('/api/categories', categories_1.default);
 app.use('/api/cart', cart_1.default);
 app.use('/api/wishlist', wishlist_1.default);
+app.use('/api/addresses', addresses_1.default);
+app.use('/api/orders', orders_1.default);
 // Admin API Routes
 app.use('/api/admin/analytics', analytics_1.default);
 app.use('/api/admin/products', products_2.default);
 app.use('/api/admin/users', users_1.default);
-app.use('/api/admin/orders', orders_1.default);
+app.use('/api/admin/orders', orders_2.default);
 // Error handling middleware
 app.use(errorHandler_1.errorHandler);
 // Start server

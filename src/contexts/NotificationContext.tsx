@@ -172,6 +172,12 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
           border: '#93c5fd',
           text: '#1e40af',
         };
+      default:
+        return {
+          bg: '#f3f4f6',
+          border: '#d1d5db',
+          text: '#374151',
+        };
     }
   };
 

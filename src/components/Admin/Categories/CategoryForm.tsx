@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../Common/Modal';
 import { FormInput, FormTextarea, FormSelect, FormCheckbox } from '../../Common/FormInput';
+import { ImageUpload } from '../Common/ImageUpload';
 import { apiClient } from '../../../lib/apiClient';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Loader2 } from 'lucide-react';
@@ -189,14 +190,27 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
             rows={3}
             placeholder="Category description"
           />
+        </div>
+
+        {/* Category Image */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Category Image</h3>
+
+          <ImageUpload
+            value={formData.image_url}
+            onChange={(image) => setFormData(prev => ({ ...prev, image_url: Array.isArray(image) ? image[0] : image }))}
+            multiple={false}
+            label="Upload Category Image"
+            helperText="Upload a category image or enter URL below"
+          />
 
           <FormInput
-            label="Image URL"
+            label="Or Enter Image URL"
             name="image_url"
             value={formData.image_url}
             onChange={handleChange}
             placeholder="https://example.com/image.jpg"
-            helperText="URL to category image"
+            helperText="Direct URL to category image"
           />
         </div>
 

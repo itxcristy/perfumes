@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../Common/Modal';
 import { FormInput, FormTextarea, FormSelect, FormCheckbox } from '../../Common/FormInput';
+import { ImageUpload } from '../Common/ImageUpload';
 import { apiClient } from '../../../lib/apiClient';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Loader2 } from 'lucide-react';
@@ -24,6 +25,7 @@ interface FormData {
   sku: string;
   is_featured: boolean;
   is_active: boolean;
+  images: string[];
 }
 
 interface FormErrors {
@@ -43,7 +45,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
     min_stock_level: '5',
     sku: '',
     is_featured: false,
-    is_active: true
+    is_active: true,
+    images: []
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -66,7 +69,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
         min_stock_level: product.min_stock_level?.toString() || '5',
         sku: product.sku || '',
         is_featured: product.is_featured || false,
-        is_active: product.is_active !== undefined ? product.is_active : true
+        is_active: product.is_active !== undefined ? product.is_active : true,
+        images: product.images || []
       });
     }
   }, [product]);
@@ -147,7 +151,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock: parseInt(formData.stock),
         min_stock_level: parseInt(formData.min_stock_level),
-        images: [] // TODO: Add image upload functionality
+        images: formData.images
       };
 
       if (product) {
@@ -280,10 +284,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
           </div>
         </div>
 
+        {/* Product Images */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Product Images</h3>
+
+          <ImageUpload
+            value={formData.images}
+            onChange={(images) => setFormData(prev => ({ ...prev, images: Array.isArray(images) ? images : [images] }))}
+            multiple={true}
+            maxFiles={5}
+            label="Upload Product Images"
+            helperText="Upload up to 5 product images. First image will be the main image."
+          />
+        </div>
+
         {/* Category & Settings */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Category & Settings</h3>
-          
+
           <FormSelect
             label="Category"
             name="category_id"

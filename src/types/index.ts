@@ -1,6 +1,7 @@
 export interface User {
   id: string;
-  name: string; // Maps to full_name in DB
+  name?: string; // Alias for fullName (for backward compatibility)
+  fullName?: string; // Maps to full_name in DB
   email: string;
   role: 'admin' | 'seller' | 'customer';
   avatar?: string; // Maps to avatar_url in DB

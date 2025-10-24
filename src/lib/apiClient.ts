@@ -260,6 +260,70 @@ class ApiClient {
   async clearCart() {
     return this.delete('/cart');
   }
+
+  // ==========================================
+  // Wishlist
+  // ==========================================
+
+  async getWishlist() {
+    return this.get('/wishlist');
+  }
+
+  async addToWishlist(productId: string) {
+    return this.post('/wishlist', { productId });
+  }
+
+  async removeFromWishlist(productId: string) {
+    return this.delete(`/wishlist/${productId}`);
+  }
+
+  // ==========================================
+  // Orders
+  // ==========================================
+
+  async getOrders() {
+    return this.get('/orders');
+  }
+
+  async getOrder(id: string) {
+    return this.get(`/orders/${id}`);
+  }
+
+  async createOrder(data: any) {
+    return this.post('/orders', data);
+  }
+
+  async updateOrderStatus(id: string, status: string) {
+    return this.put(`/orders/${id}/status`, { status });
+  }
+
+  // ==========================================
+  // Addresses
+  // ==========================================
+
+  async getAddresses() {
+    return this.get('/addresses');
+  }
+
+  async getAddress(id: string) {
+    return this.get(`/addresses/${id}`);
+  }
+
+  async createAddress(data: any) {
+    return this.post('/addresses', data);
+  }
+
+  async updateAddress(id: string, data: any) {
+    return this.put(`/addresses/${id}`, data);
+  }
+
+  async deleteAddress(id: string) {
+    return this.delete(`/addresses/${id}`);
+  }
+
+  async setDefaultAddress(id: string) {
+    return this.put(`/addresses/${id}/default`, {});
+  }
 }
 
 // Export singleton instance

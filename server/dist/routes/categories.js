@@ -27,6 +27,7 @@ router.get('/', auth_1.optionalAuth, (0, errorHandler_1.asyncHandler)(async (req
        GROUP BY c.id, c.name, c.slug, c.description, c.image_url, c.parent_id, c.sort_order, c.is_active, c.created_at
        ORDER BY c.sort_order ASC, c.name ASC`);
     res.json({
+        success: true,
         data: result.rows,
     });
 }));
@@ -49,6 +50,7 @@ router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
        ORDER BY created_at DESC
        LIMIT 50`, [id]);
     res.json({
+        success: true,
         category,
         products: productsResult.rows,
     });
@@ -72,6 +74,7 @@ router.post('/', auth_1.authenticate, (0, auth_1.authorize)('admin'), (0, errorH
        VALUES ($1, $2, $3, $4, $5, $6, true)
        RETURNING *`, [name, slug, description, imageUrl, parentId, sortOrder || 0]);
     res.status(201).json({
+        success: true,
         message: 'Category created successfully',
         category: result.rows[0],
     });
@@ -105,6 +108,7 @@ router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), (0, erro
        WHERE id = $6
        RETURNING *`, [name, slug, description, imageUrl, sortOrder, id]);
     res.json({
+        success: true,
         message: 'Category updated successfully',
         category: result.rows[0],
     });
@@ -126,7 +130,7 @@ router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), (0, e
         throw (0, errorHandler_1.createError)('Cannot delete category with products', 409, 'CATEGORY_HAS_PRODUCTS');
     }
     await (0, connection_1.query)('DELETE FROM public.categories WHERE id = $1', [id]);
-    res.json({ message: 'Category deleted successfully' });
+    res.json({ success: true, message: 'Category deleted successfully' });
 }));
 exports.default = router;
 //# sourceMappingURL=categories.js.map
