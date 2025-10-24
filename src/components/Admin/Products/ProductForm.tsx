@@ -10,6 +10,7 @@ interface ProductFormProps {
   product: any | null;
   onClose: () => void;
   onSuccess: () => void;
+  endpointPrefix?: string; // Add endpoint prefix prop
 }
 
 interface FormData {
@@ -32,7 +33,7 @@ interface FormErrors {
   [key: string]: string;
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess }) => {
+export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess, endpointPrefix = '/admin' }) => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     slug: '',
@@ -155,16 +156,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
       };
 
       if (product) {
-        await apiClient.put(`/admin/products/${product.id}`, payload);
-        showSuccess('Product updated successfully');
+        await apiClient.put(`${endpointPrefix}/products/${product.id}`, payload);
+        showSuccess('Success', 'Product updated successfully');
       } else {
-        await apiClient.post('/admin/products', payload);
-        showSuccess('Product created successfully');
+        await apiClient.post(`${endpointPrefix}/products`, payload);
+        showSuccess('Success', 'Product created successfully');
       }
 
       onSuccess();
     } catch (error: any) {
-      showError(error.message || 'Failed to save product');
+      showError('Error', error.message || 'Failed to save product');
     } finally {
       setLoading(false);
     }
@@ -187,7 +188,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
             name="name"
             value={formData.name}
             onChange={handleChange}
-            error={errors.name}
+            error={errors.name || ''}
             required
             placeholder="Enter product name"
           />
@@ -197,7 +198,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
             name="slug"
             value={formData.slug}
             onChange={handleChange}
-            error={errors.slug}
+            error={errors.slug || ''}
             helperText="URL-friendly version of the name"
             placeholder="product-slug"
           />
@@ -233,7 +234,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
               step="0.01"
               value={formData.price}
               onChange={handleChange}
-              error={errors.price}
+              error={errors.price || ''}
               required
               placeholder="0.00"
             />
@@ -245,7 +246,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
               step="0.01"
               value={formData.original_price}
               onChange={handleChange}
-              error={errors.original_price}
+              error={errors.original_price || ''}
               placeholder="0.00"
               helperText="Leave empty if no discount"
             />
@@ -258,7 +259,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
               type="number"
               value={formData.stock}
               onChange={handleChange}
-              error={errors.stock}
+              error={errors.stock || ''}
               required
               placeholder="0"
             />
@@ -269,6 +270,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
               type="number"
               value={formData.min_stock_level}
               onChange={handleChange}
+              error={''}
               placeholder="5"
               helperText="Low stock alert threshold"
             />
@@ -278,6 +280,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
               name="sku"
               value={formData.sku}
               onChange={handleChange}
+              error={''}
               placeholder="PROD-001"
               helperText="Stock Keeping Unit"
             />
@@ -307,7 +310,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSu
             name="category_id"
             value={formData.category_id}
             onChange={handleChange}
-            error={errors.category_id}
+            error={errors.category_id || ''}
             required
             options={[
               { value: '', label: 'Select a category' },

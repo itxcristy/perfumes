@@ -28,13 +28,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const response = await apiClient.getCurrentUser();
-        if (response.user) {
-          setUser(response.user);
-          setError(null);
+        // Ensure token is properly restored
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          apiClient.setToken(token);
+          const response = await apiClient.getCurrentUser();
+          if (response.user) {
+            setUser(response.user);
+            setError(null);
+          } else {
+            // If user fetch fails, clear the token
+            localStorage.removeItem('auth_token');
+            apiClient.setToken(null);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
         }
       } catch (error) {
-        // User not authenticated, which is fine
+        // User not authenticated or token invalid, clear token
+        localStorage.removeItem('auth_token');
+        apiClient.setToken(null);
         setUser(null);
       } finally {
         setLoading(false);
@@ -50,7 +64,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       const response = await apiClient.login(email, password);
 
-      if (response.user) {
+      if (response.token && response.user) {
+        // Ensure token is set in apiClient
+        apiClient.setToken(response.token);
         setUser(response.user);
         setError(null);
       } else {
@@ -59,6 +75,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       setError(message);
+      // Clear any invalid token
+      localStorage.removeItem('auth_token');
+      apiClient.setToken(null);
+      setUser(null);
       throw error;
     } finally {
       setLoading(false);
@@ -68,13 +88,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (
     email: string,
     password: string,
-    fullName: string
+    additionalData?: Record<string, unknown>
   ): Promise<void> => {
     try {
       setLoading(true);
+      // Extract fullName from additionalData or use default
+      const fullName = (additionalData?.fullName as string) || 'User';
       const response = await apiClient.register(email, password, fullName);
 
-      if (response.user) {
+      if (response.token && response.user) {
+        // Ensure token is set in apiClient
+        apiClient.setToken(response.token);
         setUser(response.user);
         setError(null);
       } else {
@@ -83,6 +107,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed';
       setError(message);
+      // Clear any invalid token
+      localStorage.removeItem('auth_token');
+      apiClient.setToken(null);
+      setUser(null);
       throw error;
     } finally {
       setLoading(false);
@@ -124,7 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await signUp(
         userData.email!,
         userData.password!,
-        userData.name || 'User'
+        { fullName: userData.name || 'User' }
       );
       return true;
     } catch (error) {

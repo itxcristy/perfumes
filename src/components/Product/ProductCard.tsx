@@ -29,8 +29,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
     handleAddToWishlist(product);
   };
 
-
-
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -47,11 +45,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
     <div
       className={`product-card group flex ${isListView ? 'flex-row' : 'flex-col'} h-full bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation`}
     >
-      <div className={`relative overflow-hidden group/image bg-gray-50 ${isListView ? 'w-32 h-32 flex-shrink-0' : ''}`}>
+      <div className={`relative overflow-hidden group/image bg-gray-50 ${isListView ? 'w-32 sm:w-40 md:w-48 h-full flex-shrink-0' : ''}`}>
 
-        <Link to={`/products/${product.id}`} className="block">
-          {/* Amazon-style 4:3 aspect ratio for better grid display */}
-          <div className={`${isListView ? 'aspect-square' : 'aspect-[4/3]'} relative overflow-hidden`}>
+        <Link to={`/products/${product.id}`} className="block h-full">
+          {/* Amazon-style 4:3 aspect ratio for better grid display, full height for list view */}
+          <div className={`${isListView ? 'h-full' : 'aspect-[4/3]'} relative overflow-hidden`}>
             <ProductImage
               product={product}
               className="w-full h-full object-cover"
@@ -104,54 +102,58 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
           )}
         </div>
 
-        {/* Amazon-Style Action Buttons with mobile touch optimization */}
-        <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex flex-col space-y-1 sm:space-y-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={handleWishlistToggle}
-            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${isInWishlist(product.id)
-              ? 'bg-red-50 text-red-600 border-red-200'
-              : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
-              } touch-manipulation`}
-          >
-            <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-          </button>
+        {/* Amazon-Style Action Buttons with mobile touch optimization - Hidden in list view */}
+        {!isListView && (
+          <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex flex-col space-y-1 sm:space-y-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={handleWishlistToggle}
+              className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${isInWishlist(product.id)
+                ? 'bg-red-50 text-red-600 border-red-200'
+                : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
+                } touch-manipulation`}
+            >
+              <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+            </button>
 
-        </div>
+          </div>
+        )}
 
-        {/* Amazon-Style Add to Cart Button with mobile touch optimization */}
-        <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-gradient-to-t from-white via-white/95 to-transparent">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              // TODO: Add analytics tracking for add to cart
-              if (product.stock > 0) {
-                handleAddToCart(product);
-              }
-            }}
-            disabled={product.stock === 0}
-            className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${product.stock === 0
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
-              } touch-manipulation`}
-          >
-            <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            <span className="text-[10px] sm:text-xs font-medium">
-              {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-            </span>
-          </button>
-        </div>
+        {/* Amazon-Style Add to Cart Button with mobile touch optimization - Hidden in list view */}
+        {!isListView && (
+          <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-gradient-to-t from-white via-white/95 to-transparent">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // TODO: Add analytics tracking for add to cart
+                if (product.stock > 0) {
+                  handleAddToCart(product);
+                }
+              }}
+              disabled={product.stock === 0}
+              className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${product.stock === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
+                } touch-manipulation`}
+            >
+              <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="text-[10px] sm:text-xs font-medium">
+                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Amazon-Style Product Information with mobile optimization */}
-      <div className={`p-2.5 sm:p-3 flex flex-col flex-grow space-y-1.5 sm:space-y-2 ${isListView ? 'ml-3' : ''}`}>
+      <div className={`p-2.5 sm:p-3 flex flex-col flex-grow ${isListView ? 'ml-3 sm:ml-4 flex-1' : ''}`}>
 
         <div className="space-y-1">
           <span className="text-[10px] sm:text-xs text-gray-600 uppercase tracking-wide font-medium">
             {product.category}
           </span>
           <Link to={`/products/${product.id}`}>
-            <h3 className={`text-xs sm:text-sm font-medium text-gray-900 line-clamp-2 leading-4 group-hover:text-blue-600 transition-colors duration-200 ${isListView ? 'line-clamp-1' : 'line-clamp-2'}`}>
+            <h3 className={`font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200 ${isListView ? 'text-sm sm:text-base line-clamp-2' : 'text-xs sm:text-sm line-clamp-2 leading-4'}`}>
               {product.name}
             </h3>
           </Link>
@@ -159,56 +161,91 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
 
         <div className="flex-grow"></div>
 
-        <div className="space-y-1.5 sm:space-y-2">
-          {/* Rating */}
-          <div className="flex items-center space-x-0.5 sm:space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={`${product.id}-star-${i}`}
-                className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
-                  ? 'text-yellow-400 fill-current'
-                  : 'text-gray-300'
-                  }`}
-              />
-            ))}
-            <span className="text-[10px] text-gray-600 ml-0.5">({product.rating})</span>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center space-x-1.5">
-            <span className="text-sm sm:text-base font-bold text-gray-900">
-              ₹{product.price.toLocaleString('en-IN')}
-            </span>
-            {product.originalPrice && (
-              <span className="text-[10px] sm:text-xs text-gray-500 line-through">
-                ₹{product.originalPrice.toLocaleString('en-IN')}
-              </span>
-            )}
-          </div>
-
-          {/* Stock Status */}
-          <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'
-              }`}>
-              {product.stock > 0 ? (product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`) : 'Out of stock'}
-            </span>
-            {discount > 0 && (
-              <span className="bg-red-100 text-red-700 text-[10px] font-semibold px-1 py-0.5 rounded">
-                {discount}% OFF
-              </span>
-            )}
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="pt-1.5 border-t border-gray-100">
-            <MiniTrustIndicators
-              freeShipping={product.price >= 2000}
-              warranty={true}
-              returns={true}
-              className="justify-center scale-75"
+        {/* Rating */}
+        <div className="flex items-center space-x-0.5 sm:space-x-1 mt-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={`${product.id}-star-${i}`}
+              className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
+                ? 'text-yellow-400 fill-current'
+                : 'text-gray-300'
+                }`}
             />
-          </div>
+          ))}
+          <span className="text-[10px] text-gray-600 ml-0.5">({product.rating})</span>
         </div>
+
+        {/* Price */}
+        <div className="flex items-center space-x-1.5 mt-1">
+          <span className="text-sm sm:text-base font-bold text-gray-900">
+            ₹{product.price.toLocaleString('en-IN')}
+          </span>
+          {product.originalPrice && (
+            <span className="text-[10px] sm:text-xs text-gray-500 line-through">
+              ₹{product.originalPrice.toLocaleString('en-IN')}
+            </span>
+          )}
+        </div>
+
+        {/* Stock Status */}
+        <div className="flex items-center justify-between mt-1">
+          <span className={`text-[10px] font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'
+            }`}>
+            {product.stock > 0 ? (product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`) : 'Out of stock'}
+          </span>
+          {discount > 0 && (
+            <span className="bg-red-100 text-red-700 text-[10px] font-semibold px-1 py-0.5 rounded">
+              {discount}% OFF
+            </span>
+          )}
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="pt-1.5 border-t border-gray-100 mt-2">
+          <MiniTrustIndicators
+            freeShipping={product.price >= 2000}
+            warranty={true}
+            returns={true}
+            className="justify-center scale-75"
+          />
+        </div>
+
+        {/* Action Buttons for List View - Only shown in list view */}
+        {isListView && (
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100">
+            <button
+              onClick={handleWishlistToggle}
+              className={`p-2 rounded-full shadow-sm border transition-colors duration-200 ${
+                isInWishlist(product.id)
+                  ? 'bg-red-50 text-red-600 border-red-200'
+                  : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
+              } touch-manipulation`}
+            >
+              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (product.stock > 0) {
+                  handleAddToCart(product);
+                }
+              }}
+              disabled={product.stock === 0}
+              className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                product.stock === 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
+              } touch-manipulation min-w-[120px]`}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

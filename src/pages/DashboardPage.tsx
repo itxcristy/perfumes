@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminDashboard } from '../components/Dashboard/AdminDashboard';
 import { CustomerDashboard } from '../components/Dashboard/CustomerDashboard';
+import { SellerDashboard } from '../components/Dashboard/SellerDashboard';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 
 export const DashboardPage: React.FC = () => {
@@ -52,8 +53,7 @@ export const DashboardPage: React.FC = () => {
       case 'admin':
         return <AdminDashboard />;
       case 'seller':
-        // Seller dashboard coming soon - show customer dashboard for now
-        return <CustomerDashboard />;
+        return <SellerDashboard />;
       case 'customer':
         return <CustomerDashboard />;
       default:

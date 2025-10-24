@@ -162,19 +162,18 @@ export const CheckoutPage: React.FC = () => {
       newOrderId = await createOrder(
         items,
         shippingAddress,
-        undefined, // billing address
-        selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay'
+        selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay',
+        finalTotal
       );
     } else {
-      // Guest user order
-      newOrderId = await createGuestOrder({
-        items,
-        shippingAddress,
-        paymentMethod: selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay',
-        guestEmail: formData.email,
-        guestName: `${formData.firstName} ${formData.lastName}`,
-        paymentId: paymentId
+      // For guest users, we'll need to implement guest checkout functionality
+      // For now, we'll show an error message
+      showNotification({
+        type: 'error',
+        title: 'Authentication Required',
+        message: 'Please log in to place an order'
       });
+      return;
     }
 
     if (newOrderId) {
@@ -313,16 +312,16 @@ export const CheckoutPage: React.FC = () => {
       }
     };
 
-    const canProceed = () => {
+    const canProceed = (): boolean => {
       switch (step) {
         case 1:
-          return formData.firstName && formData.lastName && formData.email &&
+          return !!(formData.firstName && formData.lastName && formData.email &&
             formData.phone && formData.address && formData.city &&
-            formData.state && formData.zipCode;
+            formData.state && formData.zipCode);
         case 2:
           if (selectedPaymentMethod === 'card') {
-            return formData.cardNumber && formData.expiryDate &&
-              formData.cvv && formData.cardName;
+            return !!(formData.cardNumber && formData.expiryDate &&
+              formData.cvv && formData.cardName);
           }
           return true;
         case 3:
@@ -366,8 +365,8 @@ export const CheckoutPage: React.FC = () => {
             <MobileOrderSummary
               items={items}
               subtotal={subtotal}
-              shipping={shippingCost}
-              tax={tax}
+              shipping={shipping}
+              tax={gst}
               total={finalTotal}
             />
           );
@@ -397,6 +396,7 @@ export const CheckoutPage: React.FC = () => {
           canProceed={canProceed()}
           isLoading={false}
         />
+
       </>
     );
   }
@@ -673,19 +673,25 @@ export const CheckoutPage: React.FC = () => {
 
                 <div className="space-y-4 mb-8">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
+                    <div key={item.product?.id || item.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                      {item.product?.images && item.product.images.length > 0 ? (
+                        <img
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <Package className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{item.product.name}</h3>
+                        <h3 className="font-medium text-gray-900">{item.product?.name || 'Product'}</h3>
                         <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
-                          ₹{(item.product.price * item.quantity).toFixed(2)}
+                          ₹{item.product?.price ? (item.product.price * item.quantity).toFixed(2) : '0.00'}
                         </p>
                       </div>
                     </div>

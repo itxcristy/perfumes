@@ -138,7 +138,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                 <div className="flex-shrink-0 border-t border-neutral-200 p-6 bg-neutral-50">
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-lg font-semibold text-neutral-700">Total:</span>
-                    <span className="text-2xl font-bold text-neutral-900">${total.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-neutral-900">₹{total.toLocaleString('en-IN')}</span>
                   </div>
 
                   <div className="space-y-3">

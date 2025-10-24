@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CreditCard, CheckCircle, Lock, Smartphone, Apple } from 'lucide-react';
 import { MobileTouchButton } from './MobileTouchButton';
 import { useMobileDetection } from '../../hooks/useMobileGestures';
@@ -235,8 +235,8 @@ export const MobilePaymentSelector: React.FC<MobilePaymentSelectorProps> = ({
 interface MobileStepNavigationProps {
   currentStep: number;
   totalSteps: number;
-  onBack?: () => void;
-  onNext?: () => void;
+  onBack: (() => void) | undefined;
+  onNext: (() => void) | undefined;
   nextLabel?: string;
   canProceed: boolean;
   isLoading?: boolean;

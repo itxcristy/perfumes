@@ -9,7 +9,8 @@ import {
   Calendar, 
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  Package
 } from 'lucide-react';
 import { MobileFormInput, MobileSecurityIndicator } from './MobileCheckout';
 
@@ -40,7 +41,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
             onChange={onChange}
             placeholder="John"
             required
-            error={errors.firstName}
+            error={errors.firstName || ''}
             icon={User}
           />
           <MobileFormInput
@@ -50,7 +51,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
             onChange={onChange}
             placeholder="Doe"
             required
-            error={errors.lastName}
+            error={errors.lastName || ''}
           />
         </div>
 
@@ -62,7 +63,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
           onChange={onChange}
           placeholder="john@example.com"
           required
-          error={errors.email}
+            error={errors.email || ''}
           icon={Mail}
         />
 
@@ -74,7 +75,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
           onChange={onChange}
           placeholder="+1 (555) 123-4567"
           required
-          error={errors.phone}
+          error={errors.phone || ''}
           icon={Phone}
         />
 
@@ -85,7 +86,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
           onChange={onChange}
           placeholder="123 Main Street"
           required
-          error={errors.address}
+          error={errors.address || ''}
           icon={MapPin}
         />
 
@@ -97,7 +98,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
             onChange={onChange}
             placeholder="New York"
             required
-            error={errors.city}
+            error={errors.city || ''}
           />
           <MobileFormInput
             label="State"
@@ -106,7 +107,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
             onChange={onChange}
             placeholder="NY"
             required
-            error={errors.state}
+            error={errors.state || ''}
           />
         </div>
 
@@ -118,7 +119,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
             onChange={onChange}
             placeholder="10001"
             required
-            error={errors.zipCode}
+            error={errors.zipCode || ''}
           />
           <div className="space-y-2">
             <label htmlFor="mobile-country-select" className="block text-sm font-medium text-neutral-900">
@@ -128,14 +129,14 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
               id="mobile-country-select"
               name="country"
               value={formData.country}
-              onChange={onChange}
+              onChange={(e) => onChange(e as any)}
               className="w-full px-4 py-4 text-base border border-neutral-300 rounded-xl focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition-colors duration-200 touch-manipulation"
               required
             >
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Australia">Australia</option>
+              <option value="Srinagar">Srinagar</option>
+              <option value="Budgam">Budgam</option>
+              <option value="Baramullah">Baramullah</option>
+              <option value="Sopore">Sopore</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -210,7 +211,7 @@ export const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
           onChange={onChange}
           placeholder="1234 5678 9012 3456"
           required
-          error={errors.cardNumber}
+          error={errors.cardNumber || ''}
           icon={CreditCard}
         />
 
@@ -223,7 +224,7 @@ export const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
             onChange={onChange}
             placeholder="MM/YY"
             required
-            error={errors.expiryDate}
+            error={errors.expiryDate || ''}
             icon={Calendar}
           />
           
@@ -276,7 +277,7 @@ export const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
           onChange={onChange}
           placeholder="John Doe"
           required
-          error={errors.cardName}
+          error={errors.cardName || ''}
           icon={User}
         />
       </div>
@@ -330,7 +331,7 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
             <p className="text-sm text-neutral-600">{items.length} items</p>
           </div>
           <div className="text-right">
-            <div className="text-lg font-semibold text-neutral-900">${total.toFixed(2)}</div>
+            <div className="text-lg font-semibold text-neutral-900">₹{total.toLocaleString('en-IN')}</div>
             <div className="text-sm text-neutral-600">
               {isExpanded ? 'Hide details' : 'Show details'}
             </div>
@@ -348,17 +349,23 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
             <div className="space-y-3">
               {items.map((item) => (
                 <div key={item.id} className="flex items-center space-x-3">
-                  <img
-                    src={item.images[0]}
-                    alt={item.name}
-                    className="w-12 h-12 object-cover rounded-lg"
-                  />
+                  {item.product?.images && item.product.images.length > 0 ? (
+                    <img
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      className="w-12 h-12 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <Package className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
                   <div className="flex-1">
-                    <h4 className="font-medium text-neutral-900 text-sm">{item.name}</h4>
+                    <h4 className="font-medium text-neutral-900 text-sm">{item.product?.name || 'Product'}</h4>
                     <p className="text-xs text-neutral-600">Qty: {item.quantity}</p>
                   </div>
                   <div className="text-sm font-medium text-neutral-900">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ₹{item.product?.price ? (item.product.price * item.quantity).toLocaleString('en-IN') : '0.00'}
                   </div>
                 </div>
               ))}
@@ -368,21 +375,21 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
             <div className="border-t border-neutral-200 pt-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-600">Subtotal</span>
-                <span className="text-neutral-900">${subtotal.toFixed(2)}</span>
+                <span className="text-neutral-900">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-600">Shipping</span>
                 <span className="text-neutral-900">
-                  {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? 'Free' : `₹${shipping.toLocaleString('en-IN')}`}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-neutral-600">Tax</span>
-                <span className="text-neutral-900">${tax.toFixed(2)}</span>
+                <span className="text-neutral-900">₹{tax.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between font-semibold text-base border-t border-neutral-200 pt-2">
                 <span className="text-neutral-900">Total</span>
-                <span className="text-neutral-900">${total.toFixed(2)}</span>
+                <span className="text-neutral-900">₹{total.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>

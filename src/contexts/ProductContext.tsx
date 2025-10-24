@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { Product, ProductContextType, Category } from '../types';
+import { Product, ProductContextType, Category, Review } from '../types';
 import { apiClient } from '../lib/apiClient';
 import { useError } from './ErrorContext';
 
@@ -119,6 +119,40 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, [setError]);
 
+  const fetchReviewsForProduct = useCallback(async (productId: string) => {
+    try {
+      // For now, we'll return an empty array since reviews are included in the product data
+      // In a more complex implementation, this might fetch reviews separately
+      return [];
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch reviews');
+      return [];
+    }
+  }, [setError]);
+
+  const addProduct = useCallback(async (product: Omit<Product, 'id' | 'createdAt' | 'reviews' | 'rating' | 'reviewCount'>) => {
+    try {
+      const response = await apiClient.createProduct(product);
+      // Refresh products list
+      await fetchProducts(1);
+      return response;
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create product');
+      throw error;
+    }
+  }, [setError, fetchProducts]);
+
+  const submitReview = useCallback(async (review: Omit<Review, 'id' | 'createdAt' | 'profiles'>) => {
+    try {
+      // For now, we'll just log this as reviews would typically be handled separately
+      console.log('Submitting review:', review);
+      // In a real implementation, this would call an API endpoint to submit the review
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to submit review');
+      throw error;
+    }
+  }, [setError]);
+
   const getProductById = useCallback(async (id: string) => {
     try {
       return await apiClient.getProduct(id);
@@ -172,9 +206,9 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, [setError, fetchProducts]);
 
-  const updateProduct = useCallback(async (id: string, data: Partial<Product>) => {
+  const updateProduct = useCallback(async (product: Product) => {
     try {
-      const response = await apiClient.updateProduct(id, data);
+      const response = await apiClient.updateProduct(product.id, product);
       // Refresh products list
       await fetchProducts(pagination.page);
       return response;
@@ -263,6 +297,10 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
     fetchFeaturedProducts,
     fetchBestSellers,
     fetchLatestProducts,
+    fetchReviewsForProduct,
+    fetchCategories,
+    addProduct,
+    submitReview,
     getProductById,
     searchProducts,
     filterByCategory,

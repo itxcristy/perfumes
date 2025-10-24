@@ -118,7 +118,7 @@ router.get(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await query(
-      `SELECT id, email, full_name, avatar_url, role, phone, date_of_birth, 
+      `SELECT id, email, full_name, avatar_url, role, phone, date_of_birth, gender,
               is_active, email_verified, created_at, updated_at
        FROM public.profiles WHERE id = $1`,
       [req.userId]
@@ -138,6 +138,7 @@ router.get(
         role: user.role,
         phone: user.phone,
         dateOfBirth: user.date_of_birth,
+        gender: user.gender,
         isActive: user.is_active,
         emailVerified: user.email_verified,
         createdAt: user.created_at,
@@ -155,7 +156,7 @@ router.put(
   '/profile',
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { fullName, phone, dateOfBirth, avatarUrl } = req.body;
+    const { fullName, phone, dateOfBirth, avatarUrl, gender } = req.body;
 
     const result = await query(
       `UPDATE public.profiles 
@@ -163,10 +164,11 @@ router.put(
            phone = COALESCE($2, phone),
            date_of_birth = COALESCE($3, date_of_birth),
            avatar_url = COALESCE($4, avatar_url),
+           gender = COALESCE($5, gender),
            updated_at = NOW()
-       WHERE id = $5
-       RETURNING id, email, full_name, avatar_url, role, phone, date_of_birth, updated_at`,
-      [fullName, phone, dateOfBirth, avatarUrl, req.userId]
+       WHERE id = $6
+       RETURNING id, email, full_name, avatar_url, role, phone, date_of_birth, gender, updated_at`,
+      [fullName, phone, dateOfBirth, avatarUrl, gender, req.userId]
     );
 
     if (result.rows.length === 0) {
@@ -184,6 +186,7 @@ router.put(
         role: user.role,
         phone: user.phone,
         dateOfBirth: user.date_of_birth,
+        gender: user.gender,
         updatedAt: user.updated_at,
       },
     });

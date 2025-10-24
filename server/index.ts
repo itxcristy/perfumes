@@ -16,12 +16,17 @@ import cartRoutes from './routes/cart';
 import wishlistRoutes from './routes/wishlist';
 import addressRoutes from './routes/addresses';
 import orderRoutes from './routes/orders';
+import paymentMethodRoutes from './routes/paymentMethods';
+import notificationPreferenceRoutes from './routes/notificationPreferences';
 
 // Import admin routes
 import adminAnalyticsRoutes from './routes/admin/analytics';
 import adminProductsRoutes from './routes/admin/products';
 import adminUsersRoutes from './routes/admin/users';
 import adminOrdersRoutes from './routes/admin/orders';
+
+// Import seller routes
+import sellerProductsRoutes from './routes/seller/products';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -39,8 +44,9 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase payload limits for image uploads and large data
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(requestLogger);
 
 // Health check endpoint
@@ -56,12 +62,17 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payment-methods', paymentMethodRoutes);
+app.use('/api/notification-preferences', notificationPreferenceRoutes);
 
 // Admin API Routes
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/admin/products', adminProductsRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
 app.use('/api/admin/orders', adminOrdersRoutes);
+
+// Seller API Routes
+app.use('/api/seller/products', sellerProductsRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
@@ -86,4 +97,3 @@ async function startServer() {
 startServer();
 
 export default app;
-

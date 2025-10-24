@@ -118,10 +118,10 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
       setLoading(true);
 
       const payload: any = {
-        fullName: formData.full_name,
+        full_name: formData.full_name,
         email: formData.email,
         role: formData.role,
-        isActive: formData.is_active
+        is_active: formData.is_active
       };
 
       // Only include password if it's provided
@@ -131,15 +131,15 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
 
       if (user) {
         await apiClient.put(`/admin/users/${user.id}`, payload);
-        showSuccess('User updated successfully');
+        showSuccess('Success', 'User updated successfully');
       } else {
         await apiClient.post('/admin/users', payload);
-        showSuccess('User created successfully');
+        showSuccess('Success', 'User created successfully');
       }
 
       onSuccess();
     } catch (error: any) {
-      showError(error.message || 'Failed to save user');
+      showError('Error', error.message || 'Failed to save user');
     } finally {
       setLoading(false);
     }
@@ -164,7 +164,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
             name="full_name"
             value={formData.full_name}
             onChange={handleChange}
-            error={errors.full_name}
+            error={errors.full_name || ''}
             required
             placeholder="Enter full name"
           />
@@ -175,7 +175,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
             type="email"
             value={formData.email}
             onChange={handleChange}
-            error={errors.email}
+            error={errors.email || ''}
             required
             placeholder="user@example.com"
           />
@@ -187,7 +187,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange}
-              error={errors.password}
+              error={errors.password || ''}
               required={!user}
               placeholder="Enter password"
             />
@@ -215,7 +215,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
             name="role"
             value={formData.role}
             onChange={handleChange}
-            error={errors.role}
+            error={errors.role || ''}
             required
             options={[
               { value: 'customer', label: 'Customer' },
@@ -255,4 +255,3 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onClose, onSuccess }) 
     </Modal>
   );
 };
-

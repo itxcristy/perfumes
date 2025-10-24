@@ -7,6 +7,7 @@ export interface User {
   avatar?: string; // Maps to avatar_url in DB
   phone?: string;
   dateOfBirth?: string; // Maps to date_of_birth in DB
+  gender?: string; // Maps to gender in DB
   isActive?: boolean; // Maps to is_active in DB
   emailVerified?: boolean; // Maps to email_verified in DB
   createdAt: Date; // Maps to created_at in DB

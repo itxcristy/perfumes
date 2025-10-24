@@ -27,15 +27,17 @@ router.get(
 
     // Calculate totals
     let subtotal = 0;
-    result.rows.forEach(item => {
+    let totalQuantity = 0;
+    result.rows.forEach((item: any) => {
       const price = item.variant_price || item.price;
       subtotal += price * item.quantity;
+      totalQuantity += item.quantity;
     });
 
     res.json({
       items: result.rows,
       subtotal,
-      itemCount: result.rows.length,
+      itemCount: totalQuantity,
     });
   })
 );

@@ -502,7 +502,7 @@ const ProductsPage: React.FC = () => {
                             : 'space-y-3 md:space-y-4'
                             }`}>
                             {sortedProducts.map(product => (
-                                <div key={product.id}>
+                                <div key={product.id} className={viewMode === 'list' ? '' : ''}>
                                     <ProductCard product={product} isListView={viewMode === 'list'} />
                                 </div>
                             ))}

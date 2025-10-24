@@ -1,7 +1,6 @@
 import React, { Suspense, lazy, memo } from 'react';
 import { Hero } from '@/components/Home/Hero';
 import { CategorySection } from '@/components/Home/CategorySection';
-import { NewsletterSection } from '@/components/Home/NewsletterSection';
 import { useProducts } from '@/contexts/ProductContext';
 import { LoadingSpinner } from '@/components/Common/LoadingSpinner';
 import { Link } from 'react-router-dom';
@@ -61,28 +60,31 @@ export default function HomePage() {
         <LatestArrivals />
       </Suspense>
 
-      {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-r from-amber-600 to-orange-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Discover Premium Attars
-          </h2>
-          <p className="text-amber-100 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-            Experience the finest fragrances crafted with traditional methods and premium ingredients
-          </p>
-          <Link
-            to="/products"
-            className="inline-flex items-center gap-2 bg-white text-amber-600 px-8 py-4 rounded-full font-semibold hover:bg-amber-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            Start Shopping
-          </Link>
+      {/* CTA Section - Improved Design */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center relative overflow-hidden">
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-200 rounded-full opacity-20"></div>
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-200 rounded-full opacity-20"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                Discover Exquisite Fragrances
+              </h2>
+              <p className="text-gray-700 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+                Experience our premium collection of traditional attars, crafted with the finest ingredients and time-honored techniques
+              </p>
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                <span>Explore Collection</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
-
-      {/* Newsletter Section */}
-      <NewsletterSection />
     </div>
   );
 }
-

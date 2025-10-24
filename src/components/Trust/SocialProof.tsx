@@ -166,7 +166,9 @@ export const ReviewSummary: React.FC<{
   reviewCount: number;
   className?: string;
 }> = ({ rating, reviewCount, className = '' }) => {
-  const percentage = (rating / 5) * 100;
+  // Ensure rating is a number
+  const numericRating = typeof rating === 'number' ? rating : parseFloat(rating) || 0;
+  const percentage = (numericRating / 5) * 100;
 
   return (
     <motion.div
@@ -180,7 +182,7 @@ export const ReviewSummary: React.FC<{
             <Star
               key={i}
               className={`h-5 w-5 ${
-                i < Math.floor(rating)
+                i < Math.floor(numericRating)
                   ? 'text-yellow-400 fill-current'
                   : 'text-gray-300'
               }`}
@@ -189,7 +191,7 @@ export const ReviewSummary: React.FC<{
         </div>
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-gray-900">{rating.toFixed(1)}</span>
+            <span className="text-lg font-bold text-gray-900">{numericRating.toFixed(1)}</span>
             <span className="text-sm text-gray-600">
               ({reviewCount.toLocaleString()} reviews)
             </span>

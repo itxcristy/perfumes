@@ -2,21 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, ChevronDown, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Order } from '../types';
+import { Order, TrackingEvent } from '../types';
 import { OrderTracking } from '../components/Order/OrderTracking';
 import { useOrders } from '../contexts/OrderContext';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 
 export const OrdersPage: React.FC = () => {
-  const { orders, loading, fetchUserOrders } = useOrders();
+  const { orders, loading } = useOrders();
   const [activeTab, setActiveTab] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchUserOrders();
-  }, [fetchUserOrders]);
-
-  // Use orders from context
+  // Use orders from context (they are automatically fetched by the context)
   const displayOrders = orders;
 
   const tabs = [
@@ -46,7 +42,14 @@ export const OrdersPage: React.FC = () => {
     }
   };
 
-
+  // Convert OrderTracking to TrackingEvent
+  const convertToTrackingEvents = (trackingHistory: any[]): TrackingEvent[] => {
+    return trackingHistory.map(event => ({
+      status: event.status,
+      date: new Date(event.createdAt || event.date),
+      location: event.location || ''
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,11 +89,11 @@ export const OrdersPage: React.FC = () => {
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 cursor-pointer" onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}>
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-center space-x-4">
-                    <div><h3 className="text-lg font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3><p className="text-sm text-gray-600">Placed on {new Date(order.created_at).toLocaleDateString()}</p></div>
+                    <div><h3 className="text-lg font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3><p className="text-sm text-gray-600">Placed on {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</p></div>
                     <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>{getStatusIcon(order.status)}<span className="capitalize">{order.status}</span></span>
                   </div>
                   <div className="flex items-center space-x-4 mt-4 lg:mt-0">
-                    <span className="text-lg font-bold text-gray-900">${order.total.toFixed(2)}</span>
+                    <span className="text-lg font-bold text-gray-900">₹{order.total.toLocaleString('en-IN')}</span>
                     <motion.div animate={{ rotate: expandedOrderId === order.id ? 180 : 0 }}><ChevronDown className="h-5 w-5 text-gray-500" /></motion.div>
                   </div>
                 </div>
@@ -99,14 +102,18 @@ export const OrdersPage: React.FC = () => {
                 {expandedOrderId === order.id && (
                   <motion.div initial="collapsed" animate="open" exit="collapsed" variants={{ open: { opacity: 1, height: 'auto' }, collapsed: { opacity: 0, height: 0 } }} transition={{ duration: 0.3, ease: 'easeInOut' }} className="overflow-hidden">
                     <div className="p-6">
-                      <OrderTracking history={order.trackingHistory} status={order.status} />
+                      {order.trackingHistory && (
+                        <OrderTracking history={convertToTrackingEvents(order.trackingHistory)} />
+                      )}
                       <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-end">
-                        <Link to={`/products/${order.items[0].product.id}#reviews`}>
-                          <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                            <Edit className="h-4 w-4" />
-                            <span>Write a Review</span>
-                          </button>
-                        </Link>
+                        {order.items && order.items[0] && order.items[0].product && (
+                          <Link to={`/products/${order.items[0].product.id}#reviews`}>
+                            <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                              <Edit className="h-4 w-4" />
+                              <span>Write a Review</span>
+                            </button>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </motion.div>

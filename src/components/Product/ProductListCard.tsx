@@ -6,14 +6,15 @@ import { useWishlist } from '../../contexts/WishlistContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Link } from 'react-router-dom';
 import { MiniTrustIndicators } from '../Trust';
+import ProductImage from '../Common/ProductImage';
 
 interface ProductListCardProps {
   product: Product;
 }
 
 export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => {
-  const { addToCart } = useCart();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addItem: addToCart } = useCart();
+  const { addItem: addToWishlist, isInWishlist } = useWishlist();
   const { showNotification } = useNotification();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -22,7 +23,7 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
     e.preventDefault();
     if (product.stock > 0) {
       addToCart(product);
-      showSuccess(`${product.name} has been added to your cart.`, 'Added to Cart');
+      showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added to your cart.` });
     }
   };
 
@@ -31,8 +32,6 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
     e.preventDefault();
     addToWishlist(product);
   };
-  
-
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -47,28 +46,16 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
   const stockStatus = getStockStatus();
 
   return (
-    <div
-      className="product-list-card group flex flex-col sm:flex-row bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation"
-      onMouseEnter={() => {
-        // Preload product details on hover
-        dataPreloader.preloadProduct(product.id, { priority: 'high' });
-      }}
-    >
+    <div className="product-list-card group flex flex-col sm:flex-row bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation">
       {/* Product Image Section */}
       <div className="relative overflow-hidden group/image bg-gray-50 sm:w-48 flex-shrink-0">
         <Link to={`/products/${product.id}`} className="block h-full">
           <div className="aspect-[4/3] sm:aspect-square h-full relative overflow-hidden">
-            <img
-              key={currentImageIndex}
-              src={(product.images && product.images.length > 0 ? product.images[currentImageIndex] || product.images[0] : '') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4='}
-              alt={product.name}
+            <ProductImage
+              product={product}
               className="w-full h-full object-cover"
-              loading="lazy"
-              crossOrigin="anonymous"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNjM3MzgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2UgTm90IEZvdW5kPC90ZXh0Pgo8L3N2Zz4=';
-              }}
+              alt={product.name}
+              size="medium"
             />
 
             {/* Image Navigation - Amazon Style */}
@@ -181,9 +168,9 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col space-y-3 sm:space-y-4 sm:items-end">
-            <div className="flex space-x-2">
+          {/* Action Buttons - Positioned at the bottom right */}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
+            <div className="flex sm:flex-col gap-2 sm:gap-3">
               <button
                 onClick={handleWishlistToggle}
                 className={`p-2 rounded-full shadow-sm border transition-colors duration-200 ${
@@ -193,8 +180,6 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
                 } touch-manipulation`}
               >
                 <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-              </button>
-
               </button>
             </div>
             

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { CartItem, CartContextType } from '../types';
+import { CartItem, CartContextType, Product } from '../types';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
@@ -76,7 +76,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       if (user) {
         // If API fails for authenticated user, show error
-        showNotification('Failed to load cart', 'error');
+        showNotification({ type: 'error', title: 'Error', message: 'Failed to load cart' });
       }
     } finally {
       setLoading(false);
@@ -102,22 +102,20 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (user) {
         await apiClient.addToCart(product.id, quantity, variantId);
         await fetchCart();
-        showNotification('Added to cart', 'success');
+        showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added to your cart.` });
       } else {
         const newItem: CartItem = {
-          id: `${product.id}-${variantId || 'default'}`,
           product,
           quantity,
-          variantId,
-          createdAt: new Date()
+          ...(variantId && { variantId }), // Only include variantId if it's provided
         };
         const updatedCart = [...guestCart, newItem];
         saveGuestCart(updatedCart);
         setItems(updatedCart);
-        showNotification('Added to cart', 'success');
+        showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added to your cart.` });
       }
     } catch (error) {
-      showNotification('Failed to add to cart', 'error');
+      showNotification({ type: 'error', title: 'Error', message: 'Failed to add to cart' });
     }
   }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
@@ -135,7 +133,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setItems(updatedCart);
       }
     } catch (error) {
-      showNotification('Failed to update cart', 'error');
+      showNotification({ type: 'error', title: 'Error', message: 'Failed to update cart' });
     }
   }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
@@ -150,9 +148,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         saveGuestCart(updatedCart);
         setItems(updatedCart);
       }
-      showNotification('Removed from cart', 'success');
+      showNotification({ type: 'info', title: 'Removed from Cart', message: 'Item removed from your cart.' });
     } catch (error) {
-      showNotification('Failed to remove from cart', 'error');
+      showNotification({ type: 'error', title: 'Error', message: 'Failed to remove from cart' });
     }
   }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
@@ -165,9 +163,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.removeItem('guestCart');
       setItems([]);
       setGuestCart([]);
-      showNotification('Cart cleared', 'success');
+      showNotification({ type: 'success', title: 'Cart Cleared', message: 'Cart cleared successfully.' });
     } catch (error) {
-      showNotification('Failed to clear cart', 'error');
+      showNotification({ type: 'error', title: 'Error', message: 'Failed to clear cart' });
     }
   }, [user, showNotification]);
 
@@ -191,7 +189,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       item.product.id === productId &&
       (variantId ? item.variantId === variantId : !item.variantId)
     );
-    if (itemToRemove) {
+    if (itemToRemove && itemToRemove.id) {
       await removeFromCart(itemToRemove.id);
     }
   }, [items, removeFromCart]);
@@ -202,7 +200,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       item.product.id === productId &&
       (variantId ? item.variantId === variantId : !item.variantId)
     );
-    if (itemToUpdate) {
+    if (itemToUpdate && itemToUpdate.id) {
       await updateQuantity(itemToUpdate.id, quantity);
     }
   }, [items, updateQuantity]);
@@ -224,4 +222,3 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     </CartContext.Provider>
   );
 };
-

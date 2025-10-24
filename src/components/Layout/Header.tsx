@@ -325,17 +325,6 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                       </div>
                       <div className="py-1">
                         <Link
-                          to="/profile"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            window.scrollTo(0, 0);
-                          }}
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
-                        >
-                          <User className="h-4 w-4 mr-3" />
-                          <span>Profile</span>
-                        </Link>
-                        <Link
                           to="/dashboard"
                           onClick={() => {
                             setIsUserMenuOpen(false);

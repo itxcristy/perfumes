@@ -49,7 +49,12 @@ class ApiClient {
    * Get stored token
    */
   getToken(): string | null {
-    return this.token || localStorage.getItem('auth_token');
+    // Always check localStorage in case it was updated by another tab
+    const storedToken = localStorage.getItem('auth_token');
+    if (storedToken) {
+      this.token = storedToken;
+    }
+    return this.token;
   }
 
   /**
@@ -68,7 +73,7 @@ class ApiClient {
     // Add auth token if available
     const token = this.getToken();
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
 
     try {
@@ -183,6 +188,7 @@ class ApiClient {
     featured?: boolean;
     bestSellers?: boolean;
     latest?: boolean;
+    sellerId?: string;
   }): Promise<PaginatedResponse<any>> {
     const query = new URLSearchParams();
     if (params?.page) query.append('page', params.page.toString());
@@ -192,6 +198,7 @@ class ApiClient {
     if (params?.featured) query.append('featured', 'true');
     if (params?.bestSellers) query.append('bestSellers', 'true');
     if (params?.latest) query.append('latest', 'true');
+    if (params?.sellerId) query.append('sellerId', params.sellerId);
 
     const queryString = query.toString();
     return this.get(`/products${queryString ? '?' + queryString : ''}`);
@@ -289,14 +296,6 @@ class ApiClient {
     return this.get(`/orders/${id}`);
   }
 
-  async createOrder(data: any) {
-    return this.post('/orders', data);
-  }
-
-  async updateOrderStatus(id: string, status: string) {
-    return this.put(`/orders/${id}/status`, { status });
-  }
-
   // ==========================================
   // Addresses
   // ==========================================
@@ -321,12 +320,63 @@ class ApiClient {
     return this.delete(`/addresses/${id}`);
   }
 
-  async setDefaultAddress(id: string) {
-    return this.put(`/addresses/${id}/default`, {});
+  // ==========================================
+  // Orders
+  // ==========================================
+
+  async getOrders() {
+    return this.get('/orders');
+  }
+
+  async getOrder(id: string) {
+    return this.get(`/orders/${id}`);
+  }
+
+  // ==========================================
+  // Payment Methods
+  // ==========================================
+
+  async getPaymentMethods() {
+    return this.get('/payment-methods');
+  }
+
+  async getPaymentMethod(id: string) {
+    return this.get(`/payment-methods/${id}`);
+  }
+
+  async createPaymentMethod(data: any) {
+    return this.post('/payment-methods', data);
+  }
+
+  async updatePaymentMethod(id: string, data: any) {
+    return this.put(`/payment-methods/${id}`, data);
+  }
+
+  async deletePaymentMethod(id: string) {
+    return this.delete(`/payment-methods/${id}`);
+  }
+
+  async setDefaultPaymentMethod(id: string) {
+    return this.put(`/payment-methods/${id}/set-default`, {});
+  }
+
+  // ==========================================
+  // Notification Preferences
+  // ==========================================
+
+  async getNotificationPreferences() {
+    return this.get('/notification-preferences');
+  }
+
+  async createNotificationPreferences(data: any) {
+    return this.post('/notification-preferences', data);
+  }
+
+  async updateNotificationPreferences(data: any) {
+    return this.put('/notification-preferences', data);
   }
 }
 
-// Export singleton instance
 export const apiClient = new ApiClient();
 
 // Restore token from localStorage on app load

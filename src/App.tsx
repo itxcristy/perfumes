@@ -123,7 +123,7 @@ function App() {
                       <Route path="/search" element={<SearchPage />} />
                       <Route path="/compare" element={<ComparePage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
-                      <Route path="/profile" element={<ProfilePage />} />
+                      {/* <Route path="/profile" element={<ProfilePage />} /> */}
                       <Route path="/wishlist" element={<WishlistPage />} />
                       <Route path="/orders" element={<OrdersPage />} />
                       <Route path="/checkout" element={<CheckoutPage />} />

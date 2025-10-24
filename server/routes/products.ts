@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, Request } from 'express';
 import { query } from '../db/connection';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import { authenticate, authorize, AuthRequest, optionalAuth } from '../middleware/auth';
@@ -12,7 +12,7 @@ const router = Router();
 router.get(
   '/',
   optionalAuth,
-  asyncHandler(async (req: AuthRequest, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
     const offset = (page - 1) * limit;
@@ -21,6 +21,7 @@ router.get(
     const featured = req.query.featured === 'true';
     const bestSellers = req.query.bestSellers === 'true';
     const latest = req.query.latest === 'true';
+    const sellerId = req.query.sellerId as string; // Add sellerId filter
 
     let whereClause = 'WHERE is_active = true';
     const params: any[] = [];
@@ -38,6 +39,11 @@ router.get(
 
     if (featured) {
       whereClause += ` AND is_featured = true`;
+    }
+
+    if (sellerId) {
+      whereClause += ` AND seller_id = $${params.length + 1}`;
+      params.push(sellerId);
     }
 
     // Best sellers: Sort by rating and review count (temporary until we have order data)
@@ -60,7 +66,7 @@ router.get(
     // Get products
     const result = await query(
       `SELECT id, name, slug, description, short_description, price, original_price,
-              category_id, images, stock, rating, review_count, is_featured, tags, created_at
+              category_id, seller_id, images, stock, rating, review_count, is_featured, tags, created_at
        FROM public.products
        ${whereClause}
        ${orderByClause}
@@ -86,11 +92,15 @@ router.get(
  */
 router.get(
   '/:id',
-  asyncHandler(async (req: AuthRequest, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const result = await query(
-      `SELECT * FROM public.products WHERE id = $1`,
+      `SELECT id, name, slug, description, short_description, price, original_price,
+              category_id, seller_id, images, stock, min_stock_level, sku, weight,
+              dimensions, tags, specifications, rating::numeric, review_count, is_featured,
+              is_active, meta_title, meta_description, created_at, updated_at
+       FROM public.products WHERE id = $1`,
       [id]
     );
 
@@ -119,7 +129,8 @@ router.get(
     );
 
     res.json({
-      product: {
+      success: true,
+      data: {
         ...product,
         variants: variantsResult.rows,
         reviews: reviewsResult.rows,
@@ -266,4 +277,3 @@ router.delete(
 );
 
 export default router;
-

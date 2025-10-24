@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   role TEXT CHECK (role IN ('admin', 'seller', 'customer')) DEFAULT 'customer',
   phone TEXT,
   date_of_birth DATE,
+  gender TEXT,
   is_active BOOLEAN DEFAULT true,
   email_verified BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -170,6 +171,38 @@ CREATE TABLE IF NOT EXISTS public.addresses (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Payment methods table
+CREATE TABLE IF NOT EXISTS public.payment_methods (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  type TEXT CHECK (type IN ('visa', 'mastercard', 'amex', 'paypal', 'bank_transfer')) NOT NULL,
+  last_four TEXT,
+  expiry_month TEXT,
+  expiry_year TEXT,
+  cardholder_name TEXT,
+  billing_address JSONB,
+  is_default BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Notification preferences table
+CREATE TABLE IF NOT EXISTS public.notification_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  email_notifications BOOLEAN DEFAULT true,
+  sms_notifications BOOLEAN DEFAULT false,
+  push_notifications BOOLEAN DEFAULT true,
+  order_updates BOOLEAN DEFAULT true,
+  promotional_emails BOOLEAN DEFAULT false,
+  newsletter BOOLEAN DEFAULT true,
+  product_updates BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
 -- ==========================================
 -- Indexes for Performance
 -- ==========================================
@@ -191,4 +224,5 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_
 CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON public.reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON public.reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user_id ON public.addresses(user_id);
-
+CREATE INDEX IF NOT EXISTS idx_payment_methods_user_id ON public.payment_methods(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_preferences_user_id ON public.notification_preferences(user_id);

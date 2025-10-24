@@ -14,8 +14,8 @@ router.get(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await query(
-      `SELECT id, user_id, address_line1, address_line2, city, state, 
-              postal_code, country, is_default, address_type, 
+      `SELECT id, user_id, full_name, phone, street_address, city, state, 
+              postal_code, country, is_default, type as address_type, 
               created_at, updated_at
        FROM public.addresses
        WHERE user_id = $1
@@ -41,8 +41,8 @@ router.get(
     const { id } = req.params;
 
     const result = await query(
-      `SELECT id, user_id, address_line1, address_line2, city, state, 
-              postal_code, country, is_default, address_type, 
+      `SELECT id, user_id, full_name, phone, street_address, city, state, 
+              postal_code, country, is_default, type as address_type, 
               created_at, updated_at
        FROM public.addresses
        WHERE id = $1 AND user_id = $2`,
@@ -69,23 +69,24 @@ router.post(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const {
-      address_line1,
-      address_line2,
+      fullName,
+      phone,
+      streetAddress,
       city,
       state,
-      postal_code,
+      postalCode,
       country,
-      is_default,
-      address_type
+      isDefault,
+      type
     } = req.body;
 
     // Validation
-    if (!address_line1 || !city || !state || !postal_code || !country) {
+    if (!fullName || !streetAddress || !city || !state || !postalCode || !country) {
       throw createError('Missing required fields', 400, 'VALIDATION_ERROR');
     }
 
     // If this is set as default, unset other defaults
-    if (is_default) {
+    if (isDefault) {
       await query(
         'UPDATE public.addresses SET is_default = false WHERE user_id = $1',
         [req.userId]
@@ -94,20 +95,21 @@ router.post(
 
     const result = await query(
       `INSERT INTO public.addresses 
-       (user_id, address_line1, address_line2, city, state, postal_code, 
-        country, is_default, address_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (user_id, full_name, phone, street_address, city, state, postal_code, 
+        country, is_default, type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         req.userId,
-        address_line1,
-        address_line2 || null,
+        fullName,
+        phone || null,
+        streetAddress,
         city,
         state,
-        postal_code,
+        postalCode,
         country,
-        is_default || false,
-        address_type || 'shipping'
+        isDefault || false,
+        type || 'shipping'
       ]
     );
 
@@ -129,14 +131,15 @@ router.put(
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const {
-      address_line1,
-      address_line2,
+      fullName,
+      phone,
+      streetAddress,
       city,
       state,
-      postal_code,
+      postalCode,
       country,
-      is_default,
-      address_type
+      isDefault,
+      type
     } = req.body;
 
     // Check if address exists and belongs to user
@@ -150,7 +153,7 @@ router.put(
     }
 
     // If this is set as default, unset other defaults
-    if (is_default) {
+    if (isDefault) {
       await query(
         'UPDATE public.addresses SET is_default = false WHERE user_id = $1 AND id != $2',
         [req.userId, id]
@@ -159,26 +162,28 @@ router.put(
 
     const result = await query(
       `UPDATE public.addresses
-       SET address_line1 = COALESCE($1, address_line1),
-           address_line2 = COALESCE($2, address_line2),
-           city = COALESCE($3, city),
-           state = COALESCE($4, state),
-           postal_code = COALESCE($5, postal_code),
-           country = COALESCE($6, country),
-           is_default = COALESCE($7, is_default),
-           address_type = COALESCE($8, address_type),
+       SET full_name = COALESCE($1, full_name),
+           phone = COALESCE($2, phone),
+           street_address = COALESCE($3, street_address),
+           city = COALESCE($4, city),
+           state = COALESCE($5, state),
+           postal_code = COALESCE($6, postal_code),
+           country = COALESCE($7, country),
+           is_default = COALESCE($8, is_default),
+           type = COALESCE($9, type),
            updated_at = NOW()
-       WHERE id = $9 AND user_id = $10
+       WHERE id = $10 AND user_id = $11
        RETURNING *`,
       [
-        address_line1,
-        address_line2,
+        fullName,
+        phone,
+        streetAddress,
         city,
         state,
-        postal_code,
+        postalCode,
         country,
-        is_default,
-        address_type,
+        isDefault,
+        type,
         id,
         req.userId
       ]
@@ -262,4 +267,3 @@ router.delete(
 );
 
 export default router;
-

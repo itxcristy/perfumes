@@ -31,8 +31,8 @@ export const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { addToCart } = useCart();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addItem: addToCart } = useCart();
+  const { addItem: addToWishlist, isInWishlist } = useWishlist();
   const { showNotification } = useNotification();
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -103,11 +103,15 @@ export const ProductDetailPage: React.FC = () => {
   }
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (product) {
+      addToCart(product, quantity);
+    }
   };
 
   const handleToggleWishlist = () => {
-    addToWishlist(product);
+    if (product) {
+      addToWishlist(product);
+    }
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
