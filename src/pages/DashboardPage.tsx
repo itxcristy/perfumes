@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AdminDashboard } from '../components/Dashboard/AdminDashboard';
-import { SellerDashboard } from '../components/Dashboard/SellerDashboard';
 import { CustomerDashboard } from '../components/Dashboard/CustomerDashboard';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 
@@ -46,7 +45,8 @@ export const DashboardPage: React.FC = () => {
       case 'admin':
         return <AdminDashboard />;
       case 'seller':
-        return <SellerDashboard />;
+        // Seller dashboard coming soon - show customer dashboard for now
+        return <CustomerDashboard />;
       case 'customer':
         return <CustomerDashboard />;
       default:

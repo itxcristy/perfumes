@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { Star, Heart, ShoppingCart, GitCompare } from 'lucide-react';
+import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useCompare } from '../../contexts/CompareContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Link } from 'react-router-dom';
-import { dataPreloader } from '../../utils/preloader';
 import { MiniTrustIndicators } from '../Trust';
 
 interface ProductListCardProps {
@@ -14,10 +12,9 @@ interface ProductListCardProps {
 }
 
 export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => {
-  const { addItem: addToCart } = useCart();
-  const { addItem: addToWishlist, isInWishlist } = useWishlist();
-  const { addItem: addToCompare, isInCompare } = useCompare();
-  const { showSuccess } = useNotification();
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { showNotification } = useNotification();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -35,11 +32,7 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
     addToWishlist(product);
   };
   
-  const handleCompareToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    addToCompare(product);
-  };
+
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -201,15 +194,7 @@ export const ProductListCard: React.FC<ProductListCardProps> = ({ product }) => 
               >
                 <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
               </button>
-              <button
-                onClick={handleCompareToggle}
-                className={`p-2 rounded-full shadow-sm border transition-colors duration-200 ${
-                  isInCompare(product.id)
-                    ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : 'bg-white text-gray-600 hover:text-blue-500 border-gray-200 hover:border-blue-200'
-                } touch-manipulation`}
-              >
-                <GitCompare className="h-4 w-4" />
+
               </button>
             </div>
             

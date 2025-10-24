@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { CartItem, Product, CartContextType } from '../types';
-import {
-  getCartItems,
-  addToCart as addToCartDB,
-  updateCartItemQuantity,
-  removeFromCart as removeFromCartDB,
-  clearCart as clearCartDB
-} from '../lib/supabase';
+import { CartItem, CartContextType } from '../types';
+import { apiClient } from '../lib/apiClient';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -22,10 +16,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [guestCart, setGuestCart] = useState<CartItem[]>([]);
 
-  // Guest cart management functions
+  // Load guest cart from localStorage
   const loadGuestCart = useCallback(() => {
     try {
       const savedCart = localStorage.getItem('guestCart');
@@ -35,219 +29,194 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return parsedCart;
       }
     } catch (error) {
-      console.error('Error loading guest cart:', error);
+      // Silently fail
     }
     return [];
   }, []);
 
+  // Save guest cart to localStorage
   const saveGuestCart = useCallback((cartItems: CartItem[]) => {
     try {
       localStorage.setItem('guestCart', JSON.stringify(cartItems));
       setGuestCart(cartItems);
     } catch (error) {
-      console.error('Error saving guest cart:', error);
+      // Silently fail
     }
   }, []);
 
+  // Merge guest cart with user cart when user logs in
   const mergeGuestCartWithUserCart = useCallback(async () => {
     if (user && guestCart.length > 0) {
       try {
-        // Add guest cart items to user's database cart
         for (const item of guestCart) {
-          await addToCartDB(item.product.id, item.variantId, item.quantity);
+          await apiClient.addToCart(item.product.id, item.quantity, item.variantId);
         }
-        // Clear guest cart after merging
         localStorage.removeItem('guestCart');
         setGuestCart([]);
-        return true; // Indicate successful merge
+        await fetchCart();
+        return true;
       } catch (error) {
-        console.error('Error merging guest cart:', error);
         return false;
       }
     }
     return false;
   }, [user, guestCart]);
 
+  // Fetch cart from API or localStorage
   const fetchCart = useCallback(async () => {
     setLoading(true);
-
     try {
       if (user) {
-        // Fetch authenticated user's cart from database
-        const cartItems = await getCartItems(user.id);
-        setItems(cartItems);
+        const response = await apiClient.getCart();
+        setItems(response.items || []);
       } else {
-        // Load guest cart from localStorage
-        const guestCartItems = loadGuestCart();
-        setItems(guestCartItems);
+        const guestItems = loadGuestCart();
+        setItems(guestItems);
       }
     } catch (error) {
-      console.error('Error fetching cart:', error);
-      showNotification({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to fetch cart items. Please try again later.'
-      });
+      if (user) {
+        // If API fails for authenticated user, show error
+        showNotification('Failed to load cart', 'error');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [user, showNotification, loadGuestCart]);
+  }, [user, loadGuestCart, showNotification]);
 
-
+  // Load cart on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      mergeGuestCartWithUserCart();
+    } else {
+      loadGuestCart();
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]);
+  }, [user]);
 
-  // Load guest cart on component mount
-  useEffect(() => {
-    if (!user) {
-      loadGuestCart();
-    }
-  }, [user, loadGuestCart]);
-
-  // Merge guest cart when user logs in
-  useEffect(() => {
-    if (user && guestCart.length > 0) {
-      mergeGuestCartWithUserCart().then((merged) => {
-        if (merged) {
-          fetchCart(); // Refresh cart after successful merge
-        }
-      });
-    }
-  }, [user, guestCart.length, mergeGuestCartWithUserCart, fetchCart]);
-
-  const addItem = async (product: Product, quantity: number = 1) => {
+  // Add item to cart
+  const addToCart = useCallback(async (product: any, quantity: number = 1, variantId?: string) => {
     try {
       if (user) {
-        // Add to authenticated user's database cart
-        const success = await addToCartDB(product.id, undefined, quantity);
-        if (success) {
-          await fetchCart();
-          showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added.` });
-        } else {
-          showNotification({ type: 'error', title: 'Error', message: 'Could not add item to cart.' });
-        }
+        await apiClient.addToCart(product.id, quantity, variantId);
+        await fetchCart();
+        showNotification('Added to cart', 'success');
       } else {
-        // Add to guest cart in localStorage
-        const currentGuestCart = loadGuestCart();
-        const existingItemIndex = currentGuestCart.findIndex(item => item.product.id === product.id);
-
-        let updatedCart: CartItem[];
-        if (existingItemIndex >= 0) {
-          // Update existing item quantity
-          updatedCart = [...currentGuestCart];
-          updatedCart[existingItemIndex].quantity += quantity;
-        } else {
-          // Add new item
-          const newItem: CartItem = {
-            id: `guest-${Date.now()}-${product.id}`,
-            product,
-            productId: product.id,
-            quantity,
-            variantId: undefined,
-            createdAt: new Date()
-          };
-          updatedCart = [...currentGuestCart, newItem];
-        }
-
+        const newItem: CartItem = {
+          id: `${product.id}-${variantId || 'default'}`,
+          product,
+          quantity,
+          variantId,
+          createdAt: new Date()
+        };
+        const updatedCart = [...guestCart, newItem];
         saveGuestCart(updatedCart);
         setItems(updatedCart);
-        showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added.` });
+        showNotification('Added to cart', 'success');
       }
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      showNotification({ type: 'error', title: 'Error', message: 'Failed to add item to cart. Please try again later.' });
+      showNotification('Failed to add to cart', 'error');
     }
-  };
+  }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
-  const removeItem = async (productId: string) => {
+  // Update cart item quantity
+  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     try {
       if (user) {
-        // Remove from authenticated user's database cart
-        const success = await removeFromCartDB(productId);
-        if (success) {
-          await fetchCart();
-        } else {
-          showNotification({ type: 'error', title: 'Error', message: 'Failed to remove item from cart.' });
-        }
+        await apiClient.updateCartItem(itemId, quantity);
+        await fetchCart();
       } else {
-        // Remove from guest cart
-        const currentGuestCart = loadGuestCart();
-        const updatedCart = currentGuestCart.filter(item => item.product.id !== productId);
-        saveGuestCart(updatedCart);
-        setItems(updatedCart);
-      }
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      showNotification({ type: 'error', title: 'Error', message: 'Failed to remove item from cart. Please try again later.' });
-    }
-  };
-
-  const updateQuantity = async (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      await removeItem(productId);
-      return;
-    }
-
-    try {
-      if (user) {
-        // Update authenticated user's database cart
-        const success = await updateCartItemQuantity(productId, quantity);
-        if (success) {
-          await fetchCart();
-        } else {
-          showNotification({ type: 'error', title: 'Error', message: 'Failed to update item quantity.' });
-        }
-      } else {
-        // Update guest cart
-        const currentGuestCart = loadGuestCart();
-        const updatedCart = currentGuestCart.map(item =>
-          item.product.id === productId ? { ...item, quantity } : item
+        const updatedCart = guestCart.map(item =>
+          item.id === itemId ? { ...item, quantity } : item
         );
         saveGuestCart(updatedCart);
         setItems(updatedCart);
       }
     } catch (error) {
-      console.error('Error updating quantity:', error);
-      showNotification({ type: 'error', title: 'Error', message: 'Failed to update item quantity. Please try again later.' });
+      showNotification('Failed to update cart', 'error');
     }
-  };
+  }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
-  const clearCart = async () => {
+  // Remove item from cart
+  const removeFromCart = useCallback(async (itemId: string) => {
     try {
       if (user) {
-        // Clear authenticated user's database cart
-        const success = await clearCartDB();
-        if (success) {
-          setItems([]);
-        } else {
-          showNotification({ type: 'error', title: 'Error', message: 'Failed to clear cart.' });
-        }
+        await apiClient.removeFromCart(itemId);
+        await fetchCart();
       } else {
-        // Clear guest cart
-        localStorage.removeItem('guestCart');
-        setGuestCart([]);
-        setItems([]);
+        const updatedCart = guestCart.filter(item => item.id !== itemId);
+        saveGuestCart(updatedCart);
+        setItems(updatedCart);
       }
+      showNotification('Removed from cart', 'success');
     } catch (error) {
-      console.error('Error clearing cart:', error);
-      showNotification({ type: 'error', title: 'Error', message: 'Failed to clear cart. Please try again later.' });
+      showNotification('Failed to remove from cart', 'error');
     }
-  };
+  }, [user, guestCart, fetchCart, saveGuestCart, showNotification]);
 
-  const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  // Clear entire cart
+  const clearCart = useCallback(async () => {
+    try {
+      if (user) {
+        await apiClient.clearCart();
+      }
+      localStorage.removeItem('guestCart');
+      setItems([]);
+      setGuestCart([]);
+      showNotification('Cart cleared', 'success');
+    } catch (error) {
+      showNotification('Failed to clear cart', 'error');
+    }
+  }, [user, showNotification]);
+
+  // Calculate totals
+  const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Wrapper functions to match type definitions
+  const addItem = useCallback(async (product: Product, quantity: number = 1, variantId?: string) => {
+    await addToCart(product, quantity, variantId);
+  }, [addToCart]);
+
+  const removeItem = useCallback(async (productId: string, variantId?: string) => {
+    // Find the cart item by productId and variantId
+    const itemToRemove = items.find(item =>
+      item.product.id === productId &&
+      (variantId ? item.variantId === variantId : !item.variantId)
+    );
+    if (itemToRemove) {
+      await removeFromCart(itemToRemove.id);
+    }
+  }, [items, removeFromCart]);
+
+  const updateItemQuantity = useCallback(async (productId: string, quantity: number, variantId?: string) => {
+    // Find the cart item by productId and variantId
+    const itemToUpdate = items.find(item =>
+      item.product.id === productId &&
+      (variantId ? item.variantId === variantId : !item.variantId)
+    );
+    if (itemToUpdate) {
+      await updateQuantity(itemToUpdate.id, quantity);
+    }
+  }, [items, updateQuantity]);
 
   const value: CartContextType = {
     items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    total,
+    loading,
+    total: subtotal,
     itemCount,
-    loading
+    addItem,
+    updateQuantity: updateItemQuantity,
+    removeItem,
+    clearCart
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
 };
+

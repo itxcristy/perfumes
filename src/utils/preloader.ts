@@ -2,7 +2,7 @@
  * Preloader utility for optimistic data loading
  */
 
-import { getProductById, getProductsBasic, getCategories } from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { productCache, categoryCache, generateCacheKey } from './cache';
 
 interface PreloadOptions {

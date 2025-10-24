@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { Star, Heart, ShoppingCart, GitCompare } from 'lucide-react';
+import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useCompare } from '../../contexts/CompareContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Link } from 'react-router-dom';
-import { dataPreloader } from '../../utils/preloader';
 import { MiniTrustIndicators, TrendingIndicator } from '../Trust';
 import { useAddToCartWithAuth } from '../../hooks/useAddToCartWithAuth';
 import { useAddToWishlistWithAuth } from '../../hooks/useAddToWishlistWithAuth';
-import { useAddToCompareWithAuth } from '../../hooks/useAddToCompareWithAuth';
 import ProductImage from '../Common/ProductImage';
-import { usePerformanceMonitoring, useInteractionTracking } from '../../hooks/usePerformanceMonitoring';
 
 interface ProductCardProps {
   product: Product;
@@ -21,21 +17,10 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = false }) => {
   const { isInWishlist } = useWishlist();
-  const { isInCompare } = useCompare();
-  const { showSuccess } = useNotification();
+  const { showNotification } = useNotification();
   const { handleAddToCart } = useAddToCartWithAuth();
   const { handleAddToWishlist } = useAddToWishlistWithAuth();
-  const { handleAddToCompare } = useAddToCompareWithAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  // Performance monitoring hooks
-  const { trackRenderTime } = usePerformanceMonitoring(`ProductCard_${product.id}`);
-  const { trackInteraction } = useInteractionTracking();
-
-  // Track component render time
-  React.useEffect(() => {
-    trackRenderTime();
-  });
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,13 +30,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
     endTracking();
   };
 
-  const handleCompareToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const endTracking = trackInteraction('compare_toggle', product.id);
-    handleAddToCompare(product);
-    endTracking();
-  };
+
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -141,15 +120,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
           >
             <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
           </button>
-          <button
-            onClick={handleCompareToggle}
-            className={`p-1 sm:p-1.5 rounded-full shadow-sm border transition-colors duration-200 ${isInCompare(product.id)
-              ? 'bg-blue-50 text-blue-600 border-blue-200'
-              : 'bg-white text-gray-600 hover:text-blue-500 border-gray-200 hover:border-blue-200'
-              } touch-manipulation`}
-          >
-            <GitCompare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          </button>
+
         </div>
 
         {/* Amazon-Style Add to Cart Button with mobile touch optimization */}

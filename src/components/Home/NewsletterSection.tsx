@@ -18,31 +18,22 @@ export const NewsletterSection: React.FC = () => {
   };
 
   return (
-    <section className="section-padding bg-neutral-900">
+    <section className="py-12 md:py-16 bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-white"
-        >
-          <div className="w-20 h-20 bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-8">
-            <Mail className="h-10 w-10 text-neutral-300" />
+        <div className="text-white">
+          <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Mail className="h-10 w-10 text-gray-300" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-luxury">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Stay Connected
           </h2>
-          <p className="text-xl text-neutral-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
             Subscribe to our newsletter for exclusive access to new collections, sophisticated design insights, and curated offers.
             Join our community of discerning customers.
           </p>
 
-          <motion.form
+          <form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
             className="flex flex-col sm:flex-row max-w-lg mx-auto gap-4"
           >
             <div className="flex-1">
@@ -51,15 +42,13 @@ export const NewsletterSection: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email address"
-                className="form-input w-full text-lg bg-white border-neutral-300 focus:border-neutral-500 focus:ring-neutral-300"
+                className="w-full px-4 py-3 text-lg bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 required
               />
             </div>
-            <motion.button
+            <button
               type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn-primary btn-lg flex items-center space-x-2 px-8 shadow-xl"
+              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isSubscribed ? (
                 <>
@@ -72,16 +61,10 @@ export const NewsletterSection: React.FC = () => {
                   <span>Subscribe</span>
                 </>
               )}
-            </motion.button>
-          </motion.form>
+            </button>
+          </form>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-neutral-400"
-          >
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-gray-400">
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-emerald-500" />
               <span className="font-medium">Exclusive Access</span>
@@ -94,8 +77,8 @@ export const NewsletterSection: React.FC = () => {
               <CheckCircle className="h-5 w-5 text-emerald-500" />
               <span className="font-medium">Unsubscribe Anytime</span>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

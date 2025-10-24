@@ -3,12 +3,13 @@ import { CreditCard, Plus, Edit, Trash2, Star, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../contexts/AuthContext';
-import {
-  getUserPaymentMethods,
-  deletePaymentMethod,
-  setDefaultPaymentMethod
-} from '../../lib/supabase';
+import { apiClient } from '../../lib/apiClient';
 import { PaymentMethod } from '../../types';
+
+// Stub functions for payment methods
+const getUserPaymentMethods = async (userId: string): Promise<PaymentMethod[]> => [];
+const deletePaymentMethod = async (id: string): Promise<void> => {};
+const setDefaultPaymentMethod = async (id: string): Promise<void> => {};
 
 export const PaymentSettings: React.FC = () => {
   const { showNotification } = useNotification();

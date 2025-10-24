@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Product, WishlistItem, WishlistContextType } from '../types';
-import {
-  getWishlistItems,
-  addToWishlist as addToWishlistDB,
-  removeFromWishlist as removeFromWishlistDB
-} from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -32,7 +28,28 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     setLoading(true);
 
     try {
-      const wishlistItems = await getWishlistItems(user.id);
+      const response = await apiClient.get('/wishlist');
+      const wishlistItems = response.data.map((item: any) => ({
+        id: item.id,
+        product: {
+          id: item.product_id,
+          name: item.name,
+          slug: item.slug,
+          description: item.description,
+          shortDescription: item.short_description,
+          price: Number(item.price),
+          originalPrice: item.original_price ? Number(item.original_price) : undefined,
+          images: item.images,
+          stock: Number(item.stock),
+          rating: Number(item.rating),
+          reviewCount: Number(item.review_count),
+          isFeatured: item.is_featured,
+          categoryId: item.category_id,
+          category: item.category_name,
+          createdAt: item.created_at
+        },
+        addedAt: new Date(item.created_at)
+      }));
       setItems(wishlistItems);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
@@ -61,21 +78,24 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
       return;
     }
 
-    if (isInWishlist(product.id)) {
+    // Check if already in wishlist - if so, remove it (toggle behavior)
+    const alreadyInWishlist = isInWishlist(product.id);
+
+    if (alreadyInWishlist) {
       await removeItem(product.id);
-      showNotification({ type: 'info', title: 'Removed from Wishlist', message: `${product.name} removed from your wishlist.` });
+      // Don't show notification here - removeItem will handle it
     } else {
       try {
-        const success = await addToWishlistDB(product.id);
-        if (success) {
-          await fetchWishlist();
-          showNotification({ type: 'success', title: 'Added to Wishlist', message: `${product.name} added to your wishlist.` });
-        } else {
-          showNotification({ type: 'error', title: 'Error', message: 'Could not add item to wishlist.' });
-        }
-      } catch (error) {
+        await apiClient.post('/wishlist', { productId: product.id });
+        await fetchWishlist();
+        showNotification({ type: 'success', title: 'Added to Wishlist', message: `${product.name} added to your wishlist.` });
+      } catch (error: any) {
         console.error('Error adding to wishlist:', error);
-        showNotification({ type: 'error', title: 'Error', message: 'Failed to add item to wishlist. Please try again later.' });
+        if (error.response?.status === 409) {
+          showNotification({ type: 'info', title: 'Already in Wishlist', message: `${product.name} is already in your wishlist.` });
+        } else {
+          showNotification({ type: 'error', title: 'Error', message: 'Failed to add item to wishlist. Please try again later.' });
+        }
       }
     }
   };
@@ -84,12 +104,9 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (!user) return;
 
     try {
-      const success = await removeFromWishlistDB(productId);
-      if (success) {
-        await fetchWishlist();
-      } else {
-        showNotification({ type: 'error', title: 'Error', message: 'Failed to remove item from wishlist.' });
-      }
+      await apiClient.delete(`/wishlist/${productId}`);
+      await fetchWishlist();
+      showNotification({ type: 'info', title: 'Removed from Wishlist', message: 'Item removed from your wishlist.' });
     } catch (error) {
       console.error('Error removing from wishlist:', error);
       showNotification({ type: 'error', title: 'Error', message: 'Failed to remove item from wishlist. Please try again later.' });
@@ -102,9 +119,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (!user) return;
 
     try {
-      // Clear all items one by one using the removeFromWishlist function
-      const promises = items.map(item => removeFromWishlistDB(item.product.id));
-      await Promise.all(promises);
+      await apiClient.delete('/wishlist');
       setItems([]);
     } catch (error) {
       console.error('Error clearing wishlist:', error);

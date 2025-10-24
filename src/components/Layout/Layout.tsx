@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { CartSidebar } from '../Cart/CartSidebar';
-import { CompareTray } from './CompareTray';
 
 
 interface LayoutProps {
@@ -38,8 +37,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
       />
-
-      <CompareTray />
     </div>
   );
 };

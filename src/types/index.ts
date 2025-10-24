@@ -327,24 +327,44 @@ export interface CartContextType {
 export interface ProductContextType {
   products: Product[];
   featuredProducts: Product[];
+  bestSellers: Product[];
+  latestProducts: Product[];
   categories: Category[];
   addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'reviews' | 'rating' | 'reviewCount'>) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
   deleteProduct: (productId: string) => Promise<void>;
   fetchReviewsForProduct: (productId: string) => Promise<Review[]>;
   submitReview: (review: Omit<Review, 'id' | 'createdAt' | 'profiles'>) => Promise<void>;
-  fetchProducts: (forceRefresh?: boolean) => Promise<void>;
+  fetchProducts: (page?: number, limit?: number, filters?: any) => Promise<void>;
   fetchCategories: () => Promise<void>;
   fetchFeaturedProducts: (limit?: number) => Promise<void>;
+  fetchBestSellers: (limit?: number) => Promise<void>;
+  fetchLatestProducts: (limit?: number) => Promise<void>;
+  getProductById: (id: string) => Promise<any>;
+  searchProducts: (query: string) => Promise<void>;
+  filterByCategory: (categoryId: string) => Promise<void>;
+  createProduct: (data: Partial<Product>) => Promise<any>;
+  createCategory: (data: Partial<Category>) => Promise<any>;
+  updateCategory: (id: string, data: Partial<Category>) => Promise<any>;
+  deleteCategory: (id: string) => Promise<void>;
+  nextPage: () => void;
+  previousPage: () => void;
+  goToPage: (page: number) => void;
   loading: boolean;
   basicLoading?: boolean;
   detailsLoading?: boolean;
   featuredLoading?: boolean;
-  isUsingMockData: boolean;
-  // Category management functions
-  addCategory: (category: Omit<Category, 'id' | 'productCount' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateCategory: (category: Category) => Promise<void>;
-  deleteCategory: (categoryId: string) => Promise<void>;
+  bestSellersLoading?: boolean;
+  latestLoading?: boolean;
+  isUsingMockData?: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  // Category management functions (legacy)
+  addCategory?: (category: Omit<Category, 'id' | 'productCount' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 }
 
 export interface WishlistContextType {
@@ -363,14 +383,6 @@ export interface OrderContextType {
   getOrderById: (orderId: string) => Promise<Order | null>;
   getUserOrders: (userId?: string) => Promise<Order[]>;
   loading: boolean;
-}
-
-export interface CompareContextType {
-  items: Product[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  isInCompare: (productId: string) => boolean;
-  clearCompare: () => void;
 }
 
 // New context types for additional functionality

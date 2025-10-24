@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { Address, AddressContextType } from '../types';
-import {
-  getUserAddresses,
-  addAddress as addAddressDB,
-  updateAddress as updateAddressDB,
-  deleteAddress as deleteAddressDB,
-  setDefaultAddress as setDefaultAddressDB
-} from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 

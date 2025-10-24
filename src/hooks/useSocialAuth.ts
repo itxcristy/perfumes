@@ -1,5 +1,5 @@
 import React from 'react';
-import { supabase } from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { useNotification } from '../contexts/NotificationContext';
 
 // Hook for social auth state

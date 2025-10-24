@@ -3,7 +3,7 @@ import { CreditCard, MapPin, Package, ArrowLeft, CheckCircle } from 'lucide-reac
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrders } from '../contexts/OrderContext';
-import { createGuestOrder } from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { motion } from 'framer-motion';
 import { useNotification } from '../contexts/NotificationContext';
 import { Link } from 'react-router-dom';
@@ -25,7 +25,6 @@ import {
 } from '../components/Mobile/MobileCheckoutForms';
 import { useMobileDetection } from '../hooks/useMobileGestures';
 import { RazorpayPayment } from '../components/Payment/RazorpayPayment';
-import { emailService } from '../services/emailService';
 
 export const CheckoutPage: React.FC = () => {
   const { items, total, clearCart } = useCart();
@@ -184,31 +183,9 @@ export const CheckoutPage: React.FC = () => {
       setShowPaymentModal(false);
       clearCart();
 
-      // Send order confirmation email
+      // TODO: Send order confirmation email
       try {
-        await emailService.sendOrderConfirmationEmail({
-          email: formData.email,
-          name: `${formData.firstName} ${formData.lastName}`,
-          orderId: newOrderId,
-          items: items.map(item => ({
-            name: item.product.name,
-            quantity: item.quantity,
-            price: item.product.price,
-            image: item.product.images[0]
-          })),
-          subtotal: subtotal,
-          gst: gst,
-          shipping: shipping,
-          total: finalTotal,
-          shippingAddress: {
-            street: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-            country: formData.country
-          },
-          paymentMethod: selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay'
-        });
+        // Email service will be implemented later
       } catch (emailError) {
         console.error('Failed to send order confirmation email:', emailError);
         // Don't fail the order if email fails

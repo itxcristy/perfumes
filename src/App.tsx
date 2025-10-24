@@ -9,7 +9,6 @@ import { ScrollToTop } from '@/components/Common/ScrollToTop';
 import { PageLoader } from '@/components/Common/UniversalLoader';
 import { GlobalMediaErrorHandler } from '@/components/Common/MediaErrorHandler';
 import { SkipLink } from '@/utils/accessibilityEnhancements';
-import { initializeDatabase } from '@/utils/database/init';
 
 // Lazy-loaded pages for code splitting - optimized for performance
 const HomePage = React.lazy(() => import('@/pages/HomePage'));
@@ -68,11 +67,6 @@ const PageLoadingFallback = memo(() => (
 PageLoadingFallback.displayName = 'PageLoadingFallback';
 
 function App() {
-  // Initialize database on app start
-  useEffect(() => {
-    initializeDatabase();
-  }, []);
-
   // Handle media errors globally
   useEffect(() => {
     const handleMediaError = (e: Event) => {
@@ -119,6 +113,7 @@ function App() {
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/admin/*" element={<DashboardPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/orders" element={<OrdersPage />} />

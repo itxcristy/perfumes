@@ -4,7 +4,6 @@ import { Heart, ShieldCheck, Truck, RotateCcw, Plus, Minus, MessageSquare, Edit 
 import { useProducts } from '../contexts/ProductContext';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
-import { useRecommendations } from '../contexts/RecommendationsContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -31,9 +30,8 @@ export const ProductDetailPage: React.FC = () => {
   const { user } = useAuth();
   const product = products.find(p => p.id === id);
 
-  const { addItem: addToCart } = useCart();
-  const { addItem: toggleWishlistItem, isInWishlist } = useWishlist();
-  const { addToRecentlyViewed, getRelatedProducts, getFrequentlyBoughtTogether } = useRecommendations();
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
   const { showNotification } = useNotification();
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -45,9 +43,6 @@ export const ProductDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (product) {
-      // Add to recently viewed
-      addToRecentlyViewed(product.id);
-
       const getReviews = async () => {
         setReviewsLoading(true);
         const fetchedReviews = await fetchReviewsForProduct(product.id);
@@ -56,7 +51,7 @@ export const ProductDetailPage: React.FC = () => {
       };
       getReviews();
     }
-  }, [product, fetchReviewsForProduct, addToRecentlyViewed]);
+  }, [product, fetchReviewsForProduct]);
 
   if (productsLoading) {
     return <div className="min-h-screen"><LoadingSpinner /></div>;
@@ -78,7 +73,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   const handleToggleWishlist = () => {
-    toggleWishlistItem(product);
+    addToWishlist(product);
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {

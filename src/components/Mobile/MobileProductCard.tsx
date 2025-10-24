@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, GitCompare } from 'lucide-react';
+import { Heart, ShoppingCart, Star } from 'lucide-react';
 
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useCompare } from '../../contexts/CompareContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { MobileTouchButton, MobileIconButton } from './MobileTouchButton';
 import { useSwipeGesture } from '../../hooks/useMobileGestures';
@@ -20,10 +19,9 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
   product,
   variant = 'default'
 }) => {
-  const { addItem: addToCart } = useCart();
-  const { addItem: addToWishlist, isInWishlist } = useWishlist();
-  const { addItem: addToCompare, isInCompare } = useCompare();
-  const { showSuccess } = useNotification();
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { showNotification } = useNotification();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Swipe gesture for image carousel
@@ -63,11 +61,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
     );
   };
 
-  const handleCompareToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    addToCompare(product);
-  };
+
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -197,14 +191,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
             active={isInWishlist(product.id)}
           />
 
-          <MobileIconButton
-            icon={GitCompare}
-            onClick={handleCompareToggle}
-            variant={isInCompare(product.id) ? 'primary' : 'secondary'}
-            size="minimum"
-            ariaLabel={isInCompare(product.id) ? 'Remove from compare' : 'Add to compare'}
-            active={isInCompare(product.id)}
-          />
+
         </div>
       </div>
 

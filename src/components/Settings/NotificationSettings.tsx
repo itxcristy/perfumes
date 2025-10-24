@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Mail, Smartphone, Save, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNotification } from '../../contexts/NotificationContext';
-import { getUserPreferences, updateUserPreferences } from '../../lib/supabase';
+import { apiClient } from '../../lib/apiClient';
 import { UserPreferences } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+
+// Stub functions for user preferences
+const getUserPreferences = async (userId: string): Promise<UserPreferences | null> => null;
+const updateUserPreferences = async (userId: string, prefs: Partial<UserPreferences>): Promise<void> => {};
 
 export const NotificationSettings: React.FC = () => {
   const { showNotification } = useNotification();

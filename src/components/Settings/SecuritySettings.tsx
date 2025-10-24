@@ -3,8 +3,12 @@ import { Lock, Shield, AlertTriangle, Smartphone, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import { getUserSecuritySettings, updateUserSecuritySettings } from '../../lib/supabase';
+import { apiClient } from '../../lib/apiClient';
 import { UserSecuritySettings } from '../../types';
+
+// Stub functions for security settings
+const getUserSecuritySettings = async (userId: string): Promise<UserSecuritySettings | null> => null;
+const updateUserSecuritySettings = async (userId: string, settings: Partial<UserSecuritySettings>): Promise<void> => {};
 
 export const SecuritySettings: React.FC = () => {
   const { user, updatePassword } = useAuth();

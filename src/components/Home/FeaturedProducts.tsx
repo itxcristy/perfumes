@@ -1,70 +1,72 @@
-import React, { useState, useEffect, memo } from 'react';
-import { Product } from '../../types';
-import { ProductCard } from '../Product/ProductCard';
-import { ProductDetails } from '../Product/ProductDetails';
+import React, { useEffect, memo } from 'react';
+import { Star, ArrowRight } from 'lucide-react';
 import { useProducts } from '../../contexts/ProductContext';
-import { LoadingSpinner } from '../Common/LoadingSpinner';
-import { MobileFeaturedCarousel } from '../Mobile/MobileProductCarousel';
-import { useMobileDetection } from '../../hooks/useMobileGestures';
+import { ProductGridSkeleton } from '../Common/ProductCardSkeleton';
+import { FeaturedProductCard } from '../Product/FeaturedProductCard';
+import { Link } from 'react-router-dom';
 
-// FeaturedProducts component without framer-motion for better performance
+/**
+ * FeaturedProducts Component
+ * Displays handpicked featured products with luxurious card design
+ * Optimized for performance with lazy loading
+ */
 export const FeaturedProducts: React.FC = memo(() => {
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const { featuredProducts, featuredLoading, fetchFeaturedProducts } = useProducts();
-    const { isMobile } = useMobileDetection();
 
     useEffect(() => {
-        // Reduce initial load to 6 items for better performance
-        fetchFeaturedProducts(6);
+        // Fetch 8 featured products on mount
+        fetchFeaturedProducts(8);
     }, [fetchFeaturedProducts]);
 
     return (
-        <section className="py-6 sm:py-8 md:py-12 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-                <div className="text-center mb-6 sm:mb-8 md:mb-10">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
-                        Featured Attars & Perfumes
+        <section className="py-12 md:py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <Star className="h-6 w-6 text-amber-600 fill-current" />
+                        <span className="text-amber-600 font-semibold text-sm uppercase tracking-wider">
+                            Handpicked Selection
+                        </span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Featured Products
                     </h2>
-                    <p className="text-sm sm:text-base text-gray-600 px-3 sm:px-0">
-                        Handpicked authentic Indian attars and premium perfumes
+                    <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+                        Handpicked selections from our premium collection of authentic attars and fragrances
                     </p>
                 </div>
 
+                {/* Products Grid */}
                 {featuredLoading ? (
-                    <div className="flex justify-center py-8 sm:py-10">
-                        <LoadingSpinner />
-                    </div>
+                    <ProductGridSkeleton count={8} variant="featured" />
                 ) : featuredProducts.length > 0 ? (
-                    isMobile ? (
-                        <MobileFeaturedCarousel
-                            products={featuredProducts}
-                            title="Featured Attars"
-                        />
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {featuredProducts.map((product) => (
-                                <div
-                                    key={product.id}
-                                    className="touch-manipulation transform hover:scale-[1.02] transition-transform duration-200"
-                                >
-                                    <ProductCard product={product} />
-                                </div>
+                                <FeaturedProductCard key={product.id} product={product} />
                             ))}
                         </div>
-                    )
-                ) : (
-                    <div className="text-center py-8 sm:py-10">
-                        <p className="text-gray-600">No featured products available at the moment.</p>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Check back soon for our latest featured items!</p>
-                    </div>
-                )}
 
-                {selectedProduct && (
-                    <ProductDetails
-                        product={selectedProduct}
-                        isOpen={!!selectedProduct}
-                        onClose={() => setSelectedProduct(null)}
-                    />
+                        {/* View All Link */}
+                        <div className="text-center mt-12">
+                            <Link
+                                to="/products?featured=true"
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                            >
+                                View All Featured Products
+                                <ArrowRight className="h-5 w-5" />
+                            </Link>
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-center py-12">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+                            <Star className="h-8 w-8 text-amber-600 fill-current" />
+                        </div>
+                        <p className="text-gray-600 text-lg">No featured products available at the moment.</p>
+                        <p className="text-gray-500 mt-2">Check back soon for our latest featured items!</p>
+                    </div>
                 )}
             </div>
         </section>

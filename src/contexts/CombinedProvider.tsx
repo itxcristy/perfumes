@@ -3,13 +3,10 @@ import { AuthProvider } from './AuthContext';
 import { CartProvider } from './CartContext';
 import { WishlistProvider } from './WishlistContext';
 import { NotificationProvider } from './NotificationContext';
-import { ProductProvider } from './ProductContext'; // Use the correct context
-import { CollectionProvider } from './CollectionContext';
-import { CompareProvider } from './CompareContext';
+import { ProductProvider } from './ProductContext';
 import { ErrorProvider } from './ErrorContext';
-import { OrderProvider } from './OrderContext'; // Use the correct context
+import { OrderProvider } from './OrderContext';
 import { AddressProvider } from './AddressContext';
-import { RecommendationsProvider } from './RecommendationsContext';
 import { ThemeProvider } from './ThemeContext';
 import { AuthModalProvider } from './AuthModalContext';
 
@@ -33,23 +30,17 @@ export const CombinedProvider = memo<CombinedProviderProps>(({ children }) => {
                         <SecurityProvider>
                             <AuthModalProvider>
                                 <ProductProvider>
-                                    <CollectionProvider>
-                                        <CartProvider>
-                                            <WishlistProvider>
-                                                <CompareProvider>
-                                                    <OrderProvider>
-                                                        <AddressProvider>
-                                                            <RecommendationsProvider>
-                                                                <NetworkStatusProvider>
-                                                                    {children}
-                                                                </NetworkStatusProvider>
-                                                            </RecommendationsProvider>
-                                                        </AddressProvider>
-                                                    </OrderProvider>
-                                                </CompareProvider>
-                                            </WishlistProvider>
-                                        </CartProvider>
-                                    </CollectionProvider>
+                                    <CartProvider>
+                                        <WishlistProvider>
+                                            <OrderProvider>
+                                                <AddressProvider>
+                                                    <NetworkStatusProvider>
+                                                        {children}
+                                                    </NetworkStatusProvider>
+                                                </AddressProvider>
+                                            </OrderProvider>
+                                        </WishlistProvider>
+                                    </CartProvider>
                                 </ProductProvider>
                             </AuthModalProvider>
                         </SecurityProvider>

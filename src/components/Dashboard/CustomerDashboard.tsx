@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useWishlist } from '../../contexts/WishlistContext';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { getOrders } from '../../lib/supabase';
+import { useOrders } from '../../contexts/OrderContext';
 import { Order } from '../../types';
 import { ResponsiveTable } from '../../components/Common/ResponsiveTable';
 
@@ -12,19 +12,11 @@ export const CustomerDashboard: React.FC = () => {
   const { items: wishlistItems } = useWishlist();
   const { itemCount } = useCart();
   const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const { orders, loading: ordersLoading } = useOrders();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserOrders = async () => {
-      if (user) {
-        try {
-          const userOrders = await getOrders(user.id);
-          setOrders(userOrders);
-        } catch (error) {
-          console.error('Error fetching orders:', error);
-        }
-      }
       setLoading(false);
     };
 

@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import { CreditCard, Smartphone, Building, Wallet, Banknote, Shield, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNotification } from '../../contexts/NotificationContext';
-import { paymentService } from '../../services/paymentService';
 import { CartItem } from '../../types';
+
+// Stub payment service
+const paymentService = {
+  isConfigured: () => false,
+  processPayment: async (data: any) => ({ success: false, error: 'Payment service not configured' })
+};
 
 interface RazorpayPaymentProps {
   amount: number;

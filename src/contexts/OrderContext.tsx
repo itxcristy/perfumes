@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { Order, CartItem, Address, OrderContextType } from '../types';
-import {
-  createOrder as createOrderDB,
-  getOrders,
-  getOrderById as getOrderByIdDB,
-  updateOrderStatus as updateOrderStatusDB
-} from '../lib/supabase';
+import { apiClient } from '../lib/apiClient';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
