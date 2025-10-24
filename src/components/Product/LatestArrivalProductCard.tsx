@@ -4,7 +4,6 @@ import { Sparkles, Clock, Heart, ShoppingCart, Calendar } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useNotification } from '../../contexts/NotificationContext';
 
 interface LatestArrivalProductCardProps {
   product: Product;
@@ -17,14 +16,13 @@ interface LatestArrivalProductCardProps {
 export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> = ({ product }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
-  const { showSuccess } = useNotification();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     try {
       await addToCart(product, 1);
-      showSuccess('Added to cart successfully');
+      // Notification is handled by CartContext
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }
@@ -35,7 +33,7 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
     e.stopPropagation();
     try {
       await addToWishlist(product);
-      showSuccess(isInWishlist(product.id) ? 'Removed from wishlist' : 'Added to wishlist');
+      // Notification is handled by WishlistContext
     } catch (error) {
       console.error('Failed to toggle wishlist:', error);
     }
@@ -43,8 +41,8 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
 
   // Calculate days since product was added
   const getDaysAgo = () => {
-    if (!product.created_at) return null;
-    const createdDate = new Date(product.created_at);
+    if (!product.createdAt) return null;
+    const createdDate = new Date(product.createdAt);
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - createdDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -64,12 +62,12 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
         </div>
 
         {/* Date Badge */}
-        {product.created_at && (
+        {product.createdAt && (
           <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-sm text-gray-700 px-2.5 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {new Date(product.created_at).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
+            {new Date(product.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric'
             })}
           </div>
         )}

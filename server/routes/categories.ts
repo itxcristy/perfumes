@@ -33,6 +33,7 @@ router.get(
     );
 
     res.json({
+      success: true,
       data: result.rows,
     });
   })
@@ -70,6 +71,7 @@ router.get(
     );
 
     res.json({
+      success: true,
       category,
       products: productsResult.rows,
     });
@@ -110,6 +112,7 @@ router.post(
     );
 
     res.status(201).json({
+      success: true,
       message: 'Category created successfully',
       category: result.rows[0],
     });
@@ -164,6 +167,7 @@ router.put(
     );
 
     res.json({
+      success: true,
       message: 'Category updated successfully',
       category: result.rows[0],
     });
@@ -207,7 +211,7 @@ router.delete(
 
     await query('DELETE FROM public.categories WHERE id = $1', [id]);
 
-    res.json({ message: 'Category deleted successfully' });
+    res.json({ success: true, message: 'Category deleted successfully' });
   })
 );
 

@@ -34,8 +34,7 @@
     /* Font smoothing for better text rendering */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Ensure proper stacking context for fixed elements */
-    transform-style: preserve-3d;
+    /* REMOVED: transform-style: preserve-3d; - This was breaking fixed positioning for modals and toasts */
   }
 
   /* Enhanced typography hierarchy */

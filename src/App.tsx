@@ -28,6 +28,7 @@ const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'));
 const DashboardPage = React.lazy(() =>
   import('./pages/DashboardPage.tsx').then(module => ({ default: module.default }))
 );
+const AdminLoginPage = React.lazy(() => import('./pages/AdminLoginPage'));
 const ProfilePage = React.lazy(() =>
   import('./pages/ProductionProfilePage.tsx').then(module => ({ default: module.default }))
 );
@@ -103,34 +104,44 @@ function App() {
           <GlobalMediaErrorHandler />
           <ScrollToTop />
           <SkipLink href="#main-content">Skip to main content</SkipLink>
-          <Layout>
-            <main id="main-content" className="focus:outline-none">
-              <Suspense fallback={<PageLoadingFallback />}>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/compare" element={<ComparePage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/admin/*" element={<DashboardPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/orders" element={<OrdersPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-                  <Route path="/deals" element={<DealsPage />} />
-                  <Route path="/categories" element={<CategoriesPage />} />
-                  <Route path="/categories/:slug" element={<ProductsPage />} />
-                  <Route path="/collections" element={<CollectionsPage />} />
-                  <Route path="/collections/:slug" element={<ProductsPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </Suspense>
-            </main>
-          </Layout>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <Routes>
+              {/* Admin login - NO Layout wrapper */}
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+
+              {/* Admin routes - NO Layout wrapper (has its own AdminLayout) */}
+              <Route path="/admin/*" element={<DashboardPage />} />
+
+              {/* Regular routes - WITH Layout wrapper */}
+              <Route path="/*" element={
+                <Layout>
+                  <main id="main-content" className="focus:outline-none">
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/products" element={<ProductsPage />} />
+                      <Route path="/products/:id" element={<ProductDetailPage />} />
+                      <Route path="/search" element={<SearchPage />} />
+                      <Route path="/compare" element={<ComparePage />} />
+                      <Route path="/dashboard" element={<DashboardPage />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/wishlist" element={<WishlistPage />} />
+                      <Route path="/orders" element={<OrdersPage />} />
+                      <Route path="/checkout" element={<CheckoutPage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+                      <Route path="/deals" element={<DealsPage />} />
+                      <Route path="/categories" element={<CategoriesPage />} />
+                      <Route path="/categories/:slug" element={<ProductsPage />} />
+                      <Route path="/collections" element={<CollectionsPage />} />
+                      <Route path="/collections/:slug" element={<ProductsPage />} />
+                      <Route path="/auth" element={<AuthPage />} />
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                  </main>
+                </Layout>
+              } />
+            </Routes>
+          </Suspense>
           <DatabaseErrorOverlay />
         </Router>
       </CombinedProvider>

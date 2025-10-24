@@ -1,4 +1,4 @@
-import { pool } from '../db/connection.js';
+import { query, initializeDatabase } from '../db/connection';
 
 /**
  * Seed Categories Script
@@ -65,24 +65,21 @@ const categories = [
 ];
 
 async function seedCategories() {
-  const client = await pool.connect();
-  
   try {
+    console.log('🔧 Initializing database connection...');
+    await initializeDatabase();
+
     console.log('🌱 Starting category seeding...\n');
-    
-    // Clear existing categories (optional)
-    // await client.query('DELETE FROM categories');
-    // console.log('🗑️  Cleared existing categories\n');
-    
+
     let insertedCount = 0;
     let updatedCount = 0;
-    
+
     for (const category of categories) {
-      const query = `
-        INSERT INTO categories (name, slug, description, image_url, sort_order, is_active)
+      const sql = `
+        INSERT INTO public.categories (name, slug, description, image_url, sort_order, is_active)
         VALUES ($1, $2, $3, $4, $5, true)
-        ON CONFLICT (slug) 
-        DO UPDATE SET 
+        ON CONFLICT (slug)
+        DO UPDATE SET
           name = EXCLUDED.name,
           description = EXCLUDED.description,
           image_url = EXCLUDED.image_url,
@@ -90,7 +87,7 @@ async function seedCategories() {
           updated_at = NOW()
         RETURNING id, name, (xmax = 0) AS inserted
       `;
-      
+
       const values = [
         category.name,
         category.slug,
@@ -98,9 +95,9 @@ async function seedCategories() {
         category.image_url,
         category.sort_order
       ];
-      
-      const result = await client.query(query, values);
-      
+
+      const result = await query(sql, values);
+
       if (result.rows.length > 0) {
         const wasInserted = result.rows[0].inserted;
         if (wasInserted) {
@@ -112,47 +109,20 @@ async function seedCategories() {
         }
       }
     }
-    
-    // Update product counts for each category
-    console.log('\n📊 Updating product counts...');
-    await client.query(`
-      UPDATE categories c
-      SET sort_order = (
-        SELECT COUNT(*)
-        FROM products p
-        WHERE p.category_id = c.id
-      )
-      FROM (
-        SELECT category_id, COUNT(*) as product_count
-        FROM products
-        WHERE category_id IS NOT NULL
-        GROUP BY category_id
-      ) pc
-      WHERE c.id = pc.category_id
-    `);
-    
+
     console.log(`\n🎉 Category seeding completed!`);
     console.log(`   - Inserted: ${insertedCount} categories`);
     console.log(`   - Updated: ${updatedCount} categories`);
     console.log(`   - Total: ${insertedCount + updatedCount} categories\n`);
-    
-  } catch (error) {
-    console.error('❌ Error seeding categories:', error);
-    throw error;
-  } finally {
-    client.release();
-    await pool.end();
+
+    process.exit(0);
+  } catch (error: any) {
+    console.error('❌ Error seeding categories:', error.message);
+    console.error(error);
+    process.exit(1);
   }
 }
 
 // Run the seeding
-seedCategories()
-  .then(() => {
-    console.log('✅ Seeding completed successfully!');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('❌ Seeding failed:', error);
-    process.exit(1);
-  });
+seedCategories();
 

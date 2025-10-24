@@ -25,9 +25,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    const endTracking = trackInteraction('wishlist_toggle', product.id);
+    // TODO: Add analytics tracking for wishlist toggle
     handleAddToWishlist(product);
-    endTracking();
   };
 
 
@@ -47,10 +46,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
   return (
     <div
       className={`product-card group flex ${isListView ? 'flex-row' : 'flex-col'} h-full bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation`}
-      onMouseEnter={() => {
-        // Preload product details on hover
-        dataPreloader.preloadProduct(product.id, { priority: 'high' });
-      }}
     >
       <div className={`relative overflow-hidden group/image bg-gray-50 ${isListView ? 'w-32 h-32 flex-shrink-0' : ''}`}>
 
@@ -129,11 +124,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              const endTracking = trackInteraction('add_to_cart', product.id);
+              // TODO: Add analytics tracking for add to cart
               if (product.stock > 0) {
                 handleAddToCart(product);
               }
-              endTracking();
             }}
             disabled={product.stock === 0}
             className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${product.stock === 0

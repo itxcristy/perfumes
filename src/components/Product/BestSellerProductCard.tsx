@@ -4,7 +4,6 @@ import { TrendingUp, Star, Heart, ShoppingBag, Flame } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useNotification } from '../../contexts/NotificationContext';
 
 interface BestSellerProductCardProps {
   product: Product;
@@ -18,14 +17,13 @@ interface BestSellerProductCardProps {
 export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ product, rank }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
-  const { showSuccess } = useNotification();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     try {
       await addToCart(product, 1);
-      showSuccess('Added to cart successfully');
+      // Notification is handled by CartContext
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }
@@ -36,7 +34,7 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
     e.stopPropagation();
     try {
       await addToWishlist(product);
-      showSuccess(isInWishlist(product.id) ? 'Removed from wishlist' : 'Added to wishlist');
+      // Notification is handled by WishlistContext
     } catch (error) {
       console.error('Failed to toggle wishlist:', error);
     }
@@ -113,7 +111,7 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
                 </span>
               </div>
               <span className="text-xs text-gray-600 ml-1">
-                ({Number(product.review_count) || 0} reviews)
+                ({Number(product.reviewCount) || 0} reviews)
               </span>
             </div>
             <div className="flex items-center text-xs text-orange-600 font-semibold">
@@ -147,10 +145,10 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
           </div>
 
           {/* Social Proof */}
-          {product.review_count && Number(product.review_count) > 50 && (
+          {product.reviewCount && Number(product.reviewCount) > 50 && (
             <div className="mt-3 flex items-center text-xs text-gray-600 bg-green-50 px-3 py-1.5 rounded-lg">
               <span className="font-semibold text-green-700">
-                {Number(product.review_count)}+ customers love this!
+                {Number(product.reviewCount)}+ customers love this!
               </span>
             </div>
           )}

@@ -1,24 +1,24 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { CheckCircle, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
-import { AppError, ErrorHandler } from '../utils/errorHandling';
+
+// Notification types
+type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
 interface Notification {
   id: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: NotificationType;
   title: string;
   message: string;
   duration?: number;
-  timestamp: number;
-  isVisible?: boolean;
-  isDismissing?: boolean;
 }
 
 interface NotificationContextType {
-  showNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
-  showError: (error: Error | AppError, context?: string) => void;
-  showSuccess: (message: string, title?: string) => void;
-  showInfo: (message: string, title?: string) => void;
-  showWarning: (message: string, title?: string) => void;
+  showNotification: (notification: Omit<Notification, 'id'>) => void;
+  showSuccess: (title: string, message: string) => void;
+  showError: (title: string, message: string) => void;
+  showWarning: (title: string, message: string) => void;
+  showInfo: (title: string, message: string) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -26,7 +26,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotification must be used within a NotificationProvider');
+    throw new Error('useNotification must be used within NotificationProvider');
   }
   return context;
 };
@@ -37,292 +37,222 @@ interface NotificationProviderProps {
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const notificationTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-  const showNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
-    const timestamp = Date.now();
-    const id = `${timestamp}-${Math.random().toString(36).substring(2, 9)}`;
-    const duration = notification.duration || 5000;
+  const removeNotification = useCallback((id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
 
-    // Check for duplicates within the last 2 seconds
-    const isDuplicate = notifications.some(n =>
-      n.type === notification.type &&
-      n.message === notification.message &&
-      n.title === notification.title &&
-      timestamp - n.timestamp < 2000
-    );
-
-    if (isDuplicate) {
-      return; // Prevent duplicate notifications
-    }
-
+  const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
+    const id = `notification-${Date.now()}-${Math.random()}`;
     const newNotification: Notification = {
       ...notification,
       id,
-      timestamp,
-      duration,
-      isVisible: false,
-      isDismissing: false
+      duration: notification.duration || 5000,
     };
 
-    setNotifications(prev => [newNotification, ...prev]);
+    setNotifications((prev) => [...prev, newNotification]);
 
-    // Show notification with animation
+    // Auto remove after duration
     setTimeout(() => {
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, isVisible: true } : n)
-      );
-    }, 10);
+      removeNotification(id);
+    }, newNotification.duration);
+  }, [removeNotification]);
 
-    // Auto-dismiss notification
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        dismissNotification(id);
-      }, duration);
+  const showSuccess = useCallback((title: string, message: string) => {
+    showNotification({ type: 'success', title, message });
+  }, [showNotification]);
 
-      notificationTimers.current.set(id, timer);
-    }
-  };
+  const showError = useCallback((title: string, message: string) => {
+    showNotification({ type: 'error', title, message });
+  }, [showNotification]);
 
-  const dismissNotification = (id: string) => {
-    // Clear any existing timer
-    const timer = notificationTimers.current.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      notificationTimers.current.delete(id);
-    }
+  const showWarning = useCallback((title: string, message: string) => {
+    showNotification({ type: 'warning', title, message });
+  }, [showNotification]);
 
-    // Start dismiss animation
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, isDismissing: true } : n)
-    );
-
-    // Remove after animation completes
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 300);
-  };
-
-  const removeNotification = (id: string) => {
-    dismissNotification(id);
-  };
-
-  // Clean up timers on unmount
-  useEffect(() => {
-    return () => {
-      notificationTimers.current.forEach(timer => clearTimeout(timer));
-      notificationTimers.current.clear();
-    };
-  }, []);
-
-  const showError = (error: Error | AppError, context?: string) => {
-    const appError = 'type' in error ? error : ErrorHandler.handle(error);
-
-    showNotification({
-      type: 'error',
-      title: 'Oops! Something went wrong',
-      message: appError.message,
-      duration: 7000
-    });
-  };
-
-  const showSuccess = (message: string, title: string = 'Success!') => {
-    showNotification({
-      type: 'success',
-      title,
-      message,
-      duration: 4000
-    });
-  };
-
-  const showInfo = (message: string, title: string = 'Info') => {
-    showNotification({
-      type: 'info',
-      title,
-      message,
-      duration: 5000
-    });
-  };
-
-  const showWarning = (message: string, title: string = 'Heads up!') => {
-    showNotification({
-      type: 'warning',
-      title,
-      message,
-      duration: 6000
-    });
-  };
-
-  // Modern e-commerce toast notification component
-  const ToastNotification: React.FC<{ notification: Notification }> = ({ notification }) => {
-    const [progress, setProgress] = useState(100);
-    const progressRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-      if (notification.duration && notification.duration > 0 && notification.isVisible && !notification.isDismissing) {
-        const startTime = Date.now();
-        const duration = notification.duration;
-        const updateProgress = () => {
-          const elapsed = Date.now() - startTime;
-          const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
-          setProgress(remaining);
-
-          if (remaining > 0) {
-            progressRef.current = setTimeout(updateProgress, 50);
-          }
-        };
-        updateProgress();
-      }
-
-      return () => {
-        if (progressRef.current) {
-          clearTimeout(progressRef.current);
-        }
-      };
-    }, [notification.duration, notification.isVisible, notification.isDismissing]);
-
-    const getStyles = () => {
-      switch (notification.type) {
-        case 'success':
-          return {
-            container: 'bg-white border-l-4 border-emerald-500 shadow-lg shadow-emerald-500/20',
-            icon: <CheckCircle className="h-5 w-5 text-emerald-600" />,
-            iconBg: 'bg-emerald-50',
-            progress: 'bg-emerald-500'
-          };
-        case 'error':
-          return {
-            container: 'bg-white border-l-4 border-red-500 shadow-lg shadow-red-500/20',
-            icon: <AlertCircle className="h-5 w-5 text-red-600" />,
-            iconBg: 'bg-red-50',
-            progress: 'bg-red-500'
-          };
-        case 'warning':
-          return {
-            container: 'bg-white border-l-4 border-amber-500 shadow-lg shadow-amber-500/20',
-            icon: <AlertTriangle className="h-5 w-5 text-amber-600" />,
-            iconBg: 'bg-amber-50',
-            progress: 'bg-amber-500'
-          };
-        case 'info':
-        default:
-          return {
-            container: 'bg-white border-l-4 border-blue-500 shadow-lg shadow-blue-500/20',
-            icon: <Info className="h-5 w-5 text-blue-600" />,
-            iconBg: 'bg-blue-50',
-            progress: 'bg-blue-500'
-          };
-      }
-    };
-
-    const styles = getStyles();
-
-    return (
-      <div
-        className={`
-          ${styles.container}
-          rounded-lg overflow-hidden backdrop-blur-sm max-w-sm w-full
-          transform transition-all duration-300 ease-out
-          ${notification.isVisible && !notification.isDismissing
-            ? 'translate-x-0 opacity-100 scale-100'
-            : 'translate-x-full opacity-0 scale-95'
-          }
-          ${notification.isDismissing ? 'translate-x-full opacity-0 scale-95' : ''}
-        `}
-      >
-        <div className="p-4">
-          <div className="flex items-start">
-            <div className={`flex-shrink-0 ${styles.iconBg} rounded-full p-2 mr-3`}>
-              {styles.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-gray-900 mb-1">
-                {notification.title}
-              </h4>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {notification.message}
-              </p>
-            </div>
-            <button
-              onClick={() => removeNotification(notification.id)}
-              className="flex-shrink-0 ml-3 p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
-            >
-              <X className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-            </button>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        {notification.duration && notification.duration > 0 && (
-          <div className="h-1 bg-gray-200">
-            <div
-              className={`h-full ${styles.progress} transition-all duration-75 ease-linear`}
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Scroll-aware positioning for notifications
-  useEffect(() => {
-    let ticking = false;
-
-    const updateNotificationPosition = () => {
-      const container = document.querySelector('.notification-container');
-      if (container) {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        // Keep notifications visible in viewport but not too close to edges
-        const topPosition = Math.max(20, scrollTop + 20);
-        (container as HTMLElement).style.top = `${topPosition}px`;
-      }
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          updateNotificationPosition();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const showInfo = useCallback((title: string, message: string) => {
+    showNotification({ type: 'info', title, message });
+  }, [showNotification]);
 
   return (
-    <NotificationContext.Provider value={{
-      showNotification,
-      showError,
-      showSuccess,
-      showInfo,
-      showWarning
-    }}>
+    <NotificationContext.Provider
+      value={{
+        showNotification,
+        showSuccess,
+        showError,
+        showWarning,
+        showInfo,
+      }}
+    >
       {children}
-
-      {/* Modern toast container with viewport-aware positioning */}
-      <div
-        className="fixed top-4 right-4 z-[9999] pointer-events-none notification-container"
-        style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          maxHeight: 'calc(100vh - 2rem)',
-          overflow: 'hidden',
-          zIndex: 9999
-        }}
-      >
-        <div className="flex flex-col-reverse gap-3 max-w-sm w-full">
-          {notifications.map((notification) => (
-            <div key={notification.id} className="pointer-events-auto">
-              <ToastNotification notification={notification} />
-            </div>
-          ))}
-        </div>
-      </div>
+      {createPortal(
+        <NotificationContainer notifications={notifications} onRemove={removeNotification} />,
+        document.body
+      )}
     </NotificationContext.Provider>
   );
 };
+
+// Notification Container Component
+interface NotificationContainerProps {
+  notifications: Notification[];
+  onRemove: (id: string) => void;
+}
+
+const NotificationContainer: React.FC<NotificationContainerProps> = ({ notifications, onRemove }) => {
+  if (notifications.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: '1rem',
+        right: '1rem',
+        zIndex: 99999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        maxWidth: '400px',
+        width: '100%',
+        pointerEvents: 'none',
+      }}
+    >
+      {notifications.map((notification) => (
+        <Toast key={notification.id} notification={notification} onRemove={onRemove} />
+      ))}
+    </div>
+  );
+};
+
+// Individual Toast Component
+interface ToastProps {
+  notification: Notification;
+  onRemove: (id: string) => void;
+}
+
+const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
+  const { id, type, title, message } = notification;
+
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'error':
+        return <AlertCircle className="h-5 w-5 text-red-600" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+      case 'info':
+        return <Info className="h-5 w-5 text-blue-600" />;
+    }
+  };
+
+  const getStyles = () => {
+    switch (type) {
+      case 'success':
+        return {
+          bg: '#f0fdf4',
+          border: '#86efac',
+          text: '#166534',
+        };
+      case 'error':
+        return {
+          bg: '#fef2f2',
+          border: '#fca5a5',
+          text: '#991b1b',
+        };
+      case 'warning':
+        return {
+          bg: '#fffbeb',
+          border: '#fcd34d',
+          text: '#92400e',
+        };
+      case 'info':
+        return {
+          bg: '#eff6ff',
+          border: '#93c5fd',
+          text: '#1e40af',
+        };
+    }
+  };
+
+  const styles = getStyles();
+
+  return (
+    <div
+      style={{
+        backgroundColor: styles.bg,
+        border: `1px solid ${styles.border}`,
+        borderRadius: '0.75rem',
+        padding: '1rem',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.75rem',
+        pointerEvents: 'auto',
+        animation: 'slideIn 0.3s ease-out',
+        width: '100%',
+      }}
+    >
+      <div style={{ flexShrink: 0, marginTop: '0.125rem' }}>{getIcon()}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h4
+          style={{
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            color: styles.text,
+            marginBottom: '0.25rem',
+          }}
+        >
+          {title}
+        </h4>
+        <p
+          style={{
+            fontSize: '0.875rem',
+            color: styles.text,
+            opacity: 0.8,
+          }}
+        >
+          {message}
+        </p>
+      </div>
+      <button
+        onClick={() => onRemove(id)}
+        style={{
+          flexShrink: 0,
+          padding: '0.25rem',
+          borderRadius: '0.375rem',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background-color 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        <X className="h-4 w-4" style={{ color: styles.text, opacity: 0.6 }} />
+      </button>
+      <style>
+        {`
+          @keyframes slideIn {
+            from {
+              transform: translateX(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0);
+              opacity: 1;
+            }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+

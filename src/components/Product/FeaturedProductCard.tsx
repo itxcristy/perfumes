@@ -4,7 +4,6 @@ import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
-import { useNotification } from '../../contexts/NotificationContext';
 
 interface FeaturedProductCardProps {
   product: Product;
@@ -17,14 +16,13 @@ interface FeaturedProductCardProps {
 export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
-  const { showSuccess } = useNotification();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     try {
       await addToCart(product, 1);
-      showSuccess('Added to cart successfully');
+      // Notification is handled by CartContext
     } catch (error) {
       console.error('Failed to add to cart:', error);
     }
@@ -35,7 +33,7 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
     e.stopPropagation();
     try {
       await addToWishlist(product);
-      showSuccess(isInWishlist(product.id) ? 'Removed from wishlist' : 'Added to wishlist');
+      // Notification is handled by WishlistContext
     } catch (error) {
       console.error('Failed to toggle wishlist:', error);
     }
@@ -118,7 +116,7 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
                 ))}
               </div>
               <span className="text-xs text-gray-600">
-                ({Number(product.review_count) || 0})
+                ({Number(product.reviewCount) || 0})
               </span>
             </div>
           )}

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Product } from '../types';
-import { AuthModal } from '../components/Auth/AuthModal';
+import AuthModal from '../components/Auth/AuthModal';
 
 interface AuthModalContextType {
   showAuthModal: (product: Product, action: 'cart' | 'wishlist' | 'compare') => void;

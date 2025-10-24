@@ -28,6 +28,11 @@ export interface PaginatedResponse<T> {
 class ApiClient {
   private token: string | null = null;
 
+  constructor() {
+    // Initialize token from localStorage on startup
+    this.token = localStorage.getItem('auth_token');
+  }
+
   /**
    * Set authentication token
    */
@@ -80,6 +85,17 @@ class ApiClient {
 
       return data;
     } catch (error) {
+      // Silently handle expected 401 errors for /auth/me when no token exists
+      const isAuthMeEndpoint = endpoint === '/auth/me';
+      const is401Error = error instanceof Error && error.message.includes('401');
+      const hasNoToken = !this.getToken();
+
+      if (isAuthMeEndpoint && is401Error && hasNoToken) {
+        // Expected behavior - user is not logged in, don't log error
+        throw error;
+      }
+
+      // Log all other errors
       console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }

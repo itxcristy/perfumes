@@ -86,37 +86,45 @@ class PerformanceMonitor {
       fidObserver.observe({ entryTypes: ['first-input'] });
       this.observers.push(fidObserver);
 
-      // Track Cumulative Layout Shift (CLS)
-      const clsObserver = new PerformanceObserver((list) => {
-        let clsValue = 0;
-        const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+      // Track Cumulative Layout Shift (CLS) - with error handling
+      try {
+        const clsObserver = new PerformanceObserver((list) => {
+          let clsValue = 0;
+          const entries = list.getEntries();
+          entries.forEach((entry: any) => {
+            if (!entry.hadRecentInput) {
+              clsValue += entry.value;
+            }
+          });
+          if (clsValue > 0) {
+            this.recordMetric('cls', clsValue, 'gauge');
+            this.detailedMetrics.cls = clsValue;
           }
         });
-        if (clsValue > 0) {
-          this.recordMetric('cls', clsValue, 'gauge');
-          this.detailedMetrics.cls = clsValue;
-        }
-      });
-      clsObserver.observe({ entryTypes: ['layout-shift'] });
-      this.observers.push(clsObserver);
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+        this.observers.push(clsObserver);
+      } catch (error) {
+        // layout-shift not supported in this browser - silently ignore
+      }
 
-      // Track Long Tasks
-      const longTaskObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          this.recordMetric('long_task', entry.duration, 'timing', {
-            type: (entry as any).name
+      // Track Long Tasks - with error handling
+      try {
+        const longTaskObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach((entry) => {
+            this.recordMetric('long_task', entry.duration, 'timing', {
+              type: (entry as any).name
+            });
+            // Update detailed metrics
+            this.detailedMetrics.longTasks = (this.detailedMetrics.longTasks || 0) + 1;
+            this.detailedMetrics.longTaskDuration = (this.detailedMetrics.longTaskDuration || 0) + entry.duration;
           });
-          // Update detailed metrics
-          this.detailedMetrics.longTasks = (this.detailedMetrics.longTasks || 0) + 1;
-          this.detailedMetrics.longTaskDuration = (this.detailedMetrics.longTaskDuration || 0) + entry.duration;
         });
-      });
-      longTaskObserver.observe({ entryTypes: ['longtask'] });
-      this.observers.push(longTaskObserver);
+        longTaskObserver.observe({ entryTypes: ['longtask'] });
+        this.observers.push(longTaskObserver);
+      } catch (error) {
+        // longtask not supported in this browser - silently ignore
+      }
 
       // Track Navigation and Resource Timing
       const navigationObserver = new PerformanceObserver((list) => {
@@ -195,6 +203,11 @@ class PerformanceMonitor {
   }
 
   private checkPerformanceThresholds(metric: PerformanceMetric) {
+    // Only log performance warnings in production or when explicitly enabled
+    const shouldLogWarnings = import.meta.env.PROD || import.meta.env.VITE_PERFORMANCE_WARNINGS === 'true';
+
+    if (!shouldLogWarnings) return;
+
     const thresholds = {
       lcp: 2500, // Good LCP is < 2.5s
       fid: 100,  // Good FID is < 100ms
@@ -217,6 +230,11 @@ class PerformanceMonitor {
   }
 
   private logPerformanceSummary() {
+    // Only log performance summary in production or when explicitly enabled
+    const shouldLogSummary = import.meta.env.PROD || import.meta.env.VITE_PERFORMANCE_WARNINGS === 'true';
+
+    if (!shouldLogSummary) return;
+
     const summary = this.getPerformanceSummary();
     console.log('📊 Performance Summary:', summary);
   }

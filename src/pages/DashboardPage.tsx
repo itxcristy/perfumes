@@ -1,34 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminDashboard } from '../components/Dashboard/AdminDashboard';
 import { CustomerDashboard } from '../components/Dashboard/CustomerDashboard';
 import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 
 export const DashboardPage: React.FC = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    // If on admin route and not authenticated, redirect to admin login
+    if (!loading && !user && isAdminRoute) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [user, loading, isAdminRoute, navigate]);
 
   // Show loading spinner while authentication is being checked
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner />
       </div>
     );
   }
 
-  // Show access denied if no user is authenticated (temporarily bypassed for testing)
-  const isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
-  const allowTestAccess = isDevelopment && import.meta.env.VITE_DIRECT_LOGIN_ENABLED === 'true';
-
-  if (!user && !allowTestAccess) {
+  // Show access denied if no user is authenticated
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
           <p className="text-gray-600 mb-6">Please sign in to access your dashboard.</p>
           <button
-            onClick={() => window.location.href = '/'}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            onClick={() => navigate('/')}
+            className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
           >
             Go to Homepage
           </button>
@@ -38,8 +46,7 @@ export const DashboardPage: React.FC = () => {
   }
 
   const renderDashboard = () => {
-    // In test mode, default to admin dashboard
-    const userRole = user?.role || (allowTestAccess ? 'admin' : 'customer');
+    const userRole = user.role;
 
     switch (userRole) {
       case 'admin':
