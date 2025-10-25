@@ -140,11 +140,11 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-bold text-gray-900">
-                ${Number(product.price).toFixed(2)}
+                ₹{Number(product.price).toLocaleString('en-IN')}
               </span>
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                 <span className="text-sm text-gray-400 line-through">
-                  ${Number(product.originalPrice).toFixed(2)}
+                  ₹{Number(product.originalPrice).toLocaleString('en-IN')}
                 </span>
               )}
             </div>

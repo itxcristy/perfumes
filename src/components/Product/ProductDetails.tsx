@@ -107,12 +107,12 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
 
                     {/* Price */}
                     <div className="flex items-center space-x-3 mb-6">
-                      <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+                      <span className="text-3xl font-bold text-gray-900">₹{product.price.toLocaleString('en-IN')}</span>
                       {product.originalPrice && (
                         <>
-                          <span className="text-xl text-gray-500 line-through">${product.originalPrice}</span>
+                          <span className="text-xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                           <span className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-sm font-semibold">
-                            Save ${(product.originalPrice - product.price).toFixed(2)}
+                            Save ₹{(product.originalPrice - product.price).toLocaleString('en-IN')}
                           </span>
                         </>
                       )}

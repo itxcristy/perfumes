@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, X, Upload, Video, Tag, DollarSign, Package, Star, Info, Plus, Eye, EyeOff } from 'lucide-react';
+import { Save, X, Upload, Video, Tag, DollarSign, Package, Star, Info, Plus, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -81,32 +81,18 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
     description: '',
     short_description: '',
     price: 0,
-    sale_price: undefined,
-    compare_at_price: undefined,
-    cost_price: undefined,
     sku: '',
-    barcode: '',
     category_id: '',
     brand: '',
-    model: '',
-    weight: undefined,
     dimensions: {},
     color_variants: [],
     size_variants: [],
-    material: '',
-    care_instructions: '',
-    warranty_info: '',
-    return_policy: '',
     shipping_info: {
       free_shipping: false,
       shipping_class: 'standard'
     },
-    seo_title: '',
-    seo_description: '',
     seo_keywords: [],
-    featured_image_url: '',
     gallery_images: [],
-    video_url: '',
     is_active: true,
     is_featured: false,
     is_bestseller: false,
@@ -116,7 +102,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
     inventory_quantity: 0,
     inventory_policy: 'deny',
     track_inventory: true,
-    ...initialData
+    ...(initialData || {})
   });
 
   // Auto-generate slug from name
@@ -179,10 +165,8 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
 
       const uploadPromises = Array.from(files).map(async (file) => {
         const result = await StorageService.uploadImage(file, 'products');
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        return result.url;
+        // The result is already a string URL, not an object with error/url properties
+        return result;
       });
 
       const urls = await Promise.all(uploadPromises);
@@ -267,7 +251,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
     { id: 1, name: 'Basic Info', icon: Info },
     { id: 2, name: 'Pricing', icon: DollarSign },
     { id: 3, name: 'Inventory', icon: Package },
-    { id: 4, name: 'Media', icon: ImageIcon },
+    { id: 4, name: 'Media', icon: Upload },
     { id: 5, name: 'SEO', icon: Star }
   ];
 
@@ -452,7 +436,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Regular Price * ($)
+                        Regular Price *
                       </label>
                       <input
                         type="number"
@@ -468,7 +452,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
 
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Sale Price ($)
+                        Sale Price
                       </label>
                       <input
                         type="number"
@@ -485,7 +469,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Compare at Price ($)
+                        Compare at Price (₹)
                       </label>
                       <input
                         type="number"
@@ -503,7 +487,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
 
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Cost Price ($)
+                        Cost Price (₹)
                       </label>
                       <input
                         type="number"
@@ -529,7 +513,7 @@ export const ProductionProductForm: React.FC<ProductionProductFormProps> = ({
                         </span>
                       </div>
                       <p className="text-sm text-green-700 mt-1">
-                        Customers save ${(formData.price - (formData.sale_price || formData.price)).toFixed(2)}
+                        Customers save ₹{(formData.price - (formData.sale_price || formData.price)).toLocaleString('en-IN')}
                       </p>
                     </div>
                   )}

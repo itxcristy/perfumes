@@ -129,10 +129,10 @@ export const SellerProductsList: React.FC = () => {
       sortable: true,
       render: (product) => (
         <div>
-          <p className="font-semibold text-gray-900">${Number(product.price).toFixed(2)}</p>
+          <p className="font-semibold text-gray-900">₹{Number(product.price).toLocaleString('en-IN')}</p>
           {product.original_price && (
             <p className="text-xs text-gray-500 line-through">
-              ${Number(product.original_price).toFixed(2)}
+              ₹{Number(product.original_price).toLocaleString('en-IN')}
             </p>
           )}
         </div>

@@ -129,12 +129,12 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-bold text-gray-900">
-                ${Number(product.price).toFixed(2)}
+                ₹{Number(product.price).toLocaleString('en-IN')}
               </span>
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                 <>
                   <span className="text-sm text-gray-500 line-through">
-                    ${Number(product.originalPrice).toFixed(2)}
+                    ₹{Number(product.originalPrice).toLocaleString('en-IN')}
                   </span>
                   <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
                     {Math.round(((Number(product.originalPrice) - Number(product.price)) / Number(product.originalPrice)) * 100)}% OFF

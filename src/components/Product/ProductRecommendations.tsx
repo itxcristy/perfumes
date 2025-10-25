@@ -382,12 +382,12 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
 
                     {/* Price */}
                     <div className="flex items-center space-x-1.5">
-                      <span className="text-sm sm:text-base font-semibold text-neutral-900">
-                        ${product.price}
+                      <span className="text-xs font-bold text-gray-900">
+                        ₹{product.price.toLocaleString('en-IN')}
                       </span>
                       {product.originalPrice && (
                         <span className="text-[10px] sm:text-xs text-neutral-500 line-through">
-                          ${product.originalPrice}
+                          ₹{product.originalPrice.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>

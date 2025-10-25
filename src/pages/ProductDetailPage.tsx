@@ -194,9 +194,9 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-4 mb-6">
-                <span className="text-4xl font-bold text-gray-900">${product.price}</span>
+                <span className="text-4xl font-bold text-gray-900">₹{product.price.toLocaleString('en-IN')}</span>
                 {product.originalPrice && (
-                  <span className="text-2xl text-gray-500 line-through">${product.originalPrice}</span>
+                  <span className="text-2xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                 )}
               </div>
 
