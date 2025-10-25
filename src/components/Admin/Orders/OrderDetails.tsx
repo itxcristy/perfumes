@@ -56,7 +56,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onClose }) 
     try {
       setLoading(true);
       const response = await apiClient.get(`/admin/orders/${orderId}`);
-      
+
       if (response.success) {
         setOrder(response.data);
         setNewStatus(response.data.status);
@@ -228,25 +228,25 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onClose }) 
             <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="text-gray-900">${Number(order.subtotal).toFixed(2)}</span>
+                <span className="text-gray-900">₹{Number(order.subtotal).toLocaleString('en-IN')}</span>
               </div>
               {Number(order.discount_amount) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Discount</span>
-                  <span className="text-green-600">-${Number(order.discount_amount).toFixed(2)}</span>
+                  <span className="text-green-600">-₹{Number(order.discount_amount).toLocaleString('en-IN')}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Tax</span>
-                <span className="text-gray-900">${Number(order.tax_amount).toFixed(2)}</span>
+                <span className="text-gray-900">₹{Number(order.tax_amount).toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Shipping</span>
-                <span className="text-gray-900">${Number(order.shipping_amount).toFixed(2)}</span>
+                <span className="text-gray-900">₹{Number(order.shipping_amount).toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
                 <span>Total</span>
-                <span className="text-amber-600">${Number(order.total_amount).toFixed(2)}</span>
+                <span className="text-amber-600">₹{Number(order.total_amount).toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>

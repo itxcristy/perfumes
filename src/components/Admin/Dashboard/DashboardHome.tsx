@@ -68,7 +68,7 @@ export const DashboardHome: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/admin/analytics/dashboard');
-      
+
       if (response.success) {
         setMetrics(response.data.metrics);
         setTopProducts(response.data.topProducts || []);
@@ -85,8 +85,8 @@ export const DashboardHome: React.FC = () => {
   const statCards = metrics ? [
     {
       title: 'Total Revenue',
-      value: `$${Number(metrics.totalRevenue).toFixed(2)}`,
-      change: metrics.revenueToday > 0 ? `+$${Number(metrics.revenueToday).toFixed(2)} today` : 'No sales today',
+      value: `₹${Number(metrics.totalRevenue).toLocaleString('en-IN')}`,
+      change: metrics.revenueToday > 0 ? `+₹${Number(metrics.revenueToday).toLocaleString('en-IN')} today` : 'No sales today',
       icon: DollarSign,
       color: 'bg-green-500',
       trend: metrics.revenueToday > 0 ? 'up' : 'neutral'
@@ -225,13 +225,13 @@ export const DashboardHome: React.FC = () => {
                 {topProducts.map((product) => (
                   <div key={product.id} className="flex items-center space-x-4">
                     <img
-                      src={product.images[0] || '/placeholder.png'}
+                      src={(product.images && product.images[0]) || '/placeholder.png'}
                       alt={product.name}
                       className="w-12 h-12 rounded-lg object-cover"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                      <p className="text-sm text-gray-500">${Number(product.price).toFixed(2)}</p>
+                      <p className="text-sm text-gray-500">₹{Number(product.price).toLocaleString('en-IN')}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-gray-900">{product.total_sold} sold</p>
@@ -262,7 +262,7 @@ export const DashboardHome: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-3">
                       <span className="text-sm font-semibold text-gray-900">
-                        ${Number(order.total_amount).toFixed(2)}
+                        ₹{Number(order.total_amount).toLocaleString('en-IN')}
                       </span>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
