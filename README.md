@@ -69,48 +69,42 @@ A modern, full-featured e-commerce platform built with React, TypeScript, and Su
 - **ESLint** - Code linting
 - **TypeScript** - Type checking
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
-- Supabase account
+- Node.js 18+
+- PostgreSQL 14+
+- Git
 
-### Installation Steps
-
-1. **Clone the repository**
+### Setup
+1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd advanced_multi-role_e-commerce_platform
+   cd perfumes
    ```
 
-2. **Install dependencies**
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. **Environment setup**
+3. Configure environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env with your Supabase credentials
+   # Edit .env with your database credentials
    ```
 
-4. **Database setup**
-   - Create a new project on [Supabase](https://supabase.com)
-   - Follow the detailed setup guide in [supabase-scripts/SETUP-GUIDE.md](supabase-scripts/SETUP-GUIDE.md)
-   - Run the SQL scripts in order from the [supabase-scripts](supabase-scripts) directory
-   - Update `.env` with your project URL and anon key
-
-5. **Start development**
+4. Create the database:
    ```bash
-   npm run dev
+   createdb sufi_essences
    ```
 
-6. **Access the application**
-   - Open http://localhost:5173 in your browser
-   - Register a new account or use direct login in development
+5. Start the development servers:
+   ```bash
+   npm run dev:all
+   ```
 
-📖 **Detailed setup instructions:** See [supabase-scripts/SETUP-GUIDE.md](supabase-scripts/SETUP-GUIDE.md)
+For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md).
 
 ## 📦 Database Schema
 

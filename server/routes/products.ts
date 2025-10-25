@@ -22,6 +22,7 @@ router.get(
     const bestSellers = req.query.bestSellers === 'true';
     const latest = req.query.latest === 'true';
     const sellerId = req.query.sellerId as string; // Add sellerId filter
+    const showOnHomepage = req.query.showOnHomepage === 'true'; // Add showOnHomepage filter
 
     let whereClause = 'WHERE is_active = true';
     const params: any[] = [];
@@ -39,6 +40,10 @@ router.get(
 
     if (featured) {
       whereClause += ` AND is_featured = true`;
+    }
+
+    if (showOnHomepage) {
+      whereClause += ` AND show_on_homepage = true`;
     }
 
     if (sellerId) {
@@ -66,7 +71,7 @@ router.get(
     // Get products
     const result = await query(
       `SELECT id, name, slug, description, short_description, price, original_price,
-              category_id, seller_id, images, stock, rating, review_count, is_featured, tags, created_at
+              category_id, seller_id, images, stock, rating, review_count, is_featured, tags, show_on_homepage, created_at
        FROM public.products
        ${whereClause}
        ${orderByClause}
@@ -99,7 +104,7 @@ router.get(
       `SELECT id, name, slug, description, short_description, price, original_price,
               category_id, seller_id, images, stock, min_stock_level, sku, weight,
               dimensions, tags, specifications, rating::numeric, review_count, is_featured,
-              is_active, meta_title, meta_description, created_at, updated_at
+              show_on_homepage, is_active, meta_title, meta_description, created_at, updated_at
        FROM public.products WHERE id = $1`,
       [id]
     );
@@ -161,6 +166,7 @@ router.post(
       sku,
       tags,
       specifications,
+      showOnHomepage,
     } = req.body;
 
     // Validation
@@ -171,8 +177,8 @@ router.post(
     const result = await query(
       `INSERT INTO public.products 
        (name, slug, description, short_description, price, original_price, 
-        category_id, seller_id, images, stock, sku, tags, specifications, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true)
+        category_id, seller_id, images, stock, sku, tags, specifications, is_active, show_on_homepage)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true, $14)
        RETURNING *`,
       [
         name,
@@ -188,6 +194,7 @@ router.post(
         sku,
         tags || [],
         specifications || {},
+        showOnHomepage !== undefined ? showOnHomepage : true
       ]
     );
 
@@ -208,7 +215,7 @@ router.put(
   authorize('admin', 'seller'),
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
-    const { name, description, price, stock, images, tags } = req.body;
+    const { name, description, price, stock, images, tags, showOnHomepage } = req.body;
 
     // Check ownership
     const productResult = await query(
@@ -232,10 +239,11 @@ router.put(
            stock = COALESCE($4, stock),
            images = COALESCE($5, images),
            tags = COALESCE($6, tags),
+           show_on_homepage = COALESCE($7, show_on_homepage),
            updated_at = NOW()
-       WHERE id = $7
+       WHERE id = $8
        RETURNING *`,
-      [name, description, price, stock, images, tags, id]
+      [name, description, price, stock, images, tags, showOnHomepage, id]
     );
 
     res.json({

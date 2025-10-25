@@ -79,6 +79,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       setFeaturedLoading(true);
       const response = await apiClient.getProducts({
         featured: true,
+        showOnHomepage: true,
         limit
       });
       setFeaturedProducts(response.data || []);
@@ -109,6 +110,7 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
       setLatestLoading(true);
       const response = await apiClient.getProducts({
         latest: true,
+        showOnHomepage: true,
         limit
       });
       setLatestProducts(response.data || []);

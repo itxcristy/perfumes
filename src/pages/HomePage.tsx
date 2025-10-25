@@ -8,7 +8,7 @@ import { ShoppingBag } from 'lucide-react';
 
 // Lazy load non-critical components for better performance
 const FeaturedProducts = lazy(() => import('@/components/Home/FeaturedProducts'));
-const BestSellers = lazy(() => import('@/components/Home/BestSellers'));
+const LovedByThousands = lazy(() => import('@/components/Home/LovedByThousands'));
 const LatestArrivals = lazy(() => import('@/components/Home/LatestArrivals'));
 
 // Loading fallback component
@@ -50,9 +50,9 @@ export default function HomePage() {
         <FeaturedProducts />
       </Suspense>
 
-      {/* Best Sellers Section */}
+      {/* Loved by Thousands Section (Replaces Best Sellers) */}
       <Suspense fallback={<SectionLoader bgColor="bg-amber-50" />}>
-        <BestSellers />
+        <LovedByThousands />
       </Suspense>
 
       {/* Latest Arrivals Section */}

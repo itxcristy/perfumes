@@ -15,6 +15,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
   const { user } = useAuth();
   const { showNotification } = useNotification();
 
+  // Initialize default values for new products
+  const defaultCategory = categories?.[0]?.name ?? '';
+  const defaultCategoryId = categories?.[0]?.id ?? '';
+
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -22,8 +26,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
     shortDescription: '',
     price: 0,
     originalPrice: 0,
-    category: categories.length > 0 ? categories[0].name : '',
-    categoryId: categories.length > 0 ? categories[0].id : '',
+    category: defaultCategory,
+    categoryId: defaultCategoryId,
     stock: 0,
     minStockLevel: 5,
     sku: '',
@@ -39,6 +43,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
       'Origin': ''
     },
     featured: false,
+    showOnHomepage: true,
     isActive: true,
     metaTitle: '',
     metaDescription: ''
@@ -53,29 +58,41 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         shortDescription: product.shortDescription || '',
         price: product.price,
         originalPrice: product.originalPrice || 0,
-        category: product.category,
-        categoryId: product.categoryId || '',
+        category: product.category || (categories?.[0]?.name ?? ''),
+        categoryId: product.categoryId || (categories?.[0]?.id ?? ''),
         stock: product.stock,
         minStockLevel: product.minStockLevel || 5,
         sku: product.sku || '',
         weight: product.weight || 0,
-        dimensions: product.dimensions || { length: 0, width: 0, height: 0 },
-        images: product.images,
-        tags: product.tags,
-        specifications: product.specifications || {
-          'Volume': '',
-          'Concentration': '',
-          'Longevity': '',
-          'Sillage': '',
-          'Origin': ''
+        dimensions: {
+          length: product.dimensions?.length || 0,
+          width: product.dimensions?.width || 0,
+          height: product.dimensions?.height || 0
+        },
+        images: product.images || [],
+        tags: product.tags || [],
+        specifications: {
+          'Volume': product.specifications?.['Volume']?.toString() || '',
+          'Concentration': product.specifications?.['Concentration']?.toString() || '',
+          'Longevity': product.specifications?.['Longevity']?.toString() || '',
+          'Sillage': product.specifications?.['Sillage']?.toString() || '',
+          'Origin': product.specifications?.['Origin']?.toString() || ''
         },
         featured: product.featured || false,
+        showOnHomepage: product.showOnHomepage !== false,
         isActive: product.isActive !== false,
         metaTitle: product.metaTitle || '',
         metaDescription: product.metaDescription || ''
       });
+    } else {
+      // Set default values when creating a new product
+      setFormData(prev => ({
+        ...prev,
+        category: categories?.[0]?.name ?? '',
+        categoryId: categories?.[0]?.id ?? ''
+      }));
     }
-  }, [product]);
+  }, [product, categories]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -158,11 +175,11 @@ const handleSubmit = (e: React.FormEvent) => {
       return;
     }
 
-    const productData = {
+    const productData: any = {
       ...formData,
       slug: formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       price: Number(formData.price),
-      originalPrice: Number(formData.originalPrice) || undefined,
+      originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
       stock: Number(formData.stock),
       minStockLevel: Number(formData.minStockLevel),
       weight: Number(formData.weight),
@@ -336,6 +353,16 @@ const handleSubmit = (e: React.FormEvent) => {
               className="mr-2" 
             />
             <label className="text-sm font-medium text-gray-700">Featured Product</label>
+          </div>
+          <div className="flex items-center">
+            <input 
+              type="checkbox" 
+              name="showOnHomepage" 
+              checked={formData.showOnHomepage} 
+              onChange={handleChange} 
+              className="mr-2" 
+            />
+            <label className="text-sm font-medium text-gray-700">Show on Homepage</label>
           </div>
           <div className="flex items-center">
             <input 

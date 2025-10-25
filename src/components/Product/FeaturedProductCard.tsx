@@ -41,13 +41,13 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
 
   return (
     <Link to={`/products/${product.id}`} className="group block">
-      <div className="relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100">
+      <div className="relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
         {/* Image Container with Luxury Overlay */}
         <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
           <img
             src={product.images?.[0] || '/placeholder-product.jpg'}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-product.jpg';
@@ -55,59 +55,59 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
           />
           
           {/* Gradient Overlay on Hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
           {/* Featured Badge */}
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1">
             <Star className="h-3 w-3 fill-current" />
             Featured
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+          <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <button
               onClick={handleToggleWishlist}
-              className={`p-2.5 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110 ${
+              className={`p-2 rounded-full backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 ${
                 isInWishlist(product.id)
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 text-gray-700 hover:bg-white'
               }`}
               aria-label="Add to wishlist"
             >
-              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+              <Heart className={`h-3.5 w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={handleAddToCart}
-              className="p-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-full backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110"
+              className="p-2 bg-amber-600 hover:bg-amber-700 text-white rounded-full backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110"
               aria-label="Add to cart"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
         {/* Product Info */}
-        <div className="p-5">
+        <div className="p-4">
           {/* Category */}
           {product.category && (
-            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wider mb-2">
+            <p className="text-xs text-amber-600 font-semibold uppercase tracking-wider mb-1.5">
               {product.category}
             </p>
           )}
 
           {/* Product Name */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-600 transition-colors duration-300">
+          <h3 className="text-base font-bold text-gray-900 mb-1.5 line-clamp-2 group-hover:text-amber-600 transition-colors duration-300">
             {product.name}
           </h3>
 
           {/* Rating */}
           {product.rating && (
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-1.5 mb-2">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-3.5 w-3.5 ${
+                    className={`h-3 w-3 ${
                       i < Math.floor(Number(product.rating) || 0)
                         ? 'text-amber-400 fill-current'
                         : 'text-gray-300'
@@ -124,11 +124,11 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
           {/* Price */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-lg font-bold text-gray-900">
                 ${Number(product.price).toFixed(2)}
               </span>
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <span className="ml-2 text-sm text-gray-500 line-through">
+                <span className="ml-1.5 text-xs text-gray-500 line-through">
                   ${Number(product.originalPrice).toFixed(2)}
                 </span>
               )}
@@ -137,14 +137,14 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
 
           {/* Description Preview */}
           {product.description && (
-            <p className="text-xs text-gray-600 mt-3 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-gray-600 mt-2 line-clamp-2 leading-relaxed">
               {product.description}
             </p>
           )}
         </div>
 
         {/* Bottom Border Accent */}
-        <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+        <div className="h-0.5 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       </div>
     </Link>
   );

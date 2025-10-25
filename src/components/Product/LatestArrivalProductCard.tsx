@@ -54,17 +54,17 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
 
   return (
     <Link to={`/products/${product.id}`} className="group block">
-      <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-200 hover:border-purple-300">
+      <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-purple-300">
         {/* NEW Badge with Animation */}
-        <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-md flex items-center gap-1">
-          <Sparkles className={`h-3 w-3 ${isVeryNew ? 'animate-pulse' : ''}`} />
+        <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-1 rounded-md text-xs font-bold shadow-sm flex items-center gap-1">
+          <Sparkles className={`h-2.5 w-2.5 ${isVeryNew ? 'animate-pulse' : ''}`} />
           NEW
         </div>
 
         {/* Date Badge */}
         {product.createdAt && (
-          <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-sm text-gray-700 px-2.5 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+          <div className="absolute top-2 right-2 z-10 bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-1 rounded-md text-xs font-medium shadow-sm flex items-center gap-1">
+            <Calendar className="h-2.5 w-2.5" />
             {new Date(product.createdAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric'
@@ -77,7 +77,7 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
           <img
             src={product.images?.[0] || '/placeholder-product.jpg'}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-product.jpg';
@@ -85,37 +85,37 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
           />
 
           {/* Minimal Overlay on Hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
           {/* Action Buttons - Minimalist Style */}
-          <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
             <button
               onClick={handleToggleWishlist}
-              className={`p-2 rounded-lg backdrop-blur-md shadow-md transition-all duration-300 hover:scale-110 ${
+              className={`p-1.5 rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110 ${
                 isInWishlist(product.id)
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 text-gray-700 hover:bg-white'
               }`}
               aria-label="Add to wishlist"
             >
-              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+              <Heart className={`h-3.5 w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={handleAddToCart}
-              className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg backdrop-blur-md shadow-md transition-all duration-300 hover:scale-110"
+              className="p-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110"
               aria-label="Add to cart"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
         {/* Product Info - Clean Layout */}
-        <div className="p-4">
+        <div className="p-3.5">
           {/* Time Indicator */}
           {daysAgo && daysAgo <= 30 && (
-            <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold mb-2">
-              <Clock className="h-3 w-3" />
+            <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold mb-1.5">
+              <Clock className="h-2.5 w-2.5" />
               <span>
                 {daysAgo === 1 ? 'Added today' : 
                  daysAgo <= 7 ? `${daysAgo} days ago` : 
@@ -125,25 +125,25 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
           )}
 
           {/* Product Name - Clean Typography */}
-          <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 leading-snug group-hover:text-purple-600 transition-colors duration-300">
+          <h3 className="text-sm font-semibold text-gray-900 mb-1.5 line-clamp-2 leading-snug group-hover:text-purple-600 transition-colors duration-300">
             {product.name}
           </h3>
 
           {/* Category Tag */}
           {product.category && (
-            <span className="inline-block text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded mb-3">
+            <span className="inline-block text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded mb-2">
               {product.category}
             </span>
           )}
 
           {/* Price - Minimalist */}
           <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-base font-bold text-gray-900">
                 ₹{Number(product.price).toLocaleString('en-IN')}
               </span>
               {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                <span className="text-sm text-gray-400 line-through">
+                <span className="text-xs text-gray-400 line-through">
                   ₹{Number(product.originalPrice).toLocaleString('en-IN')}
                 </span>
               )}
@@ -152,14 +152,14 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
 
           {/* Description - Subtle */}
           {product.description && (
-            <p className="text-xs text-gray-500 mt-3 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">
               {product.description}
             </p>
           )}
         </div>
 
         {/* Bottom Accent Line */}
-        <div className="h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       </div>
     </Link>
   );

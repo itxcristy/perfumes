@@ -143,6 +143,7 @@ router.post(
       tags,
       specifications,
       is_featured,
+      show_on_homepage,
       is_active,
       meta_title,
       meta_description
@@ -160,9 +161,9 @@ router.post(
       `INSERT INTO public.products (
         name, slug, description, short_description, price, original_price,
         category_id, seller_id, images, stock, min_stock_level, sku,
-        weight, dimensions, tags, specifications, is_featured, is_active,
+        weight, dimensions, tags, specifications, is_featured, show_on_homepage, is_active,
         meta_title, meta_description
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       RETURNING *`,
       [
         name,
@@ -182,6 +183,7 @@ router.post(
         tags || [],
         specifications || null,
         is_featured || false,
+        show_on_homepage !== undefined ? show_on_homepage : true,
         is_active !== undefined ? is_active : true,
         meta_title || null,
         meta_description || null
@@ -223,6 +225,7 @@ router.put(
       tags,
       specifications,
       is_featured,
+      show_on_homepage,
       is_active,
       meta_title,
       meta_description
@@ -256,11 +259,12 @@ router.put(
            tags = COALESCE($14, tags),
            specifications = COALESCE($15, specifications),
            is_featured = COALESCE($16, is_featured),
-           is_active = COALESCE($17, is_active),
-           meta_title = COALESCE($18, meta_title),
-           meta_description = COALESCE($19, meta_description),
+           show_on_homepage = COALESCE($17, show_on_homepage),
+           is_active = COALESCE($18, is_active),
+           meta_title = COALESCE($19, meta_title),
+           meta_description = COALESCE($20, meta_description),
            updated_at = NOW()
-       WHERE id = $20 AND seller_id = $21
+       WHERE id = $21 AND seller_id = $22
        RETURNING *`,
       [
         name,
@@ -279,6 +283,7 @@ router.put(
         tags,
         specifications,
         is_featured,
+        show_on_homepage,
         is_active,
         meta_title,
         meta_description,

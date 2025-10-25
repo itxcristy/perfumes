@@ -129,11 +129,11 @@ interface ProductGridSkeletonProps {
 }
 
 export const ProductGridSkeleton: React.FC<ProductGridSkeletonProps> = ({ 
-  count = 8, 
+  count = 4, 
   variant = 'featured' 
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
       {[...Array(count)].map((_, index) => (
         <ProductCardSkeleton key={index} variant={variant} />
       ))}

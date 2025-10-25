@@ -3,8 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { initializeDatabase } from './db/connection';
+import { autoInitializeDatabase } from './scripts/autoInitDb'; // Use our new auto-init script
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 
@@ -28,10 +27,6 @@ import adminOrdersRoutes from './routes/admin/orders';
 // Import seller routes
 import sellerProductsRoutes from './routes/seller/products';
 import sellerOrdersRoutes from './routes/seller/orders';
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Load environment variables from project root
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -82,9 +77,10 @@ app.use(errorHandler);
 // Start server
 async function startServer() {
   try {
-    // Initialize database connection
-    await initializeDatabase();
-    console.log('✓ Database connection initialized');
+    // Auto-initialize database with schema and sample data
+    console.log('🔧 Auto-initializing database...');
+    await autoInitializeDatabase();
+    console.log('✓ Database auto-initialized successfully');
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);

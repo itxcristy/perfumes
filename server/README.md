@@ -38,7 +38,8 @@ First, create the PostgreSQL database:
 createdb sufi_essences
 ```
 
-Then initialize the schema:
+The server will automatically initialize the schema and seed sample data on first run.
+Alternatively, you can manually initialize:
 
 ```bash
 npm run db:init
@@ -73,10 +74,25 @@ server/
 ├── utils/
 │   └── auth.ts            # Auth utilities
 ├── scripts/
-│   └── initDb.ts          # Database initialization
+│   ├── autoInitDb.ts      # Auto database initialization (NEW)
+│   └── initDb.ts          # Manual database initialization
 ├── index.ts               # Server entry point
 └── tsconfig.json          # TypeScript config
 ```
+
+## Auto-Initialization Feature
+
+The server now includes an auto-initialization feature that automatically:
+1. Creates database schema if it doesn't exist
+2. Seeds sample categories, products, and users
+3. Ensures consistent setup across different environments
+
+This makes it easy to set up the project on new machines without manual database setup.
+
+Default sample users:
+- Admin: admin@example.com / admin123
+- Seller: seller@example.com / admin123
+- Customer: customer@example.com / admin123
 
 ## API Endpoints (Phase 2)
 
@@ -196,4 +212,3 @@ npm run lint
 ## Support
 
 For issues or questions, refer to the main project documentation in `/docs`.
-

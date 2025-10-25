@@ -14,8 +14,8 @@ export const LatestArrivals: React.FC = memo(() => {
   const { latestProducts, latestLoading, fetchLatestProducts } = useProducts();
 
   useEffect(() => {
-    // Fetch 8 latest products on mount
-    fetchLatestProducts(8);
+    // Fetch 4 latest products on mount for homepage display
+    fetchLatestProducts(4);
   }, [fetchLatestProducts]);
 
   return (
@@ -39,10 +39,10 @@ export const LatestArrivals: React.FC = memo(() => {
 
         {/* Products Grid */}
         {latestLoading ? (
-          <ProductGridSkeleton count={8} variant="latest" />
+          <ProductGridSkeleton count={4} variant="latest" />
         ) : latestProducts.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {latestProducts.map((product) => (
                 <LatestArrivalProductCard key={product.id} product={product} />
               ))}

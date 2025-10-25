@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   rating DECIMAL(3, 2) DEFAULT 0.00,
   review_count INTEGER DEFAULT 0,
   is_featured BOOLEAN DEFAULT false,
+  show_on_homepage BOOLEAN DEFAULT true,
   is_active BOOLEAN DEFAULT true,
   meta_title TEXT,
   meta_description TEXT,

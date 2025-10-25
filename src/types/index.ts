@@ -39,6 +39,7 @@ export interface Product {
   tags: string[];
   specifications?: Record<string, string | number | boolean>; // Maps to specifications in DB
   featured: boolean; // Maps to is_featured in DB
+  showOnHomepage: boolean; // Maps to show_on_homepage in DB
   isActive?: boolean; // Maps to is_active in DB
   metaTitle?: string; // Maps to meta_title in DB
   metaDescription?: string; // Maps to meta_description in DB

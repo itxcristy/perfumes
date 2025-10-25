@@ -190,6 +190,7 @@ class ApiClient {
     bestSellers?: boolean;
     latest?: boolean;
     sellerId?: string;
+    showOnHomepage?: boolean;
   }): Promise<PaginatedResponse<any>> {
     const query = new URLSearchParams();
     if (params?.page) query.append('page', params.page.toString());
@@ -200,6 +201,7 @@ class ApiClient {
     if (params?.bestSellers) query.append('bestSellers', 'true');
     if (params?.latest) query.append('latest', 'true');
     if (params?.sellerId) query.append('sellerId', params.sellerId);
+    if (params?.showOnHomepage) query.append('showOnHomepage', 'true');
 
     const queryString = query.toString();
     return this.get(`/products${queryString ? '?' + queryString : ''}`);

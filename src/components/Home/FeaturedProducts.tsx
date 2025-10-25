@@ -14,8 +14,8 @@ export const FeaturedProducts: React.FC = memo(() => {
     const { featuredProducts, featuredLoading, fetchFeaturedProducts } = useProducts();
 
     useEffect(() => {
-        // Fetch 8 featured products on mount
-        fetchFeaturedProducts(8);
+        // Fetch 4 featured products on mount for homepage display
+        fetchFeaturedProducts(4);
     }, [fetchFeaturedProducts]);
 
     return (
@@ -39,10 +39,10 @@ export const FeaturedProducts: React.FC = memo(() => {
 
                 {/* Products Grid */}
                 {featuredLoading ? (
-                    <ProductGridSkeleton count={8} variant="featured" />
+                    <ProductGridSkeleton count={4} variant="featured" />
                 ) : featuredProducts.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                             {featuredProducts.map((product) => (
                                 <FeaturedProductCard key={product.id} product={product} />
                             ))}

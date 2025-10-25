@@ -24,7 +24,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useNotification();
 
   const images = Array.isArray(value) ? value : value ? [value] : [];
@@ -116,14 +115,44 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
-  // Handle camera capture with proper permission handling
+  // Handle camera capture with better compatibility
   const handleCameraCapture = async () => {
-    // Try different capture values to ensure compatibility
-    if (cameraInputRef.current) {
-      // Set capture attribute to different values for better compatibility
-      cameraInputRef.current.setAttribute('capture', 'environment');
-      cameraInputRef.current.click();
+    // Check if we're on a mobile device
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (!isMobile) {
+      // On desktop, just use the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.accept = 'image/*';
+        fileInputRef.current.click();
+      }
       return;
+    }
+
+    // For mobile devices, try different approaches for camera access
+    try {
+      // Method 1: Create input with capture attribute
+      const cameraInput = document.createElement('input');
+      cameraInput.type = 'file';
+      cameraInput.accept = 'image/*';
+      cameraInput.capture = 'environment'; // Prefer rear camera
+      cameraInput.multiple = multiple;
+      
+      // Add event listener
+      cameraInput.onchange = (e) => {
+        const target = e.target as HTMLInputElement;
+        handleFileChange(target.files);
+      };
+      
+      // Try to trigger click
+      cameraInput.click();
+    } catch (error) {
+      // Fallback: Use regular file input if camera access fails
+      console.warn('Camera access failed, falling back to file input:', error);
+      if (fileInputRef.current) {
+        fileInputRef.current.accept = 'image/*';
+        fileInputRef.current.click();
+      }
     }
   };
 
@@ -152,17 +181,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           type="file"
           accept={accept}
           multiple={multiple}
-          onChange={(e) => handleFileChange(e.target.files)}
-          className="hidden"
-        />
-        
-        {/* Camera input - hidden but accessible */}
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          multiple={multiple}
-          capture="environment"
           onChange={(e) => handleFileChange(e.target.files)}
           className="hidden"
         />
