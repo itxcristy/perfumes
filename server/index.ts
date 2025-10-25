@@ -27,6 +27,7 @@ import adminOrdersRoutes from './routes/admin/orders';
 
 // Import seller routes
 import sellerProductsRoutes from './routes/seller/products';
+import sellerOrdersRoutes from './routes/seller/orders';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -73,6 +74,7 @@ app.use('/api/admin/orders', adminOrdersRoutes);
 
 // Seller API Routes
 app.use('/api/seller/products', sellerProductsRoutes);
+app.use('/api/seller/orders', sellerOrdersRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

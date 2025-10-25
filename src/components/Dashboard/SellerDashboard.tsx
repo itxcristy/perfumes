@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { SellerProductsList } from '../Seller/Products/SellerProductsList';
+import { SellerOrdersPage } from '../Seller/Orders/SellerOrdersPage';
 import { SellerHeader } from '../Seller/Layout/SellerHeader';
 
 interface SellerSidebarProps {
@@ -309,26 +310,7 @@ const ProductsPage: React.FC = () => {
 };
 
 const OrdersPage: React.FC = () => {
-  return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Your Orders</h1>
-        <p className="text-gray-600 mt-2">Manage customer orders</p>
-      </div>
-      
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Order Management</h2>
-        </div>
-        
-        <div className="text-center py-12">
-          <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-          <p className="text-gray-600">Your orders will appear here once customers purchase your products</p>
-        </div>
-      </div>
-    </div>
-  );
+  return <SellerOrdersPage />;
 };
 
 const AnalyticsPage: React.FC = () => {

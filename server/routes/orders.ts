@@ -111,8 +111,8 @@ router.post(
     // Generate order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-    // Calculate total from items
-    let calculatedTotal = 0;
+    // Calculate subtotal, tax, and total from items
+    let subtotal = 0;
     for (const item of items) {
       const productResult = await query(
         'SELECT price FROM public.products WHERE id = $1',
@@ -124,19 +124,28 @@ router.post(
       }
 
       const price = productResult.rows[0].price;
-      calculatedTotal += price * item.quantity;
+      subtotal += price * item.quantity;
     }
+
+    // Calculate tax (18% GST) and shipping
+    const taxAmount = Math.round(subtotal * 0.18 * 100) / 100;
+    const shippingAmount = subtotal >= 2000 ? 0 : 
+      (shippingAddress.state?.toLowerCase().includes('kashmir') ? 50 : 100);
+    const calculatedTotal = subtotal + taxAmount + shippingAmount;
 
     // Create order
     const orderResult = await query(
       `INSERT INTO public.orders 
-       (user_id, order_number, total_amount, status, payment_status, 
+       (user_id, order_number, subtotal, tax_amount, shipping_amount, total_amount, status, payment_status, 
         payment_method, shipping_address, billing_address)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         req.userId,
         orderNumber,
+        subtotal,
+        taxAmount,
+        shippingAmount,
         calculatedTotal,
         'pending',
         'pending',
@@ -156,13 +165,13 @@ router.post(
       );
 
       const price = productResult.rows[0].price;
-      const subtotal = price * item.quantity;
+      const totalPrice = price * item.quantity;
 
       await query(
         `INSERT INTO public.order_items 
-         (order_id, product_id, quantity, price, subtotal)
+         (order_id, product_id, quantity, unit_price, total_price)
          VALUES ($1, $2, $3, $4, $5)`,
-        [order.id, item.product_id || item.productId, item.quantity, price, subtotal]
+        [order.id, item.product_id || item.productId, item.quantity, price, totalPrice]
       );
 
       // Update product stock

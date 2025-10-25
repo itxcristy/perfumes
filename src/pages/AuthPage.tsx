@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, User,
-  AlertCircle, Loader2
+  AlertCircle, Loader2, Shield, Store, Users
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
+type UserRole = 'customer' | 'seller' | 'admin';
 
 interface FormData {
   email: string;
   password: string;
   confirmPassword: string;
   fullName: string;
+  role: UserRole;
 }
 
 interface FormErrors {
@@ -36,15 +38,22 @@ const AuthPage: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    fullName: ''
+    fullName: '',
+    role: 'customer'
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Redirect to dashboard if user is already logged in
+  // Redirect to appropriate dashboard if user is already logged in
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else if (user.role === 'seller') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [user, navigate]);
 
@@ -52,10 +61,16 @@ const AuthPage: React.FC = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const modeParam = searchParams.get('mode');
+    const roleParam = searchParams.get('role') as UserRole;
+    
     if (modeParam === 'signup') {
       setMode('signup');
     } else if (modeParam === 'forgot') {
       setMode('forgot');
+    }
+    
+    if (roleParam && ['customer', 'seller', 'admin'].includes(roleParam)) {
+      setFormData(prev => ({ ...prev, role: roleParam }));
     }
   }, [location.search]);
 
@@ -123,17 +138,40 @@ const AuthPage: React.FC = () => {
           title: 'Welcome back!',
           message: 'Successfully logged in.'
         });
-        navigate('/dashboard');
+        
+        // Small delay to ensure user context is updated
+        setTimeout(() => {
+          // Redirect based on user role from context
+          if (user?.role === 'admin') {
+            navigate('/admin');
+          } else if (user?.role === 'seller') {
+            navigate('/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
+        }, 100);
       } else if (mode === 'signup') {
         await signUp(formData.email, formData.password, {
-          fullName: formData.fullName
+          fullName: formData.fullName,
+          role: formData.role
         });
         showNotification({
           type: 'success',
           title: 'Account created!',
           message: 'Account created successfully!'
         });
-        navigate('/dashboard');
+        
+        // Small delay to ensure user context is updated
+        setTimeout(() => {
+          // Redirect based on selected role
+          if (formData.role === 'admin') {
+            navigate('/admin');
+          } else if (formData.role === 'seller') {
+            navigate('/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
+        }, 100);
       } else if (mode === 'forgot') {
         // Handle forgot password
         showNotification({
@@ -155,9 +193,43 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  // Get current user to determine role
+  const getCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return null;
+      
+      // In a real implementation, you would call an API endpoint to get user info
+      // For now, we'll return the user from context
+      return user;
+    } catch (error) {
+      return null;
+    }
+  };
+
   // Navigate back to home page
   const goHome = () => {
     navigate('/');
+  };
+
+  // Get role icon
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case 'admin': return <Shield className="h-5 w-5" />;
+      case 'seller': return <Store className="h-5 w-5" />;
+      case 'customer': return <Users className="h-5 w-5" />;
+      default: return <User className="h-5 w-5" />;
+    }
+  };
+
+  // Get role label
+  const getRoleLabel = (role: UserRole) => {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'seller': return 'Seller';
+      case 'customer': return 'Customer';
+      default: return 'Customer';
+    }
   };
 
   return (
@@ -175,13 +247,34 @@ const AuthPage: React.FC = () => {
             </h1>
             <p className="text-purple-100 mt-2">
               {mode === 'login' && 'Sign in to your account'}
-              {mode === 'signup' && 'Join our community'}
+              {mode === 'signup' && `Join as ${getRoleLabel(formData.role)}`}
               {mode === 'forgot' && 'Enter your email to reset your password'}
             </p>
           </div>
 
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Role Selection (Signup) */}
+              {mode === 'signup' && (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {(['customer', 'seller', 'admin'] as UserRole[]).map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => handleInputChange('role', role)}
+                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                        formData.role === role
+                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {getRoleIcon(role)}
+                      <span className="text-xs font-medium mt-1">{getRoleLabel(role)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Email Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -353,7 +446,7 @@ const AuthPage: React.FC = () => {
                   ) : mode === 'login' ? (
                     'Sign In'
                   ) : mode === 'signup' ? (
-                    'Create Account'
+                    `Create ${getRoleLabel(formData.role)} Account`
                   ) : (
                     'Send Reset Link'
                   )}

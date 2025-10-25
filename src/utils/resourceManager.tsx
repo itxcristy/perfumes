@@ -1,3 +1,4 @@
+import React from 'react';
 import { RequestPriority, RequestDeduplicator, globalRequestDeduplicator } from './networkResilience';
 
 // Resource management interfaces
@@ -81,12 +82,13 @@ export class ResourceManager {
 
   // Add a resource request to the queue
   async addRequest<T>(request: Omit<ResourceRequest<T>, 'id' | 'retryCount'>): Promise<T> {
+    const { maxRetries = 3, timeout = 30000, ...rest } = request;
     const fullRequest: ResourceRequest<T> = {
       id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       retryCount: 0,
-      maxRetries: 3,
-      timeout: 30000,
-      ...request
+      maxRetries,
+      timeout,
+      ...rest
     };
 
     // Update request distribution metrics
@@ -200,6 +202,9 @@ export class ResourceManager {
       // Trigger success callback
       request.onSuccess?.(result);
       
+      // Continue processing queue before returning
+      this.processQueue();
+      
       return result;
     } catch (error) {
       const endTime = Date.now();
@@ -237,25 +242,29 @@ export class ResourceManager {
         // Trigger error callback
         request.onError?.(error as Error);
         
+        // Continue processing queue before throwing
+        this.processQueue();
+        
         throw error;
       }
+      
+      // This line should never be reached, but TypeScript needs it for type safety
+      throw new Error('Unexpected code path in processRequest');
     }
-    
-    // Continue processing queue
-    this.processQueue();
   }
 
   // Execute the actual request with proper error handling
   private async executeRequest<T>(request: ResourceRequest<T>): Promise<T> {
     try {
-      // For image requests, use our image optimization service
+      // For image requests, we just need to check if they load successfully
       if (request.url && (request.url.includes('.jpg') || request.url.includes('.png') || request.url.includes('.webp') || request.url.includes('.avif'))) {
         // This is a simplified implementation - in a real app, you'd integrate with your image service
         const response = await fetch(request.url);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        return response.json();
+        // For images, we don't need to parse as JSON, just return a success indicator
+        return { url: request.url, status: 'loaded' } as unknown as T;
       }
       
       // For other requests, use standard fetch
@@ -294,9 +303,11 @@ export class ResourceManager {
     const priorityLevels: RequestPriority[] = ['critical', 'high', 'normal', 'low', 'background'];
     const currentIndex = priorityLevels.indexOf(priority);
     if (currentIndex >= 0 && currentIndex < priorityLevels.length - 1) {
-      return priorityLevels[currentIndex + 1];
+      const nextIndex = currentIndex + 1;
+      return priorityLevels[nextIndex] as RequestPriority;
     }
-    return priority;
+    // If we can't downgrade further, return the lowest priority
+    return 'background';
   }
 
   // Cancel requests by tag

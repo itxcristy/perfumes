@@ -158,7 +158,7 @@ export const ProductDetailPage: React.FC = () => {
                     <ProductImage
                       product={{ id: product.id, name: product.name, images: [image] }}
                       className="w-full h-full object-cover"
-                      alt=""
+                      alt={`Product image ${index + 1}`}
                       size="small"
                     />
                   </button>

@@ -32,7 +32,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     const [currentImage, setCurrentImage] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(true);
     const network = useNetworkAdaptation();
-    const { startLoading, endLoading } = useImagePerformance(product.images?.[currentImage] || '');
+    // We're not using the performance hooks for now to simplify the component
+    // const { startLoading, endLoading } = useImagePerformance(product.images?.[currentImage] || '');
 
     // Get the first valid image URL
     const getImageUrl = () => {
@@ -42,7 +43,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
                 img &&
                 img.trim() !== '' &&
                 !img.includes('placeholder') &&
-                (img.startsWith('http') || img.startsWith('/'))
+                (img.startsWith('http') || img.startsWith('/') || img.startsWith('data:'))
             );
 
             if (validImages.length > 0) {
@@ -97,31 +98,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         return `data:image/svg+xml;base64,${btoa(svg)}`;
     };
 
-    // Preload image with resource manager
-    const preloadImage = async (url: string) => {
-        if (!url) return;
-
-        try {
-            startLoading();
-            // Use resource manager for prioritized loading
-            await globalResourceManager.addRequest({
-                url,
-                priority,
-                tags: [`product-${product.id}`, 'image'],
-                dependencies: [],
-                dedupKey: `image-${url}`,
-                maxRetries: 2,
-                timeout: 10000
-            });
-            endLoading(true);
-        } catch (error) {
-            endLoading(false);
-            console.warn('Image preload failed:', error);
-        }
-    };
-
     const handleImageError = () => {
-        endLoading(false);
         if (!imageError) {
             setImageError(true);
             setIsLoading(false);
@@ -130,20 +107,12 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     };
 
     const handleImageLoad = () => {
-        endLoading(true);
         setIsLoading(false);
         if (onLoad) onLoad();
     };
 
     const imageUrl = getImageUrl();
     const shouldShowFallback = !imageUrl || imageError || !network.shouldLoadImages;
-
-    // Preload image when component mounts or priority changes
-    React.useEffect(() => {
-        if (imageUrl && network.shouldLoadImages) {
-            preloadImage(imageUrl);
-        }
-    }, [imageUrl, priority, network.shouldLoadImages]);
 
     // Handle network changes
     React.useEffect(() => {
@@ -152,20 +121,27 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         }
     }, [network.shouldLoadImages]);
 
+    // If it's a data URL, it's already loaded
+    React.useEffect(() => {
+        if (imageUrl && imageUrl.startsWith('data:')) {
+            setIsLoading(false);
+        }
+    }, [imageUrl]);
+
     return (
         <>
-            {isLoading && network.shouldLoadImages && (
+            {isLoading && network.shouldLoadImages && !imageUrl?.startsWith('data:') && (
                 // Show skeleton loader while loading
                 <div className={`bg-gray-200 animate-pulse ${className}`} />
             )}
             <img
-                src={shouldShowFallback ? generateFallbackImage(product.name) : imageUrl}
+                src={shouldShowFallback ? generateFallbackImage(product.name) : imageUrl || generateFallbackImage(product.name)}
                 alt={alt || product.name}
                 className={className}
                 onError={handleImageError}
                 onLoad={handleImageLoad}
                 loading={priority === 'critical' ? 'eager' : 'lazy'}
-                style={{ display: isLoading && network.shouldLoadImages ? 'none' : 'block' }}
+                style={{ display: isLoading && network.shouldLoadImages && !imageUrl?.startsWith('data:') ? 'none' : 'block' }}
             />
         </>
     );

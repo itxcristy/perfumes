@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader, Camera } from 'lucide-react';
 import { useNotification } from '../../../contexts/NotificationContext';
 
 interface ImageUploadProps {
@@ -24,6 +24,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useNotification();
 
   const images = Array.isArray(value) ? value : value ? [value] : [];
@@ -35,21 +36,21 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     
     // Check file count limit
     if (multiple && images.length + fileArray.length > maxFiles) {
-      showError(`Maximum ${maxFiles} images allowed`);
+      showError('Upload Error', `Maximum ${maxFiles} images allowed`);
       return;
     }
 
     // Check file types
     const invalidFiles = fileArray.filter(file => !file.type.startsWith('image/'));
     if (invalidFiles.length > 0) {
-      showError('Only image files are allowed');
+      showError('Upload Error', 'Only image files are allowed');
       return;
     }
 
     // Check file sizes (max 5MB per file)
     const oversizedFiles = fileArray.filter(file => file.size > 5 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      showError('Each image must be less than 5MB');
+      showError('Upload Error', 'Each image must be less than 5MB');
       return;
     }
 
@@ -74,13 +75,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       if (multiple) {
         onChange([...images, ...uploadedUrls]);
       } else {
-        onChange(uploadedUrls[0]);
+        onChange(uploadedUrls[0] || '');
       }
 
-      showSuccess('Images uploaded successfully');
+      showSuccess('Upload Success', 'Images uploaded successfully');
     } catch (error) {
       console.error('Upload error:', error);
-      showError('Failed to upload images');
+      showError('Upload Error', 'Failed to upload images');
     } finally {
       setUploading(false);
     }
@@ -115,6 +116,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
+  // Handle camera capture with proper permission handling
+  const handleCameraCapture = async () => {
+    // Try different capture values to ensure compatibility
+    if (cameraInputRef.current) {
+      // Set capture attribute to different values for better compatibility
+      cameraInputRef.current.setAttribute('capture', 'environment');
+      cameraInputRef.current.click();
+      return;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {label && (
@@ -143,11 +155,19 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           onChange={(e) => handleFileChange(e.target.files)}
           className="hidden"
         />
+        
+        {/* Camera input - hidden but accessible */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          multiple={multiple}
+          capture="environment"
+          onChange={(e) => handleFileChange(e.target.files)}
+          className="hidden"
+        />
 
-        <div
-          className="flex flex-col items-center justify-center cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <div className="flex flex-col items-center justify-center">
           {uploading ? (
             <>
               <Loader className="h-12 w-12 text-amber-500 animate-spin mb-3" />
@@ -155,9 +175,36 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             </>
           ) : (
             <>
-              <Upload className="h-12 w-12 text-gray-400 mb-3" />
-              <p className="text-sm font-medium text-gray-700 mb-1">{helperText}</p>
-              <p className="text-xs text-gray-500">
+              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                {/* Upload from device button */}
+                <button
+                  type="button"
+                  className="flex flex-col items-center justify-center cursor-pointer text-gray-700 hover:text-amber-600"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="p-3 bg-gray-100 rounded-full mb-2">
+                    <Upload className="h-6 w-6" />
+                  </div>
+                  <span className="text-sm font-medium">Upload Image</span>
+                </button>
+                
+                {/* Capture from camera button */}
+                <button
+                  type="button"
+                  className="flex flex-col items-center justify-center cursor-pointer text-gray-700 hover:text-amber-600"
+                  onClick={handleCameraCapture}
+                >
+                  <div className="p-3 bg-gray-100 rounded-full mb-2">
+                    <Camera className="h-6 w-6" />
+                  </div>
+                  <span className="text-sm font-medium">Take Photo</span>
+                </button>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-4 text-center">
+                {helperText}
+              </p>
+              <p className="text-xs text-gray-400 mt-1 text-center">
                 {multiple ? `PNG, JPG, GIF up to 5MB (max ${maxFiles} files)` : 'PNG, JPG, GIF up to 5MB'}
               </p>
             </>
@@ -193,14 +240,25 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
           {/* Add More Button (for multiple uploads) */}
           {multiple && images.length < maxFiles && (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-amber-500 hover:bg-amber-50 transition-colors flex flex-col items-center justify-center text-gray-400 hover:text-amber-500"
-            >
-              <ImageIcon className="h-8 w-8 mb-2" />
-              <span className="text-xs font-medium">Add More</span>
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-amber-500 hover:bg-amber-50 transition-colors flex flex-col items-center justify-center text-gray-400 hover:text-amber-500"
+              >
+                <Upload className="h-6 w-6 mb-1" />
+                <span className="text-xs font-medium">Upload</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleCameraCapture}
+                className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-amber-500 hover:bg-amber-50 transition-colors flex flex-col items-center justify-center text-gray-400 hover:text-amber-500"
+              >
+                <Camera className="h-6 w-6 mb-1" />
+                <span className="text-xs font-medium">Camera</span>
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -213,4 +271,3 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 };
 
 export default ImageUpload;
-

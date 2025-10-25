@@ -13,6 +13,7 @@ A modern, full-featured e-commerce platform built with React, TypeScript, and Su
 - **Secure Checkout**: Multi-step checkout process with validation
 - **Order Tracking**: Track order status and history
 - **User Profile**: Manage personal information and preferences
+- **About Page**: Learn about our heritage, story, and values at Aligarh Attar House
 
 ### 👨‍💼 Seller Features
 - **Product Management**: Add, edit, and delete products
@@ -27,6 +28,14 @@ A modern, full-featured e-commerce platform built with React, TypeScript, and Su
 - **System Monitoring**: Track platform performance
 - **Content Management**: Manage categories and featured products
 - **Security Controls**: Monitor and manage platform security
+
+### 🔐 Universal Authentication System
+- **Single Sign-On**: Unified login page for all user roles (customers, sellers, admins)
+- **Role-Based Registration**: Users can register as customers, sellers, or admins
+- **Secure Authentication**: JWT-based authentication with password hashing
+- **Password Reset**: Forgot password functionality
+- **Session Management**: Persistent sessions across page refreshes
+- **Role-Based Redirection**: Automatic redirection to appropriate dashboard based on user role
 
 ### 🚀 Technical Features
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
@@ -118,11 +127,11 @@ The database schema has been organized into modular SQL scripts in the [supabase
 8. **[08-orders.sql](supabase-scripts/08-orders.sql)** - Order management
 9. **[09-reviews.sql](supabase-scripts/09-reviews.sql)** - Product reviews
 10. **[11-analytics.sql](supabase-scripts/11-analytics.sql)** - Analytics and reporting
-12. **[12-admin-functions.sql](supabase-scripts/12-admin-functions.sql)** - Administrative functions
-13. **[13-security-policies.sql](supabase-scripts/13-security-policies.sql)** - Row Level Security policies
-14. **[14-sample-data.sql](supabase-scripts/14-sample-data.sql)** - Sample data for testing
-15. **[15-remove-mock-data.sql](supabase-scripts/15-remove-mock-data.sql)** - Script to clean up mock data
-16. **[17-user-management-functions.sql](supabase-scripts/17-user-management-functions.sql)** - Enhanced user management functions
+11. **[12-admin-functions.sql](supabase-scripts/12-admin-functions.sql)** - Administrative functions
+12. **[13-security-policies.sql](supabase-scripts/13-security-policies.sql)** - Row Level Security policies
+13. **[14-sample-data.sql](supabase-scripts/14-sample-data.sql)** - Sample data for testing
+14. **[15-remove-mock-data.sql](supabase-scripts/15-remove-mock-data.sql)** - Script to clean up mock data
+15. **[17-user-management-functions.sql](supabase-scripts/17-user-management-functions.sql)** - Enhanced user management functions
 
 ### Security Hardening
 
@@ -196,91 +205,3 @@ The [14-sample-data.sql](supabase-scripts/14-sample-data.sql) file includes:
 - **Product variants** for different bottle sizes
 - **Sample reviews** with ratings
 - **Realistic product ratings** and review counts
-
-### Database Fix Scripts
-
-If you encounter issues with category creation or other administrative operations, check out the fix scripts in the [supabase-scripts](supabase-scripts) directory:
-
-- **[17-setup-admin-user.sql](supabase-scripts/17-setup-admin-user.sql)** - Creates or updates an admin user
-- **[18-fix-category-rls.sql](supabase-scripts/18-fix-category-rls.sql)** - Fixes Row Level Security policies
-- **[FIX-DATABASE-ISSUES.sql](supabase-scripts/FIX-DATABASE-ISSUES.sql)** - Comprehensive database fixes
-- **[TEST-CATEGORY-CREATION.sql](supabase-scripts/TEST-CATEGORY-CREATION.sql)** - Test category creation
-
-See [supabase-scripts/FIXES-README.md](supabase-scripts/FIXES-README.md) for detailed instructions on using these scripts.
-
-## 🔧 Enhanced User Management System
-
-The platform now includes a comprehensive user management system with the following features:
-
-### Full CRUD Operations
-- **Create**: Add new users with complete profile information
-- **Read**: View all users with sorting and filtering capabilities
-- **Update**: Modify user details including role and status
-- **Delete**: Remove users with automatic cleanup of related data
-
-### Bulk Operations
-- **Bulk Role Changes**: Change roles for multiple users simultaneously
-- **Bulk Status Updates**: Activate or deactivate multiple users
-- **Bulk Deletion**: Remove multiple users with a single action
-
-### Advanced Features
-- **Sorting**: Sort users by name, email, role, or creation date
-- **Filtering**: Filter by role, status, or search term
-- **Export**: Export user data to CSV format
-- **Selection**: Select multiple users for batch operations
-
-### Security Features
-- **Role-Based Access Control**: Only admins can access management features
-- **Data Protection**: Automatic cleanup of related data on user deletion
-- **Input Validation**: Client and server-side validation
-- **Error Handling**: Comprehensive error handling and user feedback
-
-📖 **Detailed user management documentation:** See [USER_MANAGEMENT_GUIDE.md](USER_MANAGEMENT_GUIDE.md)
-
-## Security Features
-
-- **Input Sanitization**: All user inputs are sanitized to prevent XSS attacks
-- **SQL Injection Prevention**: Parameterized queries and input validation
-- **Rate Limiting**: API request throttling to prevent abuse
-- **Authentication**: Secure user authentication with Supabase Auth
-- **Authorization**: Role-based access control with RLS policies
-- **Data Validation**: Comprehensive form validation on client and server
-
-## Performance Optimizations
-
-- **Lazy Loading**: Images and components loaded on demand
-- **Caching**: API responses cached for improved performance
-- **Code Splitting**: Dynamic imports for route-based code splitting
-
-## 📊 Monitoring and Observability
-
-The application includes comprehensive monitoring and observability features to ensure optimal performance and quick issue resolution:
-
-### Error Tracking
-- **Sentry**: Full-stack error tracking with detailed stack traces
-- **LogRocket**: Session replay and user behavior tracking
-- **Custom Error Boundaries**: Graceful error handling throughout the application
-
-### Performance Monitoring
-- **Web Vitals**: Automatic tracking of LCP, FID, and CLS metrics
-- **Custom Metrics**: Application-specific performance tracking
-- **Bundle Analysis**: Monitoring of JavaScript bundle sizes
-
-### Health Checks
-- **System Health Dashboard**: Real-time monitoring of application components
-- **External Health Endpoint**: API endpoint for uptime monitoring services
-- **Database Connection Monitoring**: Continuous database health checks
-
-### Setup
-To enable monitoring, add the following environment variables to your `.env` file:
-```bash
-VITE_SENTRY_DSN=your_sentry_dsn_here
-VITE_LOGROCKET_APP_ID=your_logrocket_app_id_here
-```
-
-### On-Call Support
-- **Runbook**: Comprehensive [RUNBOOK.md](RUNBOOK.md) with troubleshooting procedures
-- **Alerting**: Configurable alert thresholds for critical metrics
-- **Contact Information**: Clear escalation paths for different issue types
-
-## Deployment

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Wallet, CreditCard } from 'lucide-react';
 import { DataTable, Column } from '../../Common/DataTable';
 import { apiClient } from '../../../lib/apiClient';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -14,6 +14,7 @@ interface Order {
   total_amount: string;
   status: string;
   payment_status: string;
+  payment_method: string;
   created_at: string;
 }
 
@@ -27,7 +28,7 @@ export const OrdersList: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const { showError } = useNotification();
+  const { showNotification } = useNotification();
 
   const pageSize = 10;
 
@@ -54,7 +55,11 @@ export const OrdersList: React.FC = () => {
         setTotalItems(response.pagination.total);
       }
     } catch (error: any) {
-      showError(error.message || 'Failed to load orders');
+      showNotification({
+        type: 'error',
+        title: 'Error',
+        message: error.message || 'Failed to load orders'
+      });
     } finally {
       setLoading(false);
     }
@@ -81,6 +86,20 @@ export const OrdersList: React.FC = () => {
       refunded: 'bg-gray-100 text-gray-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPaymentMethodIcon = (method: string) => {
+    if (method?.toLowerCase().includes('cash') || method?.toLowerCase().includes('cod')) {
+      return <Wallet className="h-4 w-4" />;
+    }
+    return <CreditCard className="h-4 w-4" />;
+  };
+
+  const getPaymentMethodName = (method: string) => {
+    if (method?.toLowerCase().includes('cash') || method?.toLowerCase().includes('cod')) {
+      return 'Cash on Delivery';
+    }
+    return method || 'Online Payment';
   };
 
   const columns: Column<Order>[] = [
@@ -113,7 +132,7 @@ export const OrdersList: React.FC = () => {
       sortable: true,
       render: (order) => (
         <span className="font-semibold text-gray-900">
-          ${Number(order.total_amount).toFixed(2)}
+          ₹{Number(order.total_amount).toFixed(2)}
         </span>
       )
     },
@@ -127,13 +146,21 @@ export const OrdersList: React.FC = () => {
       )
     },
     {
-      key: 'payment_status',
+      key: 'payment_method',
       label: 'Payment',
-      render: (order) => (
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(order.payment_status)}`}>
-          {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
-        </span>
-      )
+      render: (order) => {
+        return (
+          <div className="flex flex-col">
+            <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(order.payment_status)}`}>
+              {getPaymentMethodIcon(order.payment_method)}
+              <span className="ml-1">{getPaymentMethodName(order.payment_method)}</span>
+            </span>
+            <span className="text-xs text-gray-500 mt-1">
+              {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+            </span>
+          </div>
+        );
+      }
     },
     {
       key: 'actions',
@@ -251,4 +278,3 @@ export const OrdersList: React.FC = () => {
     </div>
   );
 };
-

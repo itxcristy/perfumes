@@ -144,11 +144,12 @@ class ApiClient {
   // Authentication
   // ==========================================
 
-  async register(email: string, password: string, fullName: string) {
+  async register(email: string, password: string, fullName: string, role: string = 'customer') {
     const response = await this.post('/auth/register', {
       email,
       password,
       fullName,
+      role
     });
     if (response.token) {
       this.setToken(response.token);
@@ -320,6 +321,14 @@ class ApiClient {
     return this.get(`/orders/${id}`);
   }
 
+  async createOrder(data: any) {
+    return this.post('/orders', data);
+  }
+
+  async updateOrderStatus(orderId: string, status: string) {
+    return this.put(`/orders/${orderId}/status`, { status });
+  }
+
   // ==========================================
   // Payment Methods
   // ==========================================
@@ -362,6 +371,14 @@ class ApiClient {
 
   async updateNotificationPreferences(data: any) {
     return this.put('/notification-preferences', data);
+  }
+
+  // Add patch method
+  async patch<T = any>(endpoint: string, body: any = {}): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
   }
 }
 

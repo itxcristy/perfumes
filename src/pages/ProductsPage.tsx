@@ -58,10 +58,14 @@ const ProductsPage: React.FC = () => {
         discount: false
     });
 
+    // Initialize filters from URL parameters
+    const initialCategory = searchParams.get('category') || slug || '';
+    const initialSearch = searchParams.get('q') || '';
+
     // Filter State
     const [filters, setFilters] = useState<FilterState>({
-        category: slug || searchParams.get('category') || '',
-        search: searchParams.get('q') || '',
+        category: initialCategory,
+        search: initialSearch,
         priceRange: [0, 50000],
         rating: 0,
         brand: '',
@@ -118,8 +122,9 @@ const ProductsPage: React.FC = () => {
             );
         }
 
+        // Filter by category ID instead of category name
         if (filters.category) {
-            filtered = filtered.filter(p => p.category === filters.category);
+            filtered = filtered.filter(p => p.categoryId === filters.category);
         }
 
         filtered = filtered.filter(p => {
@@ -191,6 +196,8 @@ const ProductsPage: React.FC = () => {
             newParams.set('q', value);
         } else if (key === 'category' && value) {
             newParams.set('category', value);
+        } else if (key === 'category' && !value) {
+            newParams.delete('category');
         }
         setSearchParams(newParams);
     }, [searchParams, setSearchParams]);
@@ -209,7 +216,17 @@ const ProductsPage: React.FC = () => {
         setSearchParams({});
     };
 
-
+    // Update filters when URL parameters change
+    useEffect(() => {
+        const categoryParam = searchParams.get('category') || '';
+        const searchParam = searchParams.get('q') || '';
+        
+        setFilters(prev => ({
+            ...prev,
+            category: categoryParam,
+            search: searchParam
+        }));
+    }, [searchParams]);
 
     useEffect(() => {
         fetchProducts();
@@ -277,7 +294,9 @@ const ProductsPage: React.FC = () => {
                             <ArrowLeft className="h-5 w-5" />
                         </button>
                         <h1 className="text-lg font-semibold text-gray-900 flex-1 text-center">
-                            {filters.category || 'Products'}
+                            {filters.category 
+                                ? categories.find(c => c.id === filters.category)?.name || 'Products' 
+                                : 'Products'}
                         </h1>
                         <div className="flex items-center gap-2">
                             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -301,9 +320,11 @@ const ProductsPage: React.FC = () => {
                         <span className="mx-2">&gt;</span>
                         {filters.category ? (
                             <>
-                                <span>Products</span>
+                                <Link to="/products" className="hover:text-blue-600">Products</Link>
                                 <span className="mx-2">&gt;</span>
-                                <span className="text-gray-900">{filters.category}</span>
+                                <span className="text-gray-900">
+                                    {categories.find(c => c.id === filters.category)?.name || 'Category'}
+                                </span>
                             </>
                         ) : (
                             <span className="text-gray-900">All Products</span>
@@ -587,8 +608,8 @@ const DesktopFilters: React.FC<{
                                         <input
                                             type="radio"
                                             name="category"
-                                            checked={filters.category === category.name}
-                                            onChange={() => handleFilterChange('category', category.name)}
+                                            checked={filters.category === category.id}
+                                            onChange={() => handleFilterChange('category', category.id)}
                                             className="mr-2"
                                         />
                                         <span className="text-sm">{category.name}</span>
@@ -782,8 +803,8 @@ const MobileFilters: React.FC<{
                                     <input
                                         type="radio"
                                         name="category-mobile"
-                                        checked={filters.category === category.name}
-                                        onChange={() => handleFilterChange('category', category.name)}
+                                        checked={filters.category === category.id}
+                                        onChange={() => handleFilterChange('category', category.id)}
                                         className="mr-3 w-4 h-4"
                                     />
                                     <span className="text-sm">{category.name}</span>

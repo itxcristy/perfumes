@@ -23,12 +23,12 @@ const CategoriesPage = React.lazy(() => import('@/pages/CategoriesPage'));
 const CollectionsPage = React.lazy(() => import('@/pages/CollectionsPage'));
 const AuthPage = React.lazy(() => import('@/pages/AuthPage'));
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'));
+const AboutPage = React.lazy(() => import('@/pages/AboutPage')); // Added About page
 
 // Heavy admin/dashboard pages - loaded only when needed
 const DashboardPage = React.lazy(() =>
   import('./pages/DashboardPage.tsx').then(module => ({ default: module.default }))
 );
-const AdminLoginPage = React.lazy(() => import('./pages/AdminLoginPage'));
 const ProfilePage = React.lazy(() =>
   import('./pages/ProductionProfilePage.tsx').then(module => ({ default: module.default }))
 );
@@ -47,7 +47,8 @@ const SettingsPage = React.lazy(() =>
 // Universal optimized loading fallback component
 const PageLoadingFallback = memo(() => (
   <div className="min-h-screen bg-white">
-    {/* Show immediate header skeleton */}
+    {/* Show immediate header skeleton */
+    }
     <div className="h-16 bg-white shadow-sm animate-pulse">
       <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
         <div className="h-8 w-32 bg-gray-200 rounded"></div>
@@ -55,7 +56,8 @@ const PageLoadingFallback = memo(() => (
       </div>
     </div>
 
-    {/* Show hero skeleton */}
+    {/* Show hero skeleton */
+    }
     <div className="min-h-[50vh] bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
       <div className="text-center">
         <div className="h-12 w-80 bg-white/20 rounded mb-4 mx-auto"></div>
@@ -106,9 +108,6 @@ function App() {
           <SkipLink href="#main-content">Skip to main content</SkipLink>
           <Suspense fallback={<PageLoadingFallback />}>
             <Routes>
-              {/* Admin login - NO Layout wrapper */}
-              <Route path="/admin/login" element={<AdminLoginPage />} />
-
               {/* Admin routes - NO Layout wrapper (has its own AdminLayout) */}
               <Route path="/admin/*" element={<DashboardPage />} />
 
@@ -135,6 +134,7 @@ function App() {
                       <Route path="/collections" element={<CollectionsPage />} />
                       <Route path="/collections/:slug" element={<ProductsPage />} />
                       <Route path="/auth" element={<AuthPage />} />
+                      <Route path="/about" element={<AboutPage />} /> {/* Added About route */}
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </main>

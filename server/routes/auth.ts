@@ -13,7 +13,7 @@ const router = Router();
 router.post(
   '/register',
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { email, password, fullName } = req.body;
+    const { email, password, fullName, role = 'customer' } = req.body;
 
     // Validation
     if (!email || !password || !fullName) {
@@ -23,6 +23,10 @@ router.post(
     if (password.length < 8) {
       throw createError('Password must be at least 8 characters', 400, 'VALIDATION_ERROR');
     }
+
+    // Validate role
+    const validRoles = ['admin', 'seller', 'customer'];
+    const userRole = validRoles.includes(role) ? role : 'customer';
 
     // Check if user exists
     const existingUser = await query(
@@ -42,7 +46,7 @@ router.post(
       `INSERT INTO public.profiles (email, password_hash, full_name, role)
        VALUES ($1, $2, $3, $4)
        RETURNING id, email, full_name, role, created_at`,
-      [email, passwordHash, fullName, 'customer']
+      [email, passwordHash, fullName, userRole]
     );
 
     const user = result.rows[0];
@@ -194,4 +198,3 @@ router.put(
 );
 
 export default router;
-

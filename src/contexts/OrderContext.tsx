@@ -41,8 +41,6 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [user, showNotification]);
 
-
-
   // Initial fetch
   useEffect(() => {
     fetchUserOrders();
@@ -69,7 +67,7 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const response = await apiClient.createOrder({
         items,
         shippingAddress,
-        billingAddress: undefined,
+        billingAddress: shippingAddress, // For now, use shipping address as billing
         paymentMethod,
         total
       });
@@ -126,8 +124,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const getOrderById = async (orderId: string): Promise<Order | null> => {
     try {
-      const order = await getOrderByIdDB(orderId);
-      return order;
+      const response = await apiClient.getOrder(orderId);
+      return response.data || null;
     } catch (error) {
       console.error('Error fetching order:', error);
       // Check local orders as fallback
@@ -143,8 +141,8 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!targetUserId) return [];
 
     try {
-      const ordersData = await getOrders(targetUserId);
-      return ordersData;
+      const response = await apiClient.getOrders();
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching user orders:', error);
       return [];

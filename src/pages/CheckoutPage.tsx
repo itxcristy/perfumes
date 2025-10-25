@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, MapPin, Package, ArrowLeft, CheckCircle } from 'lucide-react';
+import { CreditCard, MapPin, Package, ArrowLeft, CheckCircle, Wallet } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrders } from '../contexts/OrderContext';
@@ -98,6 +98,12 @@ export const CheckoutPage: React.FC = () => {
     }
 
     if (currentStep === 2) {
+      // For COD, no validation needed
+      if (selectedPaymentMethod === 'cod') {
+        return true;
+      }
+      
+      // For other payment methods, validate card details
       if (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardName) {
         showNotification({
           type: 'error',
@@ -553,6 +559,28 @@ export const CheckoutPage: React.FC = () => {
                       required
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                    <input
+                      type="text"
+                      name="zipCode"
+                      value={formData.zipCode}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-8 flex justify-end">
@@ -579,65 +607,130 @@ export const CheckoutPage: React.FC = () => {
                   Payment Information
                 </h2>
 
-                {/* Payment Trust Badges */}
+                {/* Payment Method Selection */}
                 <div className="mb-6">
-                  <PaymentBadges className="mb-4" />
-                  <TrustBadges variant="compact" showLabels={false} className="justify-center" />
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Select Payment Method</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setSelectedPaymentMethod('razorpay')}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        selectedPaymentMethod === 'razorpay'
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-lg bg-blue-500 text-white">
+                          <CreditCard className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">Online Payment</div>
+                          <div className="text-sm text-gray-500">Credit/Debit Cards, UPI, Net Banking</div>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setSelectedPaymentMethod('cod')}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        selectedPaymentMethod === 'cod'
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-lg bg-gray-500 text-white">
+                          <Wallet className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">Cash on Delivery</div>
+                          <div className="text-sm text-gray-500">Pay when delivered</div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleInputChange}
-                      placeholder="1234 5678 9012 3456"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                    />
-                  </div>
+                {/* Payment Form (only for online payment) */}
+                {selectedPaymentMethod === 'razorpay' && (
+                  <div className="space-y-6">
+                    {/* Payment Trust Badges */}
+                    <div className="mb-6">
+                      <PaymentBadges className="mb-4" />
+                      <TrustBadges variant="compact" showLabels={false} className="justify-center" />
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
                       <input
                         type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
+                        name="cardNumber"
+                        value={formData.cardNumber}
                         onChange={handleInputChange}
-                        placeholder="MM/YY"
+                        placeholder="1234 5678 9012 3456"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
                       />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                        <input
+                          type="text"
+                          name="expiryDate"
+                          value={formData.expiryDate}
+                          onChange={handleInputChange}
+                          placeholder="MM/YY"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                        <input
+                          type="text"
+                          name="cvv"
+                          value={formData.cvv}
+                          onChange={handleInputChange}
+                          placeholder="123"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Name on Card</label>
                       <input
                         type="text"
-                        name="cvv"
-                        value={formData.cvv}
+                        name="cardName"
+                        value={formData.cardName}
                         onChange={handleInputChange}
-                        placeholder="123"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
                       />
                     </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Name on Card</label>
-                    <input
-                      type="text"
-                      name="cardName"
-                      value={formData.cardName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                    />
+                {/* COD Info */}
+                {selectedPaymentMethod === 'cod' && (
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <Wallet className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-900">
+                          Cash on Delivery
+                        </h3>
+                        <p className="text-sm text-blue-700 mt-1">
+                          You will pay ₹{finalTotal.toFixed(2)} in cash when your order is delivered.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="mt-8 flex justify-between">
                   <motion.button
@@ -698,6 +791,41 @@ export const CheckoutPage: React.FC = () => {
                   ))}
                 </div>
 
+                {/* Order Summary */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <h3 className="font-medium text-gray-900 mb-3">Order Summary</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span>₹{subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">GST (18%)</span>
+                      <span>₹{gst.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shipping</span>
+                      <span>
+                        {shipping === 0 ? (
+                          <span className="text-green-600">FREE</span>
+                        ) : (
+                          `₹${shipping.toFixed(2)}`
+                        )}
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-200 pt-2 flex justify-between font-medium">
+                      <span>Total</span>
+                      <span className="text-indigo-600">₹{finalTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between pt-2">
+                      <span className="text-gray-600">Payment Method</span>
+                      <span className="font-medium">
+                        {selectedPaymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Security Guarantee */}
                 <SecurityGuarantee className="mb-6" />
 
@@ -712,7 +840,7 @@ export const CheckoutPage: React.FC = () => {
                   </motion.button>
                   <motion.button
                     onClick={handlePlaceOrder}
-                    className="btn-primary !bg-green-600 !hover:bg-green-700 !focus:ring-green-600/20"
+                    className={`btn-primary ${selectedPaymentMethod === 'cod' ? '!bg-green-600 !hover:bg-green-700 !focus:ring-green-600/20' : ''}`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -760,6 +888,28 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Payment Method Info */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  {selectedPaymentMethod === 'cod' ? (
+                    <>
+                      <Wallet className="h-5 w-5 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-900">Cash on Delivery</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-5 w-5 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-900">Online Payment</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  {selectedPaymentMethod === 'cod' 
+                    ? 'You will pay when your order is delivered' 
+                    : 'Secure online payment via Razorpay'}
+                </p>
+              </div>
+
               {/* Checkout Trust Signals */}
               <CheckoutTrustSignals />
             </div>
@@ -768,7 +918,7 @@ export const CheckoutPage: React.FC = () => {
       </div>
 
       {/* Razorpay Payment Modal */}
-      {showPaymentModal && (
+      {showPaymentModal && selectedPaymentMethod !== 'cod' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-md w-full">
             <RazorpayPayment

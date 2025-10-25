@@ -29,8 +29,8 @@ export const CategoryDisplayCard: React.FC<CategoryDisplayCardProps> = ({ catego
     "Quran Collection": quranCollectionImg,
   };
 
-  // Use specific image if available, otherwise fallback to category.image
-  const categoryImage = categoryImages[category.name] || category.image;
+  // Use specific image if available, otherwise fallback to category.imageUrl
+  const categoryImage = categoryImages[category.name] || category.imageUrl;
 
   // Mobile-specific styling
   const cardClasses = isMobile
@@ -46,7 +46,7 @@ export const CategoryDisplayCard: React.FC<CategoryDisplayCardProps> = ({ catego
     : "text-sm font-semibold";
 
   return (
-    <Link to={`/categories/${category.slug}`}>
+    <Link to={`/products?category=${category.id}`}>
       <div className={cardClasses}>
         <img
           src={categoryImage}

@@ -92,9 +92,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<void> => {
     try {
       setLoading(true);
-      // Extract fullName from additionalData or use default
+      // Extract fullName and role from additionalData or use defaults
       const fullName = (additionalData?.fullName as string) || 'User';
-      const response = await apiClient.register(email, password, fullName);
+      const role = (additionalData?.role as string) || 'customer';
+      const response = await apiClient.register(email, password, fullName, role);
 
       if (response.token && response.user) {
         // Ensure token is set in apiClient
