@@ -285,18 +285,6 @@ class ApiClient {
   }
 
   // ==========================================
-  // Orders
-  // ==========================================
-
-  async getOrders() {
-    return this.get('/orders');
-  }
-
-  async getOrder(id: string) {
-    return this.get(`/orders/${id}`);
-  }
-
-  // ==========================================
   // Addresses
   // ==========================================
 
