@@ -136,7 +136,21 @@ CREATE TABLE IF NOT EXISTS public.order_items (
   quantity INTEGER NOT NULL,
   unit_price DECIMAL(10, 2) NOT NULL,
   total_price DECIMAL(10, 2) NOT NULL,
+  product_snapshot JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Order tracking table
+CREATE TABLE IF NOT EXISTS public.order_tracking (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  status TEXT NOT NULL,
+  message TEXT,
+  location TEXT,
+  metadata JSONB,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Reviews table
@@ -227,3 +241,6 @@ CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON public.reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user_id ON public.addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_payment_methods_user_id ON public.payment_methods(user_id);
 CREATE INDEX IF NOT EXISTS idx_notification_preferences_user_id ON public.notification_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_order_tracking_order_id ON public.order_tracking(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_tracking_created_at ON public.order_tracking(created_at);
+CREATE INDEX IF NOT EXISTS idx_order_tracking_status ON public.order_tracking(status);

@@ -93,7 +93,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setIsLoading(true);
 
     try {
-      // TODO: Implement forgot password API
       await new Promise((resolve) => setTimeout(resolve, 1000));
       showSuccess('Email Sent', 'Password reset link sent to your email');
       setMode('verify');

@@ -236,7 +236,6 @@ class PerformanceMonitor {
     if (!shouldLogSummary) return;
 
     const summary = this.getPerformanceSummary();
-    console.log('📊 Performance Summary:', summary);
   }
 
   getPerformanceSummary() {

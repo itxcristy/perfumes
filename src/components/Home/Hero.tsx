@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Truck, RefreshCw, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Hero: React.FC = () => {
@@ -49,11 +49,11 @@ export const Hero: React.FC = () => {
   }, [backgroundImages]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[85vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-950">
       {/* Dynamic Background Images */}
       <div className="absolute inset-0">
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60 z-10"></div>
+        {/* Professional overlay - deep, luxurious */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-purple-950/40 to-black/60 z-10"></div>
 
         {/* Background Images with Smooth Transition */}
         {backgroundImages.map((image, index) => (
@@ -67,55 +67,44 @@ export const Hero: React.FC = () => {
           />
         ))}
 
-        {/* Fallback gradient background */}
+        {/* Fallback warm background */}
         {!isLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-800 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-100 to-amber-200" />
         )}
       </div>
 
       {/* Main Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="font-['Poppins'] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight animate-fade-in-up">
-            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-white">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 md:mb-8 leading-tight">
+            <span className="block drop-shadow-lg">
               Aligarh Attars
             </span>
-            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-300 to-purple-500 mt-2 sm:mt-3 md:mt-4">
+            <span className="block text-purple-300 mt-2 md:mt-4 drop-shadow-lg">
               Welcomes You
             </span>
           </h1>
 
-          <p
-            className="font-['Poppins'] text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto leading-relaxed px-3 sm:px-6 animate-fade-in-up font-light"
-            style={{ animationDelay: '0.2s' }}
-          >
-            Curate your olfactory journey with our exclusive collection of premium fragrances,
-            each carefully selected to embody sophistication and timeless elegance.
+          <p className="text-lg sm:text-xl md:text-2xl text-purple-100 mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto drop-shadow-md">
+            Discover the timeless elegance of traditional Indian attars, crafted with passion and heritage
           </p>
 
-          <nav
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fade-in-up"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <Link to="/products" className="group">
-              <button
-                className="font-['Poppins'] bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-full text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl group-hover:shadow-purple-500/25 min-w-[160px]"
-              >
-                <span className="flex items-center space-x-2">
-                  <span>Shop Collection</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </button>
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
+            <Link
+              to="/products"
+              className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 md:px-10 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <ShoppingBag className="h-5 w-5" />
+              <span>Explore Collection</span>
             </Link>
-
-            <Link to="/products" className="group">
-              <button
-                className="font-['Poppins'] border-2 border-white/80 hover:border-white bg-white/10 hover:bg-white hover:text-black backdrop-blur-sm text-white font-semibold py-3 px-6 rounded-full text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl min-w-[160px]"
-              >
-                Find Your Scent
-              </button>
+            <Link
+              to="/about"
+              className="w-full sm:w-auto bg-white hover:bg-purple-50 text-purple-900 px-8 md:px-10 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-200 shadow-lg flex items-center justify-center gap-2 border-2 border-white/20"
+            >
+              <span>Learn More</span>
+              <ArrowRight className="h-5 w-5" />
             </Link>
-          </nav>
+          </div>
         </div>
       </div>
 

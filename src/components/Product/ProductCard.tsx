@@ -25,7 +25,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    // TODO: Add analytics tracking for wishlist toggle
     handleAddToWishlist(product);
   };
 
@@ -43,13 +42,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
 
   return (
     <div
-      className={`product-card group flex ${isListView ? 'flex-row' : 'flex-col'} h-full bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 touch-manipulation`}
+      className={`product-card group flex ${isListView ? 'flex-row gap-2.5' : 'flex-col'} bg-white shadow-sm hover:shadow-md transition-shadow duration-200 touch-manipulation ${isListView ? 'p-3 rounded-none border-b border-gray-200 min-h-[160px]' : 'h-full rounded-lg overflow-hidden border border-gray-100'
+        }`}
     >
-      <div className={`relative overflow-hidden group/image bg-gray-50 ${isListView ? 'w-32 sm:w-40 md:w-48 h-full flex-shrink-0' : ''}`}>
+      {/* Image Container - Amazon-style square image */}
+      <div className={`relative overflow-hidden group/image bg-gray-50 flex-shrink-0 ${isListView
+        ? 'w-[140px] h-[140px] rounded-md'
+        : ''
+        }`}>
 
         <Link to={`/products/${product.id}`} className="block h-full">
-          {/* Amazon-style 4:3 aspect ratio for better grid display, full height for list view */}
-          <div className={`${isListView ? 'h-full' : 'aspect-[4/3]'} relative overflow-hidden`}>
+          {/* Fixed aspect ratio: 1:1 for list view, 4:3 for grid view */}
+          <div className={`${isListView ? 'w-full h-full' : 'aspect-[4/3]'} relative overflow-hidden`}>
             <ProductImage
               product={product}
               className="w-full h-full object-cover"
@@ -83,24 +87,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
           </div>
         </Link>
 
-        {/* Amazon-Style Status Badges */}
-        <div className="absolute top-2 left-2 flex flex-col space-y-1 z-10">
-          {discount > 0 && (
-            <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-sm">
-              -{discount}% OFF
+        {/* Discount Badge - Amazon style */}
+        {discount > 0 && (
+          <div className={`absolute ${isListView ? 'top-1 left-1' : 'top-2 left-2'} z-10`}>
+            <span className={`bg-red-600 text-white font-bold shadow-sm ${isListView ? 'text-[11px] px-1.5 py-1 rounded-sm' : 'text-[10px] px-1.5 py-0.5 rounded'
+              }`}>
+              {discount}% off
             </span>
-          )}
+          </div>
+        )}
 
-          {product.featured && (
+        {/* Trending Badge - Grid view only */}
+        {product.featured && !isListView && (
+          <div className="absolute top-2 left-2 z-10">
             <TrendingIndicator isHot={true} className="shadow-sm" />
-          )}
-
-          {product.stock <= 0 && (
-            <span className="bg-gray-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium shadow-sm">
-              Out of Stock
-            </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Amazon-Style Action Buttons with mobile touch optimization - Hidden in list view */}
         {!isListView && (
@@ -125,7 +127,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                // TODO: Add analytics tracking for add to cart
                 if (product.stock > 0) {
                   handleAddToCart(product);
                 }
@@ -145,85 +146,117 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
         )}
       </div>
 
-      {/* Amazon-Style Product Information with mobile optimization */}
-      <div className={`p-2.5 sm:p-3 flex flex-col flex-grow ${isListView ? 'ml-3 sm:ml-4 flex-1' : ''}`}>
+      {/* Product Information - Amazon-style layout with buttons on right */}
+      <div className={`flex ${isListView ? 'flex-row flex-1 gap-2' : 'flex-col flex-1'} min-w-0 ${isListView ? '' : 'p-2.5 sm:p-3'}`}>
 
-        <div className="space-y-1">
-          <span className="text-[10px] sm:text-xs text-gray-600 uppercase tracking-wide font-medium">
-            {product.category}
-          </span>
+        {/* Left side: Product details */}
+        <div className={`flex flex-col flex-1 min-w-0 ${isListView ? 'justify-start' : ''}`}>
+
+          {/* Product Name - Prominent */}
           <Link to={`/products/${product.id}`}>
-            <h3 className={`font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200 ${isListView ? 'text-sm sm:text-base line-clamp-2' : 'text-xs sm:text-sm line-clamp-2 leading-4'}`}>
+            <h3 className={`font-normal text-gray-900 group-hover:text-orange-600 transition-colors duration-200 line-clamp-2 ${isListView ? 'text-[14px] leading-tight mb-1' : 'text-xs sm:text-sm leading-4'
+              }`}>
               {product.name}
             </h3>
           </Link>
-        </div>
 
-        <div className="flex-grow"></div>
+          {/* Rating and Reviews */}
+          <div className={`flex flex-col ${isListView ? 'gap-1 mb-1' : 'gap-1 mt-2'}`}>
+            {/* Rating - Amazon style */}
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={`${product.id}-star-${i}`}
+                    className={`${isListView ? 'h-3 w-3' : 'h-2.5 w-2.5 sm:h-3 sm:w-3'} ${i < Math.floor(product.rating)
+                      ? 'text-orange-400 fill-current'
+                      : 'text-gray-300'
+                      }`}
+                  />
+                ))}
+              </div>
+              <span className={`${isListView ? 'text-xs' : 'text-[10px]'} text-blue-600 font-medium`}>
+                {product.rating}
+              </span>
+            </div>
 
-        {/* Rating */}
-        <div className="flex items-center space-x-0.5 sm:space-x-1 mt-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={`${product.id}-star-${i}`}
-              className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
-                ? 'text-yellow-400 fill-current'
-                : 'text-gray-300'
-                }`}
-            />
-          ))}
-          <span className="text-[10px] text-gray-600 ml-0.5">({product.rating})</span>
-        </div>
+            {/* Price - Large and prominent */}
+            <div className="flex items-baseline gap-2">
+              <span className={`font-bold text-gray-900 ${isListView ? 'text-xl' : 'text-sm sm:text-base'}`}>
+                ₹{product.price.toLocaleString('en-IN')}
+              </span>
+              {product.originalPrice && (
+                <>
+                  <span className={`text-gray-500 line-through ${isListView ? 'text-sm' : 'text-[10px]'}`}>
+                    ₹{product.originalPrice.toLocaleString('en-IN')}
+                  </span>
+                  {discount > 0 && (
+                    <span className={`text-red-600 font-medium ${isListView ? 'text-xs' : 'text-[10px]'}`}>
+                      ({discount}% off)
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
 
-        {/* Price */}
-        <div className="flex items-center space-x-1.5 mt-1">
-          <span className="text-sm sm:text-base font-bold text-gray-900">
-            ₹{product.price.toLocaleString('en-IN')}
-          </span>
-          {product.originalPrice && (
-            <span className="text-[10px] sm:text-xs text-gray-500 line-through">
-              ₹{product.originalPrice.toLocaleString('en-IN')}
-            </span>
+            {/* Delivery Info - Amazon style */}
+            {isListView && (
+              <div className="flex items-center">
+                <span className="text-[11px] text-gray-700">
+                  {product.stock > 0 ? 'Get it by Tomorrow' : 'Currently unavailable'}
+                </span>
+              </div>
+            )}
+
+            {/* Prime Badge - Amazon style (optional) */}
+            {isListView && product.featured && (
+              <div className="flex items-center mt-1">
+                <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
+                  prime
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Section: Stock and Trust Indicators (Grid View Only) */}
+          {!isListView && (
+            <>
+              <div className="flex items-center justify-between mt-1">
+                <span className={`text-[10px] font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                  {product.stock > 0 ? (product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`) : 'Out of stock'}
+                </span>
+              </div>
+
+              <div className="pt-1.5 border-t border-gray-100 mt-2">
+                <MiniTrustIndicators
+                  freeShipping={product.price >= 2000}
+                  warranty={true}
+                  returns={true}
+                  className="justify-center scale-75"
+                />
+              </div>
+            </>
           )}
         </div>
 
-        {/* Stock Status */}
-        <div className="flex items-center justify-between mt-1">
-          <span className={`text-[10px] font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'
-            }`}>
-            {product.stock > 0 ? (product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`) : 'Out of stock'}
-          </span>
-          {discount > 0 && (
-            <span className="bg-red-100 text-red-700 text-[10px] font-semibold px-1 py-0.5 rounded">
-              {discount}% OFF
-            </span>
-          )}
-        </div>
-
-        {/* Trust Indicators */}
-        <div className="pt-1.5 border-t border-gray-100 mt-2">
-          <MiniTrustIndicators
-            freeShipping={product.price >= 2000}
-            warranty={true}
-            returns={true}
-            className="justify-center scale-75"
-          />
-        </div>
-
-        {/* Action Buttons for List View - Only shown in list view */}
+        {/* Right side: Action buttons for list view */}
         {isListView && (
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100">
+          <div className="flex flex-col gap-2 justify-center items-end flex-shrink-0">
+            {/* Wishlist Button */}
             <button
               onClick={handleWishlistToggle}
-              className={`p-2 rounded-full shadow-sm border transition-colors duration-200 ${
-                isInWishlist(product.id)
-                  ? 'bg-red-50 text-red-600 border-red-200'
-                  : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
-              } touch-manipulation`}
+              className={`p-2 rounded-md border transition-colors duration-200 ${isInWishlist(product.id)
+                ? 'bg-red-50 text-red-600 border-red-200'
+                : 'bg-white text-gray-600 hover:text-red-500 border-gray-200 hover:border-red-200'
+                } touch-manipulation`}
+              style={{ minWidth: '40px', minHeight: '40px' }}
+              aria-label="Add to wishlist"
             >
               <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
-            
+
+            {/* Add to Cart Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -233,14 +266,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
                 }
               }}
               disabled={product.stock === 0}
-              className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                product.stock === 0
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
-              } touch-manipulation min-w-[120px]`}
+              className={`px-3 py-2 rounded-md font-medium transition-colors duration-200 whitespace-nowrap ${product.stock === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700'
+                } touch-manipulation`}
+              style={{ minHeight: '40px' }}
             >
-              <ShoppingCart className="h-4 w-4" />
-              <span className="text-sm font-medium">
+              <span className="text-xs font-medium">
                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
               </span>
             </button>

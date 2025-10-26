@@ -201,7 +201,6 @@ export class CircuitBreaker {
         this.state = 'half-open';
         this.halfOpenSuccesses = 0;
         this.metrics.circuitBreakerEvents++;
-        console.log('Circuit breaker moving to half-open state');
       } else {
         // Circuit is still open, reject request
         throw new Error('Circuit breaker is open - service unavailable');
@@ -214,7 +213,6 @@ export class CircuitBreaker {
       // Handle successful request in half-open state
       if (this.state === 'half-open') {
         this.halfOpenSuccesses++;
-        console.log(`Circuit breaker half-open success ${this.halfOpenSuccesses}/${this.config.halfOpenAttempts}`);
         
         // If we've had enough successful attempts, close the circuit
         if (this.halfOpenSuccesses >= this.config.halfOpenAttempts) {
@@ -222,7 +220,6 @@ export class CircuitBreaker {
           this.failures = 0;
           this.failureTimestamps = []; // Clear failure history
           this.metrics.circuitBreakerEvents++;
-          console.log('Circuit breaker closed after successful half-open attempts');
         }
       } else {
         // Normal success in closed state
@@ -258,7 +255,6 @@ export class CircuitBreaker {
       
       if (shouldOpenCircuit) {
         this.state = 'open';
-        console.log(`Circuit breaker opened after ${this.failures} failures`);
       }
       
       throw error;
@@ -316,13 +312,11 @@ export class OfflineRequestQueue {
     
     // Process queue when coming back online
     window.addEventListener('online', () => {
-      console.log('Network online, processing offline queue');
       this.processQueue();
     });
 
     // Persist queue to localStorage when going offline
     window.addEventListener('offline', () => {
-      console.log('Network offline, persisting queue');
       this.persistQueue();
     });
 
@@ -382,7 +376,6 @@ export class OfflineRequestQueue {
       return;
     }
 
-    console.log(`Processing offline queue with ${this.queue.length} requests`);
     this.isProcessing = true;
 
     // Sort by priority before processing
@@ -408,7 +401,6 @@ export class OfflineRequestQueue {
             item.resolve(result);
             // Remove from queue
             this.queue = this.queue.filter(q => q.id !== item.id);
-            console.log(`Successfully processed request ${item.id}`);
           } catch (error) {
             item.retries++;
             
@@ -432,18 +424,15 @@ export class OfflineRequestQueue {
 
     // Process high priority requests first
     if (highPriorityRequests.length > 0) {
-      console.log(`Processing ${highPriorityRequests.length} high priority requests`);
       await processBatch(highPriorityRequests, 3);
     }
 
     // Then process other requests
     if (otherRequests.length > 0) {
-      console.log(`Processing ${otherRequests.length} other requests`);
       await processBatch(otherRequests, 2);
     }
 
     this.isProcessing = false;
-    console.log(`Finished processing queue. Remaining requests: ${this.queue.length}`);
     
     // Persist any remaining requests
     if (this.queue.length > 0) {
@@ -469,13 +458,11 @@ export class OfflineRequestQueue {
       const isOld = now - item.timestamp > this.maxAge;
       if (isOld) {
         item.reject(new Error('Request expired'));
-        console.log(`Removed expired request ${item.id}`);
       }
       return !isOld;
     });
     
     if (initialLength !== this.queue.length) {
-      console.log(`Cleaned up ${initialLength - this.queue.length} expired requests`);
     }
   }
 
@@ -511,7 +498,6 @@ export class OfflineRequestQueue {
     });
     this.queue = [];
     this.clearPersistedQueue();
-    console.log('Offline request queue cleared');
   }
 
   cancelRequestsByTag(tag: string) {
@@ -520,14 +506,12 @@ export class OfflineRequestQueue {
     this.queue = this.queue.filter(item => {
       if (item && item.tags && item.tags.includes(tag)) {
         item.reject(new Error(`Request cancelled by tag: ${tag}`));
-        console.log(`Cancelled request ${item.id} with tag ${tag}`);
         return false;
       }
       return true;
     });
     
     if (initialLength !== this.queue.length) {
-      console.log(`Cancelled ${initialLength - this.queue.length} requests with tag ${tag}`);
       // Update persisted queue if any requests were cancelled
       if (this.queue.some(item => item.persist)) {
         this.persistQueue();
@@ -556,7 +540,6 @@ export class OfflineRequestQueue {
       
       if (persistableItems.length > 0) {
         localStorage.setItem(this.persistenceKey, JSON.stringify(persistableItems));
-        console.log(`Persisted ${persistableItems.length} requests to localStorage`);
       } else {
         // Clear persisted queue if no items to persist
         this.clearPersistedQueue();
@@ -572,7 +555,6 @@ export class OfflineRequestQueue {
       const persistedData = localStorage.getItem(this.persistenceKey);
       if (persistedData) {
         const persistedItems = JSON.parse(persistedData);
-        console.log(`Loaded ${persistedItems.length} persisted requests from localStorage`);
         // Note: We can't recreate the actual request functions, so we just log them
         // In a real implementation, you'd need to recreate the requests based on the stored data
       }
@@ -585,7 +567,6 @@ export class OfflineRequestQueue {
   private clearPersistedQueue() {
     try {
       localStorage.removeItem(this.persistenceKey);
-      console.log('Cleared persisted offline queue from localStorage');
     } catch (error) {
       console.error('Failed to clear persisted offline queue:', error);
     }
@@ -594,10 +575,8 @@ export class OfflineRequestQueue {
   // Sync method to manually trigger queue processing
   async sync() {
     if (navigator.onLine) {
-      console.log('Manual sync triggered');
       await this.processQueue();
     } else {
-      console.log('Manual sync skipped - device is offline');
     }
   }
 }

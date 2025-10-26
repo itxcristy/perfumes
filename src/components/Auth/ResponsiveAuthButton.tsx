@@ -60,7 +60,6 @@ export const ResponsiveAuthButton: React.FC<ResponsiveAuthButtonProps> = ({
         open('login');
       } else {
         // For desktop, you might want to open a modal or redirect
-        console.log('Open desktop auth modal');
       }
     }
   };

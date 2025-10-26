@@ -81,7 +81,6 @@ export const CustomerProfilePage: React.FC = () => {
                     const file = e.target.files?.[0];
                     if (file) {
                       // In a real app, you would upload the file and update the avatar URL
-                      console.log('Uploading avatar:', file);
                     }
                   }}
                 />

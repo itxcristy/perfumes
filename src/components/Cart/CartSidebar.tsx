@@ -11,6 +11,12 @@ interface CartSidebarProps {
 export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeItem, total, clearCart, loading, itemCount } = useCart();
 
+  // Debug logging
+  React.useEffect(() => {
+    if (isOpen) {
+    }
+  }, [isOpen, items, total, itemCount]);
+
   return (
     <>
       {isOpen && (
@@ -67,7 +73,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
 
                         return (
                           <div
-                            key={item.product.id}
+                            key={item.id || item.product.id}
                             className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg animate-fade-in"
                           >
                             <img
@@ -84,7 +90,11 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
 
                               <div className="flex items-center space-x-2 mt-2">
                                 <button
-                                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                                  onClick={() => {
+                                    if (item.quantity > 1) {
+                                      updateQuantity(item.id!, item.quantity - 1);
+                                    }
+                                  }}
                                   className="p-1 hover:bg-gray-100 rounded"
                                   aria-label={`Decrease quantity of ${item.product.name}`}
                                   disabled={item.quantity <= 1}
@@ -95,7 +105,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                                   {item.quantity}
                                 </span>
                                 <button
-                                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                  onClick={() => updateQuantity(item.id!, item.quantity + 1)}
                                   className="p-1 hover:bg-gray-100 rounded"
                                   aria-label={`Increase quantity of ${item.product.name}`}
                                 >
@@ -109,7 +119,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => 
                                 ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
                               </p>
                               <button
-                                onClick={() => removeItem(item.product.id)}
+                                onClick={() => removeItem(item.id!)}
                                 className="text-red-500 text-sm hover:text-red-700 mt-1"
                                 aria-label={`Remove ${item.product.name} from cart`}
                               >

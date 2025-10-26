@@ -68,16 +68,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (user) {
         const response = await apiClient.getCart();
-        setItems(response.items || []);
+
+        // Handle both response formats: { items: [...] } and { data: { items: [...] } }
+        const cartItems = response.items || response.data?.items || response.data || [];
+
+        setItems(cartItems);
       } else {
         const guestItems = loadGuestCart();
         setItems(guestItems);
       }
     } catch (error) {
+      console.error('🛒 Error fetching cart:', error);
       if (user) {
         // If API fails for authenticated user, show error
         showNotification({ type: 'error', title: 'Error', message: 'Failed to load cart' });
       }
+      // Set empty cart on error
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -104,12 +111,30 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         await fetchCart();
         showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added to your cart.` });
       } else {
-        const newItem: CartItem = {
-          product,
-          quantity,
-          ...(variantId && { variantId }), // Only include variantId if it's provided
-        };
-        const updatedCart = [...guestCart, newItem];
+        // Check if item already exists in guest cart
+        const existingItemIndex = guestCart.findIndex(
+          item => item.product.id === product.id && item.variantId === variantId
+        );
+
+        let updatedCart: CartItem[];
+        if (existingItemIndex >= 0) {
+          // Update quantity of existing item
+          updatedCart = guestCart.map((item, index) =>
+            index === existingItemIndex
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        } else {
+          // Add new item with a unique ID
+          const newItem: CartItem = {
+            id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            product,
+            quantity,
+            ...(variantId && { variantId }), // Only include variantId if it's provided
+          };
+          updatedCart = [...guestCart, newItem];
+        }
+
         saveGuestCart(updatedCart);
         setItems(updatedCart);
         showNotification({ type: 'success', title: 'Added to Cart', message: `${product.name} has been added to your cart.` });
@@ -172,11 +197,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Calculate totals with null checks
   const subtotal = items.reduce((sum, item) => {
     if (item.product && typeof item.product.price === 'number') {
-      return sum + (item.product.price * item.quantity);
+      const itemTotal = item.product.price * item.quantity;
+      return sum + itemTotal;
     }
+    console.warn('🛒 Item missing product or price:', item);
     return sum;
   }, 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
 
   // Wrapper functions to match type definitions
   const addItem = useCallback(async (product: Product, quantity: number = 1, variantId?: string) => {

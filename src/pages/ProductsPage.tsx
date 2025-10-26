@@ -50,6 +50,7 @@ const ProductsPage: React.FC = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [expandedFilters, setExpandedFilters] = useState({
         category: true,
         price: true,
@@ -220,7 +221,7 @@ const ProductsPage: React.FC = () => {
     useEffect(() => {
         const categoryParam = searchParams.get('category') || '';
         const searchParam = searchParams.get('q') || '';
-        
+
         setFilters(prev => ({
             ...prev,
             category: categoryParam,
@@ -239,6 +240,17 @@ const ProductsPage: React.FC = () => {
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Handle window resize for mobile detection and auto list view
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // PWA-like back button handler
@@ -282,7 +294,7 @@ const ProductsPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Mobile App-like Header */}
-            <div className={`bg-white border-b sticky top-0 z-50 transition-all duration-200 ${isScrolled ? 'shadow-md' : ''
+            <div className={`bg-white border-b sticky top-0 z-30 transition-all duration-200 ${isScrolled ? 'shadow-md' : ''
                 }`}>
                 <div className="px-4 py-3">
                     {/* Mobile Header */}
@@ -294,8 +306,8 @@ const ProductsPage: React.FC = () => {
                             <ArrowLeft className="h-5 w-5" />
                         </button>
                         <h1 className="text-lg font-semibold text-gray-900 flex-1 text-center">
-                            {filters.category 
-                                ? categories.find(c => c.id === filters.category)?.name || 'Products' 
+                            {filters.category
+                                ? categories.find(c => c.id === filters.category)?.name || 'Products'
                                 : 'Products'}
                         </h1>
                         <div className="flex items-center gap-2">
@@ -518,13 +530,18 @@ const ProductsPage: React.FC = () => {
                             </button>
                         </div>
                     ) : (
-                        <div className={`${viewMode === 'grid'
-                            ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4'
-                            : 'space-y-3 md:space-y-4'
+                        <div className={`${
+                            // Force list view on mobile (< 768px), use viewMode on desktop
+                            isMobile || viewMode === 'list'
+                                ? 'space-y-3 md:space-y-4'
+                                : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4'
                             }`}>
                             {sortedProducts.map(product => (
-                                <div key={product.id} className={viewMode === 'list' ? '' : ''}>
-                                    <ProductCard product={product} isListView={viewMode === 'list'} />
+                                <div key={product.id}>
+                                    <ProductCard
+                                        product={product}
+                                        isListView={isMobile || viewMode === 'list'}
+                                    />
                                 </div>
                             ))}
                         </div>

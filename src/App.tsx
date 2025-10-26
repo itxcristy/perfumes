@@ -33,7 +33,7 @@ const ProfilePage = React.lazy(() =>
   import('./pages/ProductionProfilePage.tsx').then(module => ({ default: module.default }))
 );
 const CheckoutPage = React.lazy(() =>
-  import('./pages/CheckoutPage.tsx').then(module => ({ default: module.default }))
+  import('./pages/ImprovedCheckoutPage.tsx').then(module => ({ default: module.default }))
 );
 const OrdersPage = React.lazy(() =>
   import('./pages/OrdersPage.tsx').then(module => ({ default: module.default }))

@@ -102,7 +102,7 @@ export const CheckoutPage: React.FC = () => {
       if (selectedPaymentMethod === 'cod') {
         return true;
       }
-      
+
       // For other payment methods, validate card details
       if (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardName) {
         showNotification({
@@ -188,7 +188,6 @@ export const CheckoutPage: React.FC = () => {
       setShowPaymentModal(false);
       clearCart();
 
-      // TODO: Send order confirmation email
       try {
         // Email service will be implemented later
       } catch (emailError) {
@@ -374,6 +373,10 @@ export const CheckoutPage: React.FC = () => {
               shipping={shipping}
               tax={gst}
               total={finalTotal}
+              formData={formData}
+              selectedPaymentMethod={selectedPaymentMethod}
+              onEditShipping={() => setStep(1)}
+              onEditPayment={() => setStep(2)}
             />
           );
         default:
@@ -613,11 +616,10 @@ export const CheckoutPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       onClick={() => setSelectedPaymentMethod('razorpay')}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedPaymentMethod === 'razorpay'
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${selectedPaymentMethod === 'razorpay'
                           ? 'border-indigo-500 bg-indigo-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 rounded-lg bg-blue-500 text-white">
@@ -631,11 +633,10 @@ export const CheckoutPage: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setSelectedPaymentMethod('cod')}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedPaymentMethod === 'cod'
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${selectedPaymentMethod === 'cod'
                           ? 'border-indigo-500 bg-indigo-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 rounded-lg bg-gray-500 text-white">
@@ -904,8 +905,8 @@ export const CheckoutPage: React.FC = () => {
                   )}
                 </div>
                 <p className="text-xs text-gray-600 mt-1">
-                  {selectedPaymentMethod === 'cod' 
-                    ? 'You will pay when your order is delivered' 
+                  {selectedPaymentMethod === 'cod'
+                    ? 'You will pay when your order is delivered'
                     : 'Secure online payment via Razorpay'}
                 </p>
               </div>

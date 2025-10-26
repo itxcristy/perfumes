@@ -14,8 +14,9 @@ router.get(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await query(
-      `SELECT ci.id, ci.product_id, ci.variant_id, ci.quantity, 
-              p.name, p.price, p.images, p.stock,
+      `SELECT ci.id, ci.product_id, ci.variant_id, ci.quantity,
+              p.id as product_id, p.name, p.description, p.price, p.images, p.stock,
+              p.category_id, p.seller_id, p.rating, p.tags, p.sku,
               pv.name as variant_name, pv.price as variant_price
        FROM public.cart_items ci
        JOIN public.products p ON ci.product_id = p.id
@@ -25,17 +26,38 @@ router.get(
       [req.userId]
     );
 
+    // Transform flat structure to nested product structure
+    const items = result.rows.map((row: any) => ({
+      id: row.id,
+      quantity: row.quantity,
+      variantId: row.variant_id,
+      product: {
+        id: row.product_id,
+        name: row.name,
+        description: row.description || '',
+        price: row.variant_price || row.price,
+        images: row.images || [],
+        stock: row.stock,
+        categoryId: row.category_id,
+        sellerId: row.seller_id,
+        rating: row.rating || 0,
+        tags: row.tags || [],
+        sku: row.sku || '',
+        reviews: [],
+        sellerName: ''
+      }
+    }));
+
     // Calculate totals
     let subtotal = 0;
     let totalQuantity = 0;
-    result.rows.forEach((item: any) => {
-      const price = item.variant_price || item.price;
-      subtotal += price * item.quantity;
+    items.forEach((item: any) => {
+      subtotal += item.product.price * item.quantity;
       totalQuantity += item.quantity;
     });
 
     res.json({
-      items: result.rows,
+      items,
       subtotal,
       itemCount: totalQuantity,
     });

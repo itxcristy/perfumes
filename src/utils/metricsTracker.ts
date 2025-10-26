@@ -247,7 +247,6 @@ export class MetricsTracker {
   // Log metrics to console
   logMetrics() {
     const report = this.generateReport();
-    console.log('📊 Performance Metrics Report:', report);
   }
 
   // Send metrics to analytics service (placeholder)
@@ -257,7 +256,6 @@ export class MetricsTracker {
     // In a real implementation, this would send to an analytics service
     // For now, we'll just log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('📤 Sending metrics to analytics:', metricsReport);
     }
     
     // Example of how this might be implemented:

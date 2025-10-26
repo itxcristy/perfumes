@@ -64,8 +64,18 @@ export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setLoading(true);
 
     try {
+      // Transform cart items to order items format
+      const orderItems = items.map(item => ({
+        product_id: item.product.id,
+        productId: item.product.id, // Include both for compatibility
+        quantity: item.quantity,
+        price: item.product.price,
+        variantId: item.variantId
+      }));
+
+
       const response = await apiClient.createOrder({
-        items,
+        items: orderItems,
         shippingAddress,
         billingAddress: shippingAddress, // For now, use shipping address as billing
         paymentMethod,

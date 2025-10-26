@@ -62,9 +62,9 @@ export const OrdersPage: React.FC = () => {
         <div className="border-b border-gray-200 mb-8">
           <nav className="-mb-px flex space-x-8">
             {tabs.map((tab) => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${ activeTab === tab.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }`}>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === tab.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                 {tab.name}
-                {tab.count > 0 && <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${ activeTab === tab.id ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900' }`}>{tab.count}</span>}
+                {tab.count > 0 && <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${activeTab === tab.id ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900'}`}>{tab.count}</span>}
               </button>
             ))}
           </nav>
@@ -73,56 +73,56 @@ export const OrdersPage: React.FC = () => {
         {loading ? (
           <LoadingSpinner text="Loading your orders..." />
         ) : (
-        <div className="space-y-6">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-              <p className="text-gray-600">You haven't placed any orders yet.</p>
-              <Link to="/products" className="btn-primary mt-4 inline-block">
-                Start Shopping
-              </Link>
-            </div>
-          ) : (
-            filteredOrders.map((order, index) => (
-            <motion.div key={order.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 cursor-pointer" onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}>
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div><h3 className="text-lg font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3><p className="text-sm text-gray-600">Placed on {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</p></div>
-                    <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>{getStatusIcon(order.status)}<span className="capitalize">{order.status}</span></span>
-                  </div>
-                  <div className="flex items-center space-x-4 mt-4 lg:mt-0">
-                    <span className="text-lg font-bold text-gray-900">₹{order.total.toLocaleString('en-IN')}</span>
-                    <motion.div animate={{ rotate: expandedOrderId === order.id ? 180 : 0 }}><ChevronDown className="h-5 w-5 text-gray-500" /></motion.div>
-                  </div>
-                </div>
+          <div className="space-y-6">
+            {filteredOrders.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                <p className="text-gray-600">You haven't placed any orders yet.</p>
+                <Link to="/products" className="btn-primary mt-4 inline-block">
+                  Start Shopping
+                </Link>
               </div>
-              <AnimatePresence>
-                {expandedOrderId === order.id && (
-                  <motion.div initial="collapsed" animate="open" exit="collapsed" variants={{ open: { opacity: 1, height: 'auto' }, collapsed: { opacity: 0, height: 0 } }} transition={{ duration: 0.3, ease: 'easeInOut' }} className="overflow-hidden">
-                    <div className="p-6">
-                      {order.trackingHistory && (
-                        <OrderTracking history={convertToTrackingEvents(order.trackingHistory)} />
-                      )}
-                      <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-end">
-                        {order.items && order.items[0] && order.items[0].product && (
-                          <Link to={`/products/${order.items[0].product.id}#reviews`}>
-                            <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                              <Edit className="h-4 w-4" />
-                              <span>Write a Review</span>
-                            </button>
-                          </Link>
-                        )}
+            ) : (
+              filteredOrders.map((order, index) => (
+                <motion.div key={order.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 cursor-pointer" onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}>
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div><h3 className="text-lg font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3><p className="text-sm text-gray-600">Placed on {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</p></div>
+                        <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>{getStatusIcon(order.status)}<span className="capitalize">{order.status}</span></span>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-4 lg:mt-0">
+                        <span className="text-lg font-bold text-gray-900">₹{(order.total || 0).toLocaleString('en-IN')}</span>
+                        <motion.div animate={{ rotate: expandedOrderId === order.id ? 180 : 0 }}><ChevronDown className="h-5 w-5 text-gray-500" /></motion.div>
                       </div>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))
-          )}
-        </div>
+                  </div>
+                  <AnimatePresence>
+                    {expandedOrderId === order.id && (
+                      <motion.div initial="collapsed" animate="open" exit="collapsed" variants={{ open: { opacity: 1, height: 'auto' }, collapsed: { opacity: 0, height: 0 } }} transition={{ duration: 0.3, ease: 'easeInOut' }} className="overflow-hidden">
+                        <div className="p-6">
+                          {order.trackingHistory && (
+                            <OrderTracking history={convertToTrackingEvents(order.trackingHistory)} />
+                          )}
+                          <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-end">
+                            {order.items && order.items[0] && order.items[0].product && (
+                              <Link to={`/products/${order.items[0].product.id}#reviews`}>
+                                <button className="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                  <Edit className="h-4 w-4" />
+                                  <span>Write a Review</span>
+                                </button>
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))
+            )}
+          </div>
         )}
       </div>
     </div>

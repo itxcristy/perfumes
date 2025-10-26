@@ -46,21 +46,16 @@ export const ProductDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) {
-        console.log('No product ID provided');
         return;
       }
 
-      console.log('Fetching product with ID:', id);
       setLoading(true);
       try {
         const productData = await getProductById(id);
-        console.log('Product data received:', productData);
 
         if (productData && productData.data) {
-          console.log('Setting product:', productData.data);
           setProduct(productData.data);
         } else {
-          console.log('No product data in response');
           setProduct(null);
         }
       } catch (error) {

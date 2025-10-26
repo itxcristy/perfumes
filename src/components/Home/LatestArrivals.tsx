@@ -52,7 +52,7 @@ export const LatestArrivals: React.FC = memo(() => {
             <div className="text-center mt-12">
               <Link
                 to="/products?sort=latest"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Explore All New Arrivals
                 <ArrowRight className="h-5 w-5" />

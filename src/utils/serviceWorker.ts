@@ -28,24 +28,20 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
 
     // Skip service worker registration in development to avoid conflicts
     if (import.meta.env.DEV) {
-      console.log('🔧 Service Worker registration skipped in development mode');
       return null;
     }
 
     try {
-      console.log('🔧 Registering Service Worker...');
       
       this.registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
       });
 
-      console.log('✅ Service Worker registered successfully:', this.registration);
 
       // Handle updates
       this.registration.addEventListener('updatefound', () => {
         const newWorker = this.registration?.installing;
         if (newWorker) {
-          console.log('🔄 Service Worker update found');
           this.handleServiceWorkerUpdate(newWorker);
         }
       });
@@ -72,7 +68,6 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
 
     try {
       const result = await this.registration.unregister();
-      console.log('🗑️ Service Worker unregistered:', result);
       this.registration = null;
       
       if (this.updateCheckInterval) {
@@ -128,7 +123,6 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
   async prefetchResources(urls: string[]): Promise<void> {
     // Skip in development
     if (import.meta.env.DEV) {
-      console.log('🚀 Prefetching skipped in development');
       return;
     }
     
@@ -183,11 +177,9 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
       if (newWorker.state === 'installed') {
         if (navigator.serviceWorker.controller) {
           // New service worker available
-          console.log('🆕 New Service Worker available');
           this.showUpdateNotification();
         } else {
           // First time installation
-          console.log('🎉 Service Worker installed for the first time');
         }
       }
     });
@@ -201,17 +193,13 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
     
     switch (type) {
       case 'CACHE_UPDATED':
-        console.log('📦 Cache updated:', payload);
         break;
       case 'OFFLINE_READY':
-        console.log('📴 App ready for offline use');
         break;
       case 'UPDATE_AVAILABLE':
-        console.log('🔄 Update available');
         this.showUpdateNotification();
         break;
       default:
-        console.log('📨 SW Message:', event.data);
     }
   }
 
@@ -221,7 +209,6 @@ class ServiceWorkerManager implements ServiceWorkerAPI {
   private showUpdateNotification(): void {
     // In a real app, you'd show a proper notification UI
     // For now, we'll just log and could dispatch a custom event
-    console.log('🔔 Update notification: New version available');
     
     // Dispatch custom event for UI components to listen to
     window.dispatchEvent(new CustomEvent('sw-update-available', {
@@ -278,7 +265,6 @@ export class CacheManager {
   async prefetchCriticalResources(): Promise<void> {
     // Skip in development
     if (import.meta.env.DEV) {
-      console.log('🚀 Critical resource prefetching skipped in development');
       return;
     }
     
@@ -291,7 +277,6 @@ export class CacheManager {
 
     try {
       await this.sw.prefetchResources(criticalResources);
-      console.log('🚀 Critical resources prefetched');
     } catch (error) {
       console.error('❌ Failed to prefetch critical resources:', error);
     }
@@ -303,7 +288,6 @@ export class CacheManager {
   async prefetchRoute(route: string): Promise<void> {
     // Skip in development
     if (import.meta.env.DEV) {
-      console.log(`📍 Route prefetching skipped in development for: ${route}`);
       return;
     }
     
@@ -311,7 +295,6 @@ export class CacheManager {
     
     try {
       await this.sw.prefetchResources(routeResources);
-      console.log(`📍 Prefetched resources for route: ${route}`);
     } catch (error) {
       console.error(`❌ Failed to prefetch route ${route}:`, error);
     }
@@ -391,7 +374,6 @@ if (typeof window !== 'undefined') {
   window.addEventListener('load', () => {
     serviceWorkerManager.register().then((registration) => {
       if (registration) {
-        console.log('🎯 Service Worker registration completed');
         
         // Prefetch critical resources after registration
         cacheManager.prefetchCriticalResources().catch(console.error);
@@ -401,12 +383,10 @@ if (typeof window !== 'undefined') {
 
   // Listen for network status changes
   window.addEventListener('online', () => {
-    console.log('🌐 Back online - checking for updates');
     serviceWorkerManager.update().catch(console.error);
   });
 
   window.addEventListener('offline', () => {
-    console.log('📴 Gone offline - using cached resources');
   });
 }
 

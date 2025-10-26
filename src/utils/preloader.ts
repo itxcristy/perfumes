@@ -37,7 +37,6 @@ class DataPreloader {
 
     const preloadTask = async () => {
       try {
-        console.log(`🚀 Preloading product ${productId}...`);
         
         const product = await Promise.race([
           getProductById(productId),
@@ -49,7 +48,6 @@ class DataPreloader {
         if (product) {
           productCache.set(cacheKey, product, 5 * 60 * 1000); // 5 minute cache
           this.preloadedItems.add(cacheKey);
-          console.log(`✅ Preloaded product ${productId}`);
         }
       } catch (error) {
         console.warn(`⚠️ Failed to preload product ${productId}:`, error);
@@ -80,7 +78,6 @@ class DataPreloader {
 
     const preloadTask = async () => {
       try {
-        console.log(`🚀 Preloading products for category ${categoryId}...`);
         
         const products = await Promise.race([
           getProductsBasic({ categoryId, limit: 12 }),
@@ -92,7 +89,6 @@ class DataPreloader {
         if (products && products.length > 0) {
           productCache.set(cacheKey, products, 3 * 60 * 1000); // 3 minute cache
           this.preloadedItems.add(cacheKey);
-          console.log(`✅ Preloaded ${products.length} products for category ${categoryId}`);
         }
       } catch (error) {
         console.warn(`⚠️ Failed to preload category products ${categoryId}:`, error);
@@ -135,7 +131,6 @@ class DataPreloader {
         if (products && products.length > 0) {
           productCache.set(cacheKey, products, 2 * 60 * 1000); // 2 minute cache
           this.preloadedItems.add(cacheKey);
-          console.log(`✅ Preloaded next page with ${products.length} products`);
         }
       } catch (error) {
         console.warn(`⚠️ Failed to preload next page:`, error);
@@ -152,14 +147,12 @@ class DataPreloader {
   async preloadEssentials() {
     const preloadTask = async () => {
       try {
-        console.log('🚀 Preloading essential data...');
         
         // Preload categories if not cached
         const categoryCacheKey = generateCacheKey('categories');
         if (!categoryCache.has(categoryCacheKey)) {
           const categories = await getCategories();
           categoryCache.set(categoryCacheKey, categories);
-          console.log('✅ Preloaded categories');
         }
 
         // Preload featured products if not cached
@@ -167,7 +160,6 @@ class DataPreloader {
         if (!productCache.has(featuredCacheKey)) {
           const featuredProducts = await getProductsBasic({ featured: true, limit: 8 });
           productCache.set(featuredCacheKey, featuredProducts);
-          console.log('✅ Preloaded featured products');
         }
       } catch (error) {
         console.warn('⚠️ Failed to preload essentials:', error);
@@ -213,7 +205,6 @@ class DataPreloader {
     this.preloadQueue = [];
     this.preloadedItems.clear();
     this.isProcessing = false;
-    console.log('🧹 Cleared preloader cache and queue');
   }
 
   /**
@@ -253,7 +244,6 @@ class DataPreloader {
     // If user is viewing a product, preload related products
     if (currentPage?.startsWith('product-') && timeOnPage > 3000) {
       // Could implement related products preloading here
-      console.log('Product page detected, could preload related products');
     }
   }
 }

@@ -50,8 +50,8 @@ export default function HomePage() {
         <FeaturedProducts />
       </Suspense>
 
-      {/* Loved by Thousands Section (Replaces Best Sellers) */}
-      <Suspense fallback={<SectionLoader bgColor="bg-amber-50" />}>
+      {/* Why Choose Us Section */}
+      <Suspense fallback={<SectionLoader bgColor="bg-white" />}>
         <LovedByThousands />
       </Suspense>
 
@@ -60,28 +60,23 @@ export default function HomePage() {
         <LatestArrivals />
       </Suspense>
 
-      {/* CTA Section - Improved Design */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
+      {/* CTA Section - Professional Design */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center relative overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-200 rounded-full opacity-20"></div>
-            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-200 rounded-full opacity-20"></div>
-            
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Discover Exquisite Fragrances
-              </h2>
-              <p className="text-gray-700 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-                Experience our premium collection of traditional attars, crafted with the finest ingredients and time-honored techniques
-              </p>
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                <span>Explore Collection</span>
-              </Link>
-            </div>
+          <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 text-center border border-purple-200">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Discover Exquisite Fragrances
+            </h2>
+            <p className="text-gray-600 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+              Experience our premium collection of traditional attars, crafted with the finest ingredients and time-honored techniques
+            </p>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-3 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              <span>Explore Collection</span>
+            </Link>
           </div>
         </div>
       </section>

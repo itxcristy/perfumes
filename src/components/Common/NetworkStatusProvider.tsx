@@ -67,13 +67,11 @@ export const NetworkStatusProvider: React.FC<NetworkStatusProviderProps> = ({
       // Retry failed error reports
       const failedReports = JSON.parse(localStorage.getItem('failedErrorReports') || '[]');
       if (failedReports.length > 0) {
-        console.log(`Retrying ${failedReports.length} failed error reports...`);
         // This would integrate with the error reporting service
         localStorage.removeItem('failedErrorReports');
       }
 
       // Retry other failed requests (could integrate with offline queue)
-      console.log('Retrying failed requests...');
     } catch (error) {
       console.error('Failed to retry requests:', error);
     }

@@ -14,8 +14,8 @@ router.get(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await query(
-      `SELECT o.id, o.order_number, o.user_id, o.total_amount, o.status, 
-              o.payment_status, o.payment_method, o.shipping_address, 
+      `SELECT o.id, o.order_number, o.user_id, o.total_amount, o.status,
+              o.payment_status, o.payment_method, o.shipping_address,
               o.billing_address, o.tracking_number, o.notes,
               o.created_at, o.updated_at,
               COUNT(oi.id) as item_count
@@ -27,9 +27,27 @@ router.get(
       [req.userId]
     );
 
+    // Transform snake_case to camelCase for frontend
+    const orders = result.rows.map((row: any) => ({
+      id: row.id,
+      orderNumber: row.order_number,
+      userId: row.user_id,
+      total: row.total_amount || 0, // Map total_amount to total
+      status: row.status,
+      paymentStatus: row.payment_status,
+      paymentMethod: row.payment_method,
+      shippingAddress: row.shipping_address,
+      billingAddress: row.billing_address,
+      trackingNumber: row.tracking_number,
+      notes: row.notes,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      itemCount: row.item_count
+    }));
+
     res.json({
       success: true,
-      data: result.rows
+      data: orders
     });
   })
 );
@@ -46,9 +64,11 @@ router.get(
 
     // Get order details
     const orderResult = await query(
-      `SELECT o.id, o.order_number, o.user_id, o.total_amount, o.status, 
-              o.payment_status, o.payment_method, o.shipping_address, 
+      `SELECT o.id, o.order_number, o.user_id, o.total_amount, o.subtotal,
+              o.tax_amount, o.shipping_amount, o.discount_amount,
+              o.status, o.payment_status, o.payment_method, o.shipping_address,
               o.billing_address, o.tracking_number, o.notes,
+              o.shipped_at, o.delivered_at,
               o.created_at, o.updated_at
        FROM public.orders o
        WHERE o.id = $1 AND o.user_id = $2`,
@@ -61,7 +81,8 @@ router.get(
 
     // Get order items
     const itemsResult = await query(
-      `SELECT oi.id, oi.product_id, oi.quantity, oi.price, oi.subtotal,
+      `SELECT oi.id, oi.product_id, oi.variant_id, oi.quantity,
+              oi.unit_price, oi.total_price, oi.product_snapshot,
               p.name as product_name, p.images as product_images
        FROM public.order_items oi
        LEFT JOIN public.products p ON oi.product_id = p.id
@@ -69,8 +90,64 @@ router.get(
       [id]
     );
 
-    const order = orderResult.rows[0];
-    order.items = itemsResult.rows;
+    // Get order tracking history
+    const trackingResult = await query(
+      `SELECT id, status, message, location, metadata, created_at
+       FROM public.order_tracking
+       WHERE order_id = $1
+       ORDER BY created_at ASC`,
+      [id]
+    );
+
+    const row = orderResult.rows[0];
+
+    // Transform to camelCase
+    const order = {
+      id: row.id,
+      orderNumber: row.order_number,
+      userId: row.user_id,
+      total: row.total_amount || 0,
+      subtotal: row.subtotal || 0,
+      taxAmount: row.tax_amount || 0,
+      shippingAmount: row.shipping_amount || 0,
+      discountAmount: row.discount_amount || 0,
+      status: row.status,
+      paymentStatus: row.payment_status,
+      paymentMethod: row.payment_method,
+      shippingAddress: row.shipping_address,
+      billingAddress: row.billing_address,
+      trackingNumber: row.tracking_number,
+      notes: row.notes,
+      shippedAt: row.shipped_at,
+      deliveredAt: row.delivered_at,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      items: itemsResult.rows.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id,
+        variantId: item.variant_id,
+        quantity: item.quantity,
+        price: item.unit_price || 0,
+        unitPrice: item.unit_price || 0,
+        totalPrice: item.total_price || 0,
+        subtotal: item.total_price || 0,
+        productSnapshot: item.product_snapshot,
+        product: {
+          id: item.product_id,
+          name: item.product_name || item.product_snapshot?.name,
+          images: item.product_images || item.product_snapshot?.images || []
+        }
+      })),
+      trackingHistory: trackingResult.rows.map((track: any) => ({
+        id: track.id,
+        status: track.status,
+        message: track.message,
+        location: track.location,
+        metadata: track.metadata,
+        createdAt: track.created_at,
+        date: track.created_at
+      }))
+    };
 
     res.json({
       success: true,
@@ -157,21 +234,43 @@ router.post(
 
     const order = orderResult.rows[0];
 
-    // Create order items
+    // Create order items with product snapshots
     for (const item of items) {
       const productResult = await query(
-        'SELECT price FROM public.products WHERE id = $1',
+        `SELECT id, name, description, price, images, sku, category_id, seller_id
+         FROM public.products WHERE id = $1`,
         [item.product_id || item.productId]
       );
 
-      const price = productResult.rows[0].price;
+      const product = productResult.rows[0];
+      const price = item.price || product.price;
       const totalPrice = price * item.quantity;
 
+      // Create product snapshot to preserve product details at time of order
+      const productSnapshot = {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        images: product.images,
+        sku: product.sku,
+        categoryId: product.category_id,
+        sellerId: product.seller_id
+      };
+
       await query(
-        `INSERT INTO public.order_items 
-         (order_id, product_id, quantity, unit_price, total_price)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [order.id, item.product_id || item.productId, item.quantity, price, totalPrice]
+        `INSERT INTO public.order_items
+         (order_id, product_id, variant_id, quantity, unit_price, total_price, product_snapshot)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          order.id,
+          item.product_id || item.productId,
+          item.variantId || item.variant_id || null,
+          item.quantity,
+          price,
+          totalPrice,
+          JSON.stringify(productSnapshot)
+        ]
       );
 
       // Update product stock

@@ -125,7 +125,6 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ orderId, onClose }) 
       if (response.success) {
         // In a real app, this would generate a PDF or open a print dialog
         showSuccess('Invoice data retrieved. Print functionality coming soon.');
-        console.log('Invoice data:', response.data);
       }
     } catch (error: any) {
       showError(error.message || 'Failed to retrieve invoice');

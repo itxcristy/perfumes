@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  CreditCard, 
-  Calendar, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  CreditCard,
+  Calendar,
   Lock,
   Eye,
   EyeOff,
-  Package
+  Package,
+  Edit2,
+  CheckCircle
 } from 'lucide-react';
 import { MobileFormInput, MobileSecurityIndicator } from './MobileCheckout';
 
@@ -63,7 +65,7 @@ export const MobileShippingForm: React.FC<MobileShippingFormProps> = ({
           onChange={onChange}
           placeholder="john@example.com"
           required
-            error={errors.email || ''}
+          error={errors.email || ''}
           icon={Mail}
         />
 
@@ -227,7 +229,7 @@ export const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
             error={errors.expiryDate || ''}
             icon={Calendar}
           />
-          
+
           <div className="space-y-2">
             <label htmlFor="mobile-cvv-input" className="block text-sm font-medium text-neutral-900">
               CVV <span className="text-red-500">*</span>
@@ -307,6 +309,10 @@ interface MobileOrderSummaryProps {
   shipping: number;
   tax: number;
   total: number;
+  formData?: any;
+  selectedPaymentMethod?: string;
+  onEditShipping?: () => void;
+  onEditPayment?: () => void;
 }
 
 export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
@@ -314,12 +320,83 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
   subtotal,
   shipping,
   tax,
-  total
+  total,
+  formData,
+  selectedPaymentMethod,
+  onEditShipping,
+  onEditPayment
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div className="space-y-4">
+      {/* Shipping Address Section */}
+      {formData && (
+        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5 text-purple-600" />
+              <h3 className="font-semibold text-neutral-900">Shipping Address</h3>
+            </div>
+            {onEditShipping && (
+              <button
+                onClick={onEditShipping}
+                className="flex items-center space-x-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
+              >
+                <Edit2 className="h-4 w-4" />
+                <span>Edit</span>
+              </button>
+            )}
+          </div>
+          <div className="text-sm text-neutral-700 space-y-1">
+            <p className="font-medium">{formData.firstName} {formData.lastName}</p>
+            <p>{formData.address}</p>
+            <p>{formData.city}, {formData.state} {formData.zipCode}</p>
+            <p>{formData.country}</p>
+            <p className="flex items-center space-x-1 mt-2">
+              <Phone className="h-3.5 w-3.5" />
+              <span>{formData.phone}</span>
+            </p>
+            <p className="flex items-center space-x-1">
+              <Mail className="h-3.5 w-3.5" />
+              <span>{formData.email}</span>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Method Section */}
+      {selectedPaymentMethod && (
+        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <CreditCard className="h-5 w-5 text-purple-600" />
+              <h3 className="font-semibold text-neutral-900">Payment Method</h3>
+            </div>
+            {onEditPayment && (
+              <button
+                onClick={onEditPayment}
+                className="flex items-center space-x-1 text-purple-600 hover:text-purple-700 text-sm font-medium"
+              >
+                <Edit2 className="h-4 w-4" />
+                <span>Edit</span>
+              </button>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-neutral-700 capitalize">
+              {selectedPaymentMethod === 'cod' ? 'Cash on Delivery' :
+                selectedPaymentMethod === 'razorpay' ? 'Razorpay' :
+                  selectedPaymentMethod === 'apple-pay' ? 'Apple Pay' :
+                    selectedPaymentMethod === 'google-pay' ? 'Google Pay' :
+                      selectedPaymentMethod}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Order Summary Section */}
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
         {/* Summary Header */}
         <button
@@ -348,7 +425,7 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
             {/* Items */}
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.id} className="flex items-center space-x-3">
+                <div key={item.id || item.product?.id} className="flex items-center space-x-3">
                   {item.product?.images && item.product.images.length > 0 ? (
                     <img
                       src={item.product.images[0]}
@@ -384,7 +461,7 @@ export const MobileOrderSummary: React.FC<MobileOrderSummaryProps> = ({
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-neutral-600">Tax</span>
+                <span className="text-neutral-600">Tax (GST 18%)</span>
                 <span className="text-neutral-900">₹{tax.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between font-semibold text-base border-t border-neutral-200 pt-2">

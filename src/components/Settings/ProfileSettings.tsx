@@ -24,7 +24,6 @@ export const ProfileSettings: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      console.log('🔄 ProfileSettings: Initializing form data with user:', user);
       setFormData({
         name: user.name || '',
         email: user.email || '',
@@ -107,7 +106,6 @@ export const ProfileSettings: React.FC = () => {
     setErrors({});
 
     try {
-      console.log('🔄 ProfileSettings: Starting profile update with data:', formData);
 
       // Use the AuthContext updateProfile method which handles both database and auth updates
       await updateProfile({
@@ -124,7 +122,6 @@ export const ProfileSettings: React.FC = () => {
         message: 'Your profile has been updated successfully'
       });
 
-      console.log('✅ ProfileSettings: Profile update completed successfully');
     } catch (error) {
       console.error('❌ ProfileSettings: Error updating profile:', error);
       showNotification({

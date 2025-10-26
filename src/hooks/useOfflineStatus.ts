@@ -25,12 +25,10 @@ export const useOfflineStatus = (): OfflineStatus => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      console.log('Device is now online');
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      console.log('Device is now offline');
     };
 
     window.addEventListener('online', handleOnline);

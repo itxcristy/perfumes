@@ -60,7 +60,6 @@ export const validateAndFixStoredUser = (): void => {
         const fixedId = convertLegacyUUID(user.id);
         user.id = fixedId;
         localStorage.setItem('direct_login_current_user', JSON.stringify(user));
-        console.log(`Fixed stored user ID from invalid format to: ${fixedId}`);
       }
     }
   } catch (error) {
@@ -141,7 +140,6 @@ export const cleanupInvalidUUIDs = (): void => {
         
         if (needsUpdate) {
           localStorage.setItem(key, JSON.stringify(parsed));
-          console.log(`Fixed invalid UUIDs in localStorage key: ${key}`);
         }
       }
     } catch (error) {

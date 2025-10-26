@@ -298,7 +298,6 @@ const PerformanceDashboard: React.FC = () => {
         </button>
         <button
           onClick={() => {
-            console.log('Performance Data:', performanceData);
           }}
           className="flex-1 bg-gray-200 text-gray-800 py-1 px-2 rounded text-sm hover:bg-gray-300 transition-colors"
         >

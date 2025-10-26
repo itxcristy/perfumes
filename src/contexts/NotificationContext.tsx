@@ -103,24 +103,50 @@ const NotificationContainer: React.FC<NotificationContainerProps> = ({ notificat
   if (notifications.length === 0) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '1rem',
-        right: '1rem',
-        zIndex: 99999,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        maxWidth: '400px',
-        width: '100%',
-        pointerEvents: 'none',
-      }}
-    >
-      {notifications.map((notification) => (
-        <Toast key={notification.id} notification={notification} onRemove={onRemove} />
-      ))}
-    </div>
+    <>
+      {/* Desktop: Bottom-right */}
+      <div
+        className="hidden md:block"
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          right: '1.5rem',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          maxWidth: '400px',
+          width: '100%',
+          pointerEvents: 'none',
+        }}
+      >
+        {notifications.map((notification) => (
+          <Toast key={notification.id} notification={notification} onRemove={onRemove} />
+        ))}
+      </div>
+
+      {/* Mobile: Bottom-center */}
+      <div
+        className="md:hidden"
+        style={{
+          position: 'fixed',
+          bottom: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          maxWidth: 'calc(100vw - 2rem)',
+          width: '100%',
+          pointerEvents: 'none',
+        }}
+      >
+        {notifications.map((notification) => (
+          <Toast key={notification.id} notification={notification} onRemove={onRemove} isMobile />
+        ))}
+      </div>
+    </>
   );
 };
 
@@ -128,9 +154,10 @@ const NotificationContainer: React.FC<NotificationContainerProps> = ({ notificat
 interface ToastProps {
   notification: Notification;
   onRemove: (id: string) => void;
+  isMobile?: boolean;
 }
 
-const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
+const Toast: React.FC<ToastProps> = ({ notification, onRemove, isMobile = false }) => {
   const { id, type, title, message } = notification;
 
   const getIcon = () => {
@@ -188,15 +215,16 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
       style={{
         backgroundColor: styles.bg,
         border: `1px solid ${styles.border}`,
-        borderRadius: '0.75rem',
-        padding: '1rem',
+        borderRadius: isMobile ? '0.5rem' : '0.75rem',
+        padding: isMobile ? '0.875rem' : '1rem',
         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         display: 'flex',
         alignItems: 'flex-start',
         gap: '0.75rem',
         pointerEvents: 'auto',
-        animation: 'slideIn 0.3s ease-out',
+        animation: isMobile ? 'slideUp 0.3s ease-out' : 'slideIn 0.3s ease-out',
         width: '100%',
+        minHeight: isMobile ? '60px' : 'auto',
       }}
     >
       <div style={{ flexShrink: 0, marginTop: '0.125rem' }}>{getIcon()}</div>
@@ -225,7 +253,7 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
         onClick={() => onRemove(id)}
         style={{
           flexShrink: 0,
-          padding: '0.25rem',
+          padding: isMobile ? '0.5rem' : '0.25rem',
           borderRadius: '0.375rem',
           border: 'none',
           background: 'transparent',
@@ -234,6 +262,8 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'background-color 0.2s',
+          minWidth: isMobile ? '44px' : 'auto',
+          minHeight: isMobile ? '44px' : 'auto',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
@@ -241,8 +271,9 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
         }}
+        aria-label="Close notification"
       >
-        <X className="h-4 w-4" style={{ color: styles.text, opacity: 0.6 }} />
+        <X className={isMobile ? "h-5 w-5" : "h-4 w-4"} style={{ color: styles.text, opacity: 0.6 }} />
       </button>
       <style>
         {`
@@ -253,6 +284,17 @@ const Toast: React.FC<ToastProps> = ({ notification, onRemove }) => {
             }
             to {
               transform: translateX(0);
+              opacity: 1;
+            }
+          }
+
+          @keyframes slideUp {
+            from {
+              transform: translateY(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
               opacity: 1;
             }
           }

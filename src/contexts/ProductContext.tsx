@@ -147,7 +147,6 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({ children })
   const submitReview = useCallback(async (review: Omit<Review, 'id' | 'createdAt' | 'profiles'>) => {
     try {
       // For now, we'll just log this as reviews would typically be handled separately
-      console.log('Submitting review:', review);
       // In a real implementation, this would call an API endpoint to submit the review
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to submit review');

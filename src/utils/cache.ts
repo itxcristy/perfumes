@@ -363,7 +363,6 @@ class EnhancedCache {
     
     const cleaned = before - this.stats.entryCount;
     if (cleaned > 0) {
-      console.log(`🧹 Cache GC: Cleaned ${cleaned} expired entries`);
     }
   }
 

@@ -46,13 +46,11 @@ export const exportTableData = async (tableName: string, data: any[], format: 'c
 
 export const bulkDeleteRecords = async (tableName: string, ids: string[]): Promise<{ success: boolean; error?: string }> => {
   // Stub: This would normally call the API to delete records
-  console.log(`Bulk delete ${ids.length} records from ${tableName}`);
   return { success: true };
 };
 
 export const importTableData = async (tableName: string, file: File): Promise<{ success: boolean; imported: number; errors: string[] }> => {
   // Stub: This would normally parse the file and import data
-  console.log(`Import data to ${tableName} from file ${file.name}`);
   return { success: true, imported: 0, errors: [] };
 };
 
