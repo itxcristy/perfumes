@@ -10,27 +10,41 @@ const __dirname = path.dirname(__filename);
 // Load environment variables from project root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-// Validate required environment variables
-const requiredEnvVars = ['DB_PASSWORD'];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
-  console.error('Please update your .env file with the correct database credentials.');
-  console.error('Example: DB_PASSWORD=your_actual_postgres_password');
-}
-
 // Create connection pool
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'sufi_essences',
-  max: parseInt(process.env.DB_POOL_SIZE || '20'),
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// Supports both Neon connection string and individual env vars
+let pool: Pool;
+
+if (process.env.DATABASE_URL) {
+  // Use Neon connection string (production)
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+    max: parseInt(process.env.DB_POOL_SIZE || '20'),
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  });
+} else {
+  // Use individual env vars (development)
+  const requiredEnvVars = ['DB_PASSWORD'];
+  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+  if (missingEnvVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+    console.error('Please update your .env file with the correct database credentials.');
+    console.error('Example: DB_PASSWORD=your_actual_postgres_password');
+  }
+
+  pool = new Pool({
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME || 'sufi_essences',
+    max: parseInt(process.env.DB_POOL_SIZE || '20'),
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  });
+}
 
 // Handle pool errors
 pool.on('error', (err) => {

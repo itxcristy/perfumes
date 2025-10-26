@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-
+import { motion } from 'framer-motion';
 import { WifiOff, Wifi, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useNetworkStatus, useGracefulDegradation } from '../../utils/networkResilience';
 

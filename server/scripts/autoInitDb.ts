@@ -55,7 +55,7 @@ const categories = [
     name: 'Oud Collection',
     slug: 'oud-collection',
     description: 'Premium oud fragrances',
-    image_url: 'https://images.unsplash.com/photo-1587556930116-1a5e8e4e8a8e?w=800&q=80',
+    image_url: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80',
     sort_order: 6
   },
   {
@@ -122,7 +122,7 @@ const sampleProducts = [
     description: 'Pure sandalwood attar from Mysore. Rich, creamy, and deeply meditative.',
     price: 79.99,
     original_price: 109.99,
-    images: ['https://images.unsplash.com/photo-1587556930116-1a5e8e4e8a8e?w=500'],
+    images: ['https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500'],
     category_index: 3, // Attars
     is_featured: false,
     rating: 4.9,
@@ -174,23 +174,14 @@ const sampleUsers = [
 ];
 
 async function seedCategories(query: Function) {
-  console.log('🌱 Seeding categories...');
-  
   let insertedCount = 0;
-  let updatedCount = 0;
 
   for (const category of categories) {
     const sql = `
       INSERT INTO public.categories (name, slug, description, image_url, sort_order, is_active)
       VALUES ($1, $2, $3, $4, $5, true)
-      ON CONFLICT (slug)
-      DO UPDATE SET
-        name = EXCLUDED.name,
-        description = EXCLUDED.description,
-        image_url = EXCLUDED.image_url,
-        sort_order = EXCLUDED.sort_order,
-        updated_at = NOW()
-      RETURNING id, name, (xmax = 0) AS inserted
+      ON CONFLICT (slug) DO NOTHING
+      RETURNING id, name
     `;
 
     const values = [
@@ -204,24 +195,17 @@ async function seedCategories(query: Function) {
     const result = await query(sql, values);
 
     if (result.rows.length > 0) {
-      const wasInserted = result.rows[0].inserted;
-      if (wasInserted) {
-        insertedCount++;
-        console.log(`✅ Added category: ${result.rows[0].name}`);
-      } else {
-        updatedCount++;
-        console.log(`🔄 Updated category: ${result.rows[0].name}`);
-      }
+      insertedCount++;
     }
   }
 
-  console.log(`✅ Categories seeded - Inserted: ${insertedCount}, Updated: ${updatedCount}`);
-  return insertedCount + updatedCount;
+  if (insertedCount > 0) {
+    console.log(`   ✓ Added ${insertedCount} categories`);
+  }
+  return insertedCount;
 }
 
 async function seedUsers(query: Function) {
-  console.log('👥 Seeding sample users...');
-  
   let insertedCount = 0;
 
   for (const user of sampleUsers) {
@@ -245,32 +229,30 @@ async function seedUsers(query: Function) {
 
     if (result.rows.length > 0) {
       insertedCount++;
-      console.log(`✅ Added user: ${result.rows[0].email}`);
     }
   }
 
-  console.log(`✅ Users seeded - Inserted: ${insertedCount}`);
+  if (insertedCount > 0) {
+    console.log(`   ✓ Added ${insertedCount} users`);
+  }
   return insertedCount;
 }
 
 async function seedProducts(query: Function) {
-  console.log('🛍️  Seeding sample products...');
-  
   // First get all categories to assign to products
   const categoriesResult = await query('SELECT id FROM public.categories ORDER BY sort_order');
   const categoryIds = categoriesResult.rows.map((row: any) => row.id);
-  
+
   if (categoryIds.length === 0) {
-    console.log('⚠️  No categories found, skipping product seeding');
     return 0;
   }
-  
+
   let insertedCount = 0;
 
   for (const product of sampleProducts) {
     // Assign category based on index, fallback to first category
     const categoryId = categoryIds[product.category_index] || categoryIds[0];
-    
+
     const sql = `
       INSERT INTO public.products (
         name, description, price, original_price, images,
@@ -282,7 +264,7 @@ async function seedProducts(query: Function) {
 
     // Generate slug from name
     const slug = product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
+
     const values = [
       product.name,
       product.description,
@@ -296,17 +278,39 @@ async function seedProducts(query: Function) {
       product.stock,
       product.tags
     ];
-    
+
     const result = await query(sql, values);
-    
+
     if (result.rows.length > 0) {
       insertedCount++;
-      console.log(`✅ Added product: ${result.rows[0].name}`);
     }
   }
-  
-  console.log(`✅ Products seeded - Inserted: ${insertedCount}`);
+
+  if (insertedCount > 0) {
+    console.log(`   ✓ Added ${insertedCount} products`);
+  }
   return insertedCount;
+}
+
+/**
+ * Check if database has any data
+ */
+async function isDatabaseEmpty(query: Function): Promise<boolean> {
+  try {
+    // Check if there are any products
+    const productResult = await query('SELECT COUNT(*) as count FROM public.products');
+    const productCount = parseInt(productResult.rows[0].count);
+
+    // Check if there are any categories
+    const categoryResult = await query('SELECT COUNT(*) as count FROM public.categories');
+    const categoryCount = parseInt(categoryResult.rows[0].count);
+
+    // Database is empty if both products and categories are 0
+    return productCount === 0 && categoryCount === 0;
+  } catch (error) {
+    // If tables don't exist, database is empty
+    return true;
+  }
 }
 
 /**
@@ -315,54 +319,55 @@ async function seedProducts(query: Function) {
  */
 export async function autoInitializeDatabase(): Promise<void> {
   try {
-    console.log('🚀 Starting automatic database initialization...\n');
-
     // Import required modules
     const { initializeDatabase } = await import('../db/connection');
     const { initializeSchema } = await import('../db/init');
     const { isDatabaseInitialized } = await import('../db/utils');
 
-    // Step 1: Initialize connection
-    console.log('1️⃣  Initializing database connection...');
+    // Step 1: Initialize connection (silent)
     await initializeDatabase();
-    console.log('✅ Database connection successful\n');
 
     // Check if database is already initialized
     const initialized = await isDatabaseInitialized();
-    if (initialized) {
-      console.log('ℹ️  Database already initialized, skipping schema creation');
-    } else {
-      // Step 2: Initialize schema
-      console.log('2️⃣  Creating database schema...');
-      await initializeSchema();
-      console.log('✅ Schema created successfully\n');
-    }
 
-    // Import query function for seeding
+    // Import query function
     const { query } = await import('../db/connection');
 
-    // Step 3: Seed categories
-    console.log('3️⃣  Seeding categories...');
-    await seedCategories(query);
-    console.log('✅ Categories seeded successfully\n');
+    // Check if database has data
+    const isEmpty = await isDatabaseEmpty(query);
 
-    // Step 4: Seed users
-    console.log('4️⃣  Seeding sample users...');
-    await seedUsers(query);
-    console.log('✅ Sample users seeded successfully\n');
+    if (initialized && !isEmpty) {
+      // Database is already set up with data - silent mode
+      console.log('✅ Database ready');
+      return;
+    }
 
-    // Step 5: Seed products
-    console.log('5️⃣  Seeding sample products...');
-    await seedProducts(query);
-    console.log('✅ Sample products seeded successfully\n');
+    // Database needs initialization - show detailed logs
+    console.log('🔧 Setting up database...\n');
 
-    console.log('🎉 Automatic database initialization complete!');
-    console.log('   You can now access the application with the following credentials:');
-    console.log('   - Admin: admin@example.com / admin123');
-    console.log('   - Seller: seller@example.com / admin123');
-    console.log('   - Customer: customer@example.com / admin123\n');
+    if (!initialized) {
+      // Create schema
+      console.log('📋 Creating database schema...');
+      await initializeSchema();
+      console.log('✅ Schema created\n');
+    }
+
+    if (isEmpty) {
+      // Seed data
+      console.log('🌱 Seeding initial data...');
+
+      await seedCategories(query);
+      await seedUsers(query);
+      await seedProducts(query);
+
+      console.log('\n🎉 Database setup complete!');
+      console.log('📝 Sample credentials:');
+      console.log('   • Admin: admin@example.com / admin123');
+      console.log('   • Seller: seller@example.com / admin123');
+      console.log('   • Customer: customer@example.com / admin123\n');
+    }
   } catch (error) {
-    console.error('❌ Automatic database initialization failed:', error);
+    console.error('❌ Database initialization failed:', error);
     throw error;
   }
 }

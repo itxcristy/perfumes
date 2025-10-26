@@ -62,13 +62,13 @@ const AuthPage: React.FC = () => {
     const searchParams = new URLSearchParams(location.search);
     const modeParam = searchParams.get('mode');
     const roleParam = searchParams.get('role') as UserRole;
-    
+
     if (modeParam === 'signup') {
       setMode('signup');
     } else if (modeParam === 'forgot') {
       setMode('forgot');
     }
-    
+
     if (roleParam && ['customer', 'seller', 'admin'].includes(roleParam)) {
       setFormData(prev => ({ ...prev, role: roleParam }));
     }
@@ -138,7 +138,7 @@ const AuthPage: React.FC = () => {
           title: 'Welcome back!',
           message: 'Successfully logged in.'
         });
-        
+
         // Small delay to ensure user context is updated
         setTimeout(() => {
           // Redirect based on user role from context
@@ -160,7 +160,7 @@ const AuthPage: React.FC = () => {
           title: 'Account created!',
           message: 'Account created successfully!'
         });
-        
+
         // Small delay to ensure user context is updated
         setTimeout(() => {
           // Redirect based on selected role
@@ -198,7 +198,7 @@ const AuthPage: React.FC = () => {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) return null;
-      
+
       // In a real implementation, you would call an API endpoint to get user info
       // For now, we'll return the user from context
       return user;
@@ -233,23 +233,29 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-2xl font-bold">S</span>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-amber-100">
+          <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 p-8 text-center relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-3xl">🌸</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                {mode === 'login' && 'Aligarh Attars'}
+                {mode === 'signup' && 'Join Aligarh Attars'}
+                {mode === 'forgot' && 'Reset Password'}
+              </h1>
+              <p className="text-white/90 text-sm md:text-base">
+                {mode === 'login' && 'Sign in to explore our exquisite collection'}
+                {mode === 'signup' && `Create your ${getRoleLabel(formData.role).toLowerCase()} account`}
+                {mode === 'forgot' && 'We\'ll send you a reset link'}
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-white">
-              {mode === 'login' && 'Welcome Back'}
-              {mode === 'signup' && 'Create Account'}
-              {mode === 'forgot' && 'Reset Password'}
-            </h1>
-            <p className="text-purple-100 mt-2">
-              {mode === 'login' && 'Sign in to your account'}
-              {mode === 'signup' && `Join as ${getRoleLabel(formData.role)}`}
-              {mode === 'forgot' && 'Enter your email to reset your password'}
-            </p>
           </div>
 
           <div className="p-6">
@@ -262,11 +268,10 @@ const AuthPage: React.FC = () => {
                       key={role}
                       type="button"
                       onClick={() => handleInputChange('role', role)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
-                        formData.role === role
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${formData.role === role
+                        ? 'border-amber-500 bg-amber-50 text-amber-700'
+                        : 'border-gray-200 hover:border-amber-200'
+                        }`}
                     >
                       {getRoleIcon(role)}
                       <span className="text-xs font-medium mt-1">{getRoleLabel(role)}</span>
@@ -288,9 +293,8 @@ const AuthPage: React.FC = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-3 border ${
-                      errors.email ? 'border-red-300' : 'border-gray-300'
-                    } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'
+                      } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                     placeholder="you@example.com"
                     disabled={loading}
                     required
@@ -318,9 +322,8 @@ const AuthPage: React.FC = () => {
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-3 border ${
-                        errors.fullName ? 'border-red-300' : 'border-gray-300'
-                      } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
+                      className={`block w-full pl-10 pr-3 py-3 border ${errors.fullName ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                       placeholder="John Doe"
                       disabled={loading}
                       required
@@ -349,9 +352,8 @@ const AuthPage: React.FC = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className={`block w-full pl-10 pr-10 py-3 border ${
-                        errors.password ? 'border-red-300' : 'border-gray-300'
-                      } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
+                      className={`block w-full pl-10 pr-10 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                       placeholder="••••••••"
                       disabled={loading}
                       required
@@ -388,9 +390,8 @@ const AuthPage: React.FC = () => {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                      className={`block w-full pl-10 pr-10 py-3 border ${
-                        errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                      } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
+                      className={`block w-full pl-10 pr-10 py-3 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                       placeholder="••••••••"
                       disabled={loading}
                       required
@@ -413,21 +414,31 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Remember Me (Login) */}
+              {/* Remember Me & Forgot Password (Login) */}
               {mode === 'login' && (
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      disabled={loading}
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                      Remember me
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMode('forgot')}
+                    className="text-sm font-medium text-amber-600 hover:text-amber-700 focus:outline-none"
                     disabled={loading}
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                    Remember me
-                  </label>
+                  >
+                    Forgot password?
+                  </button>
                 </div>
               )}
 
@@ -436,7 +447,7 @@ const AuthPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-600 hover:via-orange-600 hover:to-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {loading ? (
                     <>
@@ -461,7 +472,7 @@ const AuthPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setMode('signup')}
-                      className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+                      className="font-medium text-amber-600 hover:text-amber-700 focus:outline-none"
                       disabled={loading}
                     >
                       Sign up
@@ -473,7 +484,7 @@ const AuthPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setMode('login')}
-                      className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+                      className="font-medium text-amber-600 hover:text-amber-700 focus:outline-none"
                       disabled={loading}
                     >
                       Sign in
@@ -485,7 +496,7 @@ const AuthPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setMode('login')}
-                      className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
+                      className="font-medium text-amber-600 hover:text-amber-700 focus:outline-none"
                       disabled={loading}
                     >
                       Sign in
@@ -501,7 +512,7 @@ const AuthPage: React.FC = () => {
         <div className="mt-6 text-center">
           <button
             onClick={goHome}
-            className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors focus:outline-none"
+            className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors focus:outline-none"
           >
             ← Return to Home
           </button>

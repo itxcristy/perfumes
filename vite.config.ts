@@ -51,7 +51,7 @@ export default defineConfig({
   },
 
   server: {
-    host: 'localhost',
+    host: '0.0.0.0', // Allow access from local network (mobile devices)
     port: 5173,
     strictPort: false,
     hmr: {

@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:server": "tsx watch server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "network-urls": "node scripts/show-network-urls.js",
     "build": "tsc && vite build",
     "build:server": "tsc --project server/tsconfig.json",
     "build:analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html",
@@ -48,6 +49,7 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
     "recharts": "^3.1.0",
+    "serverless-http": "^4.0.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

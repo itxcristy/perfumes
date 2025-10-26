@@ -41,7 +41,13 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:5173$/, // Allow local network access
+    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:5173$/, // Allow private network
+    /^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:5173$/ // Allow private network
+  ],
   credentials: true
 }));
 // Increase payload limits for image uploads and large data
@@ -82,13 +88,16 @@ app.use(errorHandler);
 async function startServer() {
   try {
     // Auto-initialize database with schema and sample data
-    console.log('🔧 Auto-initializing database...');
     await autoInitializeDatabase();
-    console.log('✓ Database auto-initialized successfully');
 
-    app.listen(PORT, () => {
-      console.log(`✓ Server running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✓ Server running on:`);
+      console.log(`  - Local:   http://localhost:${PORT}`);
+      console.log(`  - Network: http://<your-ip>:${PORT}`);
       console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`\n📱 To access from mobile on same network:`);
+      console.log(`  1. Find your computer's IP address`);
+      console.log(`  2. On mobile, open: http://<your-ip>:5173`);
     });
   } catch (error) {
     console.error('✗ Failed to start server:', error);

@@ -82,6 +82,8 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  timeout = 30
+  memory = 1024
 
 # Form handling for contact forms
 [build.processing]
