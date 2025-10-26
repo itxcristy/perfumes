@@ -60,12 +60,11 @@ const ProductsPage: React.FC = () => {
     });
 
     // Initialize filters from URL parameters
-    const initialCategory = searchParams.get('category') || slug || '';
     const initialSearch = searchParams.get('q') || '';
 
     // Filter State
     const [filters, setFilters] = useState<FilterState>({
-        category: initialCategory,
+        category: '',
         search: initialSearch,
         priceRange: [0, 50000],
         rating: 0,
@@ -74,6 +73,28 @@ const ProductsPage: React.FC = () => {
         availability: '',
         sortBy: 'popularity'
     });
+
+    // Convert slug to category ID when categories are loaded
+    useEffect(() => {
+        if (categories.length > 0) {
+            const categoryParam = searchParams.get('category') || slug || '';
+            if (categoryParam) {
+                // Check if it's already a UUID (category ID)
+                const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryParam);
+
+                if (isUUID) {
+                    // It's already a category ID
+                    setFilters(prev => ({ ...prev, category: categoryParam }));
+                } else {
+                    // It's a slug, find the category by slug
+                    const category = categories.find(c => c.slug === categoryParam);
+                    if (category) {
+                        setFilters(prev => ({ ...prev, category: category.id }));
+                    }
+                }
+            }
+        }
+    }, [categories, searchParams, slug]);
 
     // Sort options like Amazon
     const sortOptions = [

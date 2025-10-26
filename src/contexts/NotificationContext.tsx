@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
 
@@ -100,53 +100,46 @@ interface NotificationContainerProps {
 }
 
 const NotificationContainer: React.FC<NotificationContainerProps> = ({ notifications, onRemove }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect screen size on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Listen for resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   if (notifications.length === 0) return null;
 
+  // Render only ONE container based on screen size
   return (
-    <>
-      {/* Desktop: Bottom-right */}
-      <div
-        className="hidden md:block"
-        style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          right: '1.5rem',
-          zIndex: 99999,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          maxWidth: '400px',
-          width: '100%',
-          pointerEvents: 'none',
-        }}
-      >
-        {notifications.map((notification) => (
-          <Toast key={notification.id} notification={notification} onRemove={onRemove} />
-        ))}
-      </div>
-
-      {/* Mobile: Bottom-center */}
-      <div
-        className="md:hidden"
-        style={{
-          position: 'fixed',
-          bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 99999,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          maxWidth: 'calc(100vw - 2rem)',
-          width: '100%',
-          pointerEvents: 'none',
-        }}
-      >
-        {notifications.map((notification) => (
-          <Toast key={notification.id} notification={notification} onRemove={onRemove} isMobile />
-        ))}
-      </div>
-    </>
+    <div
+      style={{
+        position: 'fixed',
+        bottom: isMobile ? '1rem' : '1.5rem',
+        left: isMobile ? '50%' : 'auto',
+        right: isMobile ? 'auto' : '1.5rem',
+        transform: isMobile ? 'translateX(-50%)' : 'none',
+        zIndex: 99999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        maxWidth: isMobile ? 'calc(100vw - 2rem)' : '400px',
+        width: '100%',
+        pointerEvents: 'none',
+      }}
+    >
+      {notifications.map((notification) => (
+        <Toast key={notification.id} notification={notification} onRemove={onRemove} isMobile={isMobile} />
+      ))}
+    </div>
   );
 };
 

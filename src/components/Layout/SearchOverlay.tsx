@@ -21,16 +21,40 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
 
   useEffect(() => {
     if (query.length > 1) {
+      const searchTerm = query.toLowerCase();
       const filtered = products
-        .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 5);
+        .filter(p => {
+          // Search in product name
+          if (p.name.toLowerCase().includes(searchTerm)) return true;
+
+          // Search in description
+          if (p.description && p.description.toLowerCase().includes(searchTerm)) return true;
+
+          // Search in short description
+          if (p.shortDescription && p.shortDescription.toLowerCase().includes(searchTerm)) return true;
+
+          // Search in category name
+          if (p.category && p.category.toLowerCase().includes(searchTerm)) return true;
+
+          // Search in seller/brand name
+          if (p.sellerName && p.sellerName.toLowerCase().includes(searchTerm)) return true;
+
+          // Search in tags
+          if (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchTerm))) return true;
+
+          // Search in SKU
+          if (p.sku && p.sku.toLowerCase().includes(searchTerm)) return true;
+
+          return false;
+        })
+        .slice(0, 8); // Show more results (8 instead of 5)
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
     }
   }, [query, products]);
 
-  const trendingSearches = ['Wireless Headphones', 'Smart Watch', 'Running Shoes', 'Organic Coffee'];
+  const trendingSearches = ['Oudh Attar', 'Musk Perfume', 'Rose Attar', 'Sandalwood', 'Amber Fragrance', 'Floral Attar'];
 
   return (
     <>
@@ -44,13 +68,13 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
               className="animate-slide-in-up"
             >
               <div className="relative">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-neutral-400" />
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-purple-400" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search for luxury products..."
-                  className="w-full pl-16 pr-6 py-6 text-lg rounded-3xl shadow-2xl border-2 border-neutral-200/50 bg-white/95 backdrop-blur-xl focus:border-neutral-400 focus:ring-4 focus:ring-neutral-200/30 transition-all duration-300 font-medium tracking-wide placeholder:text-neutral-400"
+                  placeholder="Search for attars, perfumes, brands..."
+                  className="w-full pl-16 pr-6 py-6 text-lg rounded-3xl shadow-2xl border-2 border-purple-200/50 bg-white/95 backdrop-blur-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all duration-300 font-medium tracking-wide placeholder:text-neutral-400"
                   autoFocus
                 />
                 {/* Luxury close button */}

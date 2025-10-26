@@ -194,16 +194,25 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [user, showNotification]);
 
-  // Calculate totals with null checks
+  // Calculate totals with null checks and type conversion
   const subtotal = items.reduce((sum, item) => {
-    if (item.product && typeof item.product.price === 'number') {
-      const itemTotal = item.product.price * item.quantity;
-      return sum + itemTotal;
+    if (item.product && item.product.price !== undefined && item.product.price !== null) {
+      // Convert price to number in case it's a string from the API
+      const price = typeof item.product.price === 'string' ? parseFloat(item.product.price) : item.product.price;
+      const quantity = typeof item.quantity === 'string' ? parseInt(item.quantity) : item.quantity;
+
+      if (!isNaN(price) && !isNaN(quantity)) {
+        const itemTotal = price * quantity;
+        return sum + itemTotal;
+      }
     }
     console.warn('🛒 Item missing product or price:', item);
     return sum;
   }, 0);
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => {
+    const quantity = typeof item.quantity === 'string' ? parseInt(item.quantity) : item.quantity;
+    return sum + (isNaN(quantity) ? 0 : quantity);
+  }, 0);
 
 
   // Wrapper functions to match type definitions

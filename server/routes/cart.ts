@@ -29,18 +29,18 @@ router.get(
     // Transform flat structure to nested product structure
     const items = result.rows.map((row: any) => ({
       id: row.id,
-      quantity: row.quantity,
+      quantity: parseInt(row.quantity) || 0,
       variantId: row.variant_id,
       product: {
         id: row.product_id,
         name: row.name,
         description: row.description || '',
-        price: row.variant_price || row.price,
+        price: parseFloat(row.variant_price || row.price) || 0,
         images: row.images || [],
-        stock: row.stock,
+        stock: parseInt(row.stock) || 0,
         categoryId: row.category_id,
         sellerId: row.seller_id,
-        rating: row.rating || 0,
+        rating: parseFloat(row.rating) || 0,
         tags: row.tags || [],
         sku: row.sku || '',
         reviews: [],
@@ -52,8 +52,10 @@ router.get(
     let subtotal = 0;
     let totalQuantity = 0;
     items.forEach((item: any) => {
-      subtotal += item.product.price * item.quantity;
-      totalQuantity += item.quantity;
+      const price = parseFloat(item.product.price) || 0;
+      const quantity = parseInt(item.quantity) || 0;
+      subtotal += price * quantity;
+      totalQuantity += quantity;
     });
 
     res.json({

@@ -74,7 +74,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   useEffect(() => {
     onClose();
     setActiveDropdown(null);
-  }, [location.pathname, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // Only close when route changes, not when onClose changes
 
   // Bind swipe gestures to navigation panel
   useEffect(() => {
