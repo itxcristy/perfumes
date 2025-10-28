@@ -11,9 +11,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', ...defaultTheme.fontFamily.sans],
-        display: ['"Playfair Display"', 'Georgia', ...defaultTheme.fontFamily.serif],
-        luxury: ['"Cormorant Garamond"', '"Playfair Display"', 'Times New Roman', ...defaultTheme.fontFamily.serif],
-        mono: ['"JetBrains Mono"', 'Menlo', 'Monaco', ...defaultTheme.fontFamily.mono],
+        serif: ['"Playfair Display"', 'Georgia', ...defaultTheme.fontFamily.serif],
       },
       // Enhanced typography scale with proper line heights and letter spacing
       fontSize: {

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 @import './styles/design-system.css';
 @import './styles/unified-design-system.css';
 
@@ -45,7 +45,7 @@
   h4,
   h5,
   h6 {
-    @apply font-display text-text-primary;
+    @apply text-text-primary;
     letter-spacing: -0.025em;
     font-weight: 600;
     text-rendering: optimizeLegibility;
@@ -93,39 +93,59 @@
 
   /* Typography utility classes */
   .text-heading-xl {
-    @apply font-display text-5xl font-bold leading-tight;
+    @apply text-5xl font-bold leading-tight;
     letter-spacing: -0.02em;
   }
 
   .text-heading-lg {
-    @apply font-display text-4xl font-semibold leading-tight;
+    @apply text-4xl font-semibold leading-tight;
     letter-spacing: -0.015em;
   }
 
   .text-heading-md {
-    @apply font-sans text-2xl font-semibold leading-snug;
+    @apply text-2xl font-semibold leading-snug;
     letter-spacing: -0.01em;
   }
 
   .text-body-lg {
-    @apply font-sans text-lg font-normal leading-relaxed;
+    @apply text-lg font-normal leading-relaxed;
     letter-spacing: 0.005em;
   }
 
   .text-body-base {
-    @apply font-sans text-base font-normal leading-relaxed;
+    @apply text-base font-normal leading-relaxed;
     letter-spacing: 0.01em;
   }
 
   .text-body-sm {
-    @apply font-sans text-sm font-normal leading-relaxed;
+    @apply text-sm font-normal leading-relaxed;
     letter-spacing: 0.015em;
   }
 
   .text-caption {
-    @apply font-sans text-xs font-medium leading-normal;
+    @apply text-xs font-medium leading-normal;
     letter-spacing: 0.025em;
     text-transform: uppercase;
+  }
+
+  /* Simplified serif font utility classes for luxury branding */
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-serif-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+  }
+
+  .font-serif-subheading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+  }
+
+  .font-serif-body {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 400;
   }
 
   /* Enhanced focus styles for accessibility */
@@ -209,7 +229,7 @@
   @keyframes fade-in-left {
     0% {
       opacity: 0;
-      transform: translateX(-20px);
+      transform: translateX(-30px);
     }
 
     100% {
@@ -225,7 +245,7 @@
   @keyframes fade-in-right {
     0% {
       opacity: 0;
-      transform: translateX(20px);
+      transform: translateX(30px);
     }
 
     100% {

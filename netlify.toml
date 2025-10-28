@@ -1,4 +1,4 @@
-﻿# Netlify Configuration
+# Netlify Configuration
 [build]
   command = "npm ci && npm run build"
   publish = "dist"
@@ -71,8 +71,10 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  timeout = 30
-  memory = 1024
+
+[functions."api"]
+  node_bundler = "esbuild"
+  external_node_modules = ["pg", "bcrypt", "jsonwebtoken"]
 
 [context.production.environment]
   VITE_APP_ENV = "production"

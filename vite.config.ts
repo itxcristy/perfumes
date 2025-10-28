@@ -1,43 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
-    react(),
-    ViteImageOptimizer({
-      test: /\\.(jpe?g|png|gif|tiff|webp|avif)$/i,
-      exclude: undefined,
-      include: undefined,
-      includePublic: true,
-      logStats: true,
-      ansiColors: true,
-      png: {
-        quality: 80,
-        palette: true,
-        compressionLevel: 9,
-        adaptiveFiltering: true,
-      },
-      jpeg: {
-        quality: 80,
-        mozjpeg: true,
-      },
-      jpg: {
-        quality: 80,
-        mozjpeg: true,
-      },
-      webp: {
-        quality: 80,
-        lossless: false,
-        nearLossless: false,
-        smartSubsample: true,
-      },
-      avif: {
-        quality: 60,
-        lossless: false,
-      },
-    })
+    react()
   ],
 
   resolve: {

@@ -81,25 +81,28 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  // Real categories from the database
+  const realCategories = [
+    { name: 'Perfumes', slug: 'perfumes' },
+    { name: 'Colognes', slug: 'colognes' },
+    { name: 'Fragrances', slug: 'fragrances' },
+    { name: 'Attars', slug: 'attars' },
+    { name: 'Essential Oils', slug: 'essential-oils' },
+    { name: 'Oud Collection', slug: 'oud-collection' },
+    { name: 'Floral Scents', slug: 'floral-scents' },
+    { name: 'Woody Fragrances', slug: 'woody-fragrances' }
+  ];
+
   const navigationItems: NavigationItem[] = [
     { name: 'Home', href: '/' },
     {
       name: 'Collections',
       href: '/products',
       hasDropdown: true,
-      dropdownItems: [
-        { name: 'All Products', href: '/products' },
-        { name: 'Oudh Attars', href: '/categories/oudh-attars' },
-        { name: 'Floral Attars', href: '/categories/floral-attars' },
-        { name: 'Musk Attars', href: '/categories/musk-attars' },
-        { name: 'Amber Attars', href: '/categories/amber-attars' },
-        { name: 'Saffron Attars', href: '/categories/saffron-attars' },
-        { name: 'Sandalwood Attars', href: '/categories/sandalwood-attars' },
-        { name: 'Jasmine Attars', href: '/categories/jasmine-attars' },
-        { name: 'Attar Blends', href: '/categories/attar-blends' },
-        { name: 'Seasonal Attars', href: '/categories/seasonal-attars' },
-        { name: 'Heritage Attars', href: '/categories/heritage-attars' },
-      ]
+      dropdownItems: realCategories.map(category => ({
+        name: category.name,
+        href: `/products?category=${category.slug}`
+      }))
     },
     { name: 'New Arrivals', href: '/new-arrivals' },
     { name: 'Offers', href: '/deals' },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -255,19 +255,19 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   if (isLoading) {
     return (
       <div className={`${className}`}>
-        <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+        <div className="flex items-center space-x-2 mb-3">
           <div className="text-neutral-600">{getRecommendationIcon()}</div>
           <div>
-            <div className="h-4 sm:h-5 bg-neutral-200 rounded w-32 sm:w-40 animate-pulse"></div>
-            <div className="h-2.5 sm:h-3 bg-neutral-100 rounded w-36 sm:w-48 mt-1 animate-pulse"></div>
+            <div className="h-4 bg-neutral-200 rounded w-32 animate-pulse"></div>
+            <div className="h-3 bg-neutral-100 rounded w-36 mt-1 animate-pulse"></div>
           </div>
         </div>
-        <div className={`grid gap-3 sm:gap-4 ${layout === 'grid' ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
+        <div className={`grid gap-3 ${layout === 'grid' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'}`}>
           {Array.from({ length: maxItems }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg border border-neutral-200 p-2.5 sm:p-3 animate-pulse">
-              <div className="aspect-square bg-neutral-200 rounded-md mb-2.5 sm:mb-3"></div>
-              <div className="h-2.5 sm:h-3 bg-neutral-200 rounded mb-1.5"></div>
-              <div className="h-2.5 sm:h-3 bg-neutral-100 rounded w-3/4"></div>
+            <div key={index} className="bg-white rounded-lg border border-neutral-200 p-3 animate-pulse">
+              <div className="aspect-square bg-neutral-200 rounded-md mb-3"></div>
+              <div className="h-3 bg-neutral-200 rounded mb-2"></div>
+              <div className="h-3 bg-neutral-100 rounded w-3/4"></div>
             </div>
           ))}
         </div>
@@ -282,14 +282,14 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
   return (
     <section className={`${className}`}>
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-neutral-600">{getRecommendationIcon()}</div>
           <div>
-            <h3 className="text-base sm:text-lg font-semibold text-neutral-900">
+            <h3 className="text-base font-semibold text-neutral-900">
               {title || getDefaultTitle()}
             </h3>
-            <p className="text-[10px] sm:text-xs text-neutral-600 mt-0.5">
+            <p className="text-xs text-neutral-600 mt-0.5">
               {subtitle || getDefaultSubtitle()}
             </p>
           </div>
@@ -298,7 +298,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
         {recommendedProducts.length > maxItems && (
           <Link
             to="/products"
-            className="flex items-center space-x-1.5 text-primary-600 hover:text-primary-700 transition-colors text-xs sm:text-sm touch-manipulation"
+            className="flex items-center space-x-1.5 text-primary-600 hover:text-primary-700 transition-colors text-xs touch-manipulation"
           >
             <span className="font-medium">View All</span>
             <ArrowRight className="h-3 w-3" />
@@ -313,7 +313,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
           title={title || getDefaultTitle()}
         />
       ) : (
-        <div className={`grid gap-3 sm:gap-4 ${layout === 'grid' ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
+        <div className={`grid gap-3 ${layout === 'grid' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3'}`}>
           {recommendedProducts.map((product, index) => (
             <motion.div
               key={product.id}
@@ -323,7 +323,7 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
               className="touch-manipulation"
             >
               <Link to={`/products/${product.id}`} className="group block">
-                <div className="bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-all duration-200 hover:shadow-md overflow-hidden">
+                <div className="bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-all duration-200 hover:shadow-sm overflow-hidden">
                   {/* Product Image */}
                   <div className="aspect-square relative overflow-hidden">
                     <img
@@ -338,29 +338,29 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                     {/* Wishlist Button */}
                     <button
                       onClick={(e) => handleWishlistToggle(product, e)}
-                      className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 p-1 rounded-full transition-all ${isInWishlist(product.id)
+                      className={`absolute top-2 right-2 p-1.5 rounded-full transition-all ${isInWishlist(product.id)
                           ? 'bg-red-100 text-red-600'
                           : 'bg-white/80 text-neutral-600 hover:bg-white'
                         } touch-manipulation`}
                     >
-                      <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`h-3.5 w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                     </button>
 
                     {/* Quick Add to Cart */}
                     {showAddToCart && product.stock > 0 && (
                       <button
                         onClick={(e) => handleAddToCart(product, e)}
-                        className="absolute bottom-1.5 sm:bottom-2 left-1.5 sm:left-2 right-1.5 sm:right-2 bg-neutral-900 text-white py-1 px-2 sm:py-1.5 sm:px-3 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center space-x-1 hover:bg-neutral-800 active:bg-neutral-700 touch-manipulation"
+                        className="absolute bottom-2 left-2 right-2 bg-neutral-900 text-white py-1.5 px-3 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center space-x-1 hover:bg-neutral-800 active:bg-neutral-700 touch-manipulation text-xs font-medium"
                       >
-                        <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        <span className="text-[10px] sm:text-xs font-medium">Add to Cart</span>
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        <span>Add to Cart</span>
                       </button>
                     )}
                   </div>
 
                   {/* Product Info */}
-                  <div className="p-2.5 sm:p-3">
-                    <h4 className="font-medium text-neutral-900 mb-1 line-clamp-2 group-hover:text-primary-600 transition-colors text-xs sm:text-sm">
+                  <div className="p-3">
+                    <h4 className="font-medium text-neutral-900 mb-1 line-clamp-2 group-hover:text-primary-600 transition-colors text-sm">
                       {product.name}
                     </h4>
 
@@ -370,23 +370,23 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.floor(product.rating)
+                            className={`h-3 w-3 ${i < Math.floor(product.rating)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-neutral-300'
                               }`}
                           />
                         ))}
                       </div>
-                      <span className="text-[10px] text-neutral-500">({product.rating})</span>
+                      <span className="text-xs text-neutral-500">({product.rating})</span>
                     </div>
 
                     {/* Price */}
                     <div className="flex items-center space-x-1.5">
-                      <span className="text-xs font-bold text-gray-900">
+                      <span className="text-sm font-bold text-gray-900">
                         ₹{product.price.toLocaleString('en-IN')}
                       </span>
                       {product.originalPrice && (
-                        <span className="text-[10px] sm:text-xs text-neutral-500 line-through">
+                        <span className="text-xs text-neutral-500 line-through">
                           ₹{product.originalPrice.toLocaleString('en-IN')}
                         </span>
                       )}
@@ -394,12 +394,12 @@ export const ProductRecommendations: React.FC<ProductRecommendationsProps> = ({
 
                     {/* Stock Status */}
                     {product.stock <= 5 && product.stock > 0 && (
-                      <p className="text-[10px] text-orange-600 mt-1">
+                      <p className="text-xs text-orange-600 mt-1">
                         Only {product.stock} left in stock
                       </p>
                     )}
                     {product.stock === 0 && (
-                      <p className="text-[10px] text-red-600 mt-1">Out of stock</p>
+                      <p className="text-xs text-red-600 mt-1">Out of stock</p>
                     )}
                   </div>
                 </div>

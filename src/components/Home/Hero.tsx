@@ -41,7 +41,7 @@ export const Hero: React.FC = () => {
         console.warn('First image failed to load');
         setIsLoaded(true); // Continue anyway
       };
-      firstImage.src = backgroundImages[0];
+      firstImage.src = backgroundImages[0] || '';
 
       // Then preload remaining images in background
       for (let i = 1; i < backgroundImages.length; i++) {
@@ -52,7 +52,7 @@ export const Hero: React.FC = () => {
         img.onerror = () => {
           console.warn(`Image ${i} failed to load`);
         };
-        img.src = backgroundImages[i];
+        img.src = backgroundImages[i] || '';
       }
     };
 
@@ -61,12 +61,12 @@ export const Hero: React.FC = () => {
 
   // Preload next image before transition
   useEffect(() => {
-    if (!loadedImages.has(nextImageIndex)) {
+    if (!loadedImages.has(nextImageIndex) && nextImageIndex < backgroundImages.length) {
       const img = new Image();
       img.onload = () => {
         setLoadedImages(prev => new Set(prev).add(nextImageIndex));
       };
-      img.src = backgroundImages[nextImageIndex];
+      img.src = backgroundImages[nextImageIndex] || '';
     }
   }, [nextImageIndex, backgroundImages, loadedImages]);
 
@@ -108,7 +108,7 @@ export const Hero: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Main Heading - Largest and Most Prominent - Fade in from top */}
           <h1
-            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 md:mb-5 leading-tight tracking-tight animate-fade-in-down"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 md:mb-5 leading-tight tracking-tight animate-fade-in-down"
             style={{ animationDelay: '0.1s' }}
           >
             <span className="block drop-shadow-2xl">
@@ -118,7 +118,7 @@ export const Hero: React.FC = () => {
 
           {/* Welcome Message - Secondary Heading - Fade in from top with delay */}
           <h2
-            className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-purple-200 mb-4 md:mb-6 drop-shadow-lg animate-fade-in-down"
+            className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-purple-200 mb-4 md:mb-6 drop-shadow-lg animate-fade-in-down"
             style={{ animationDelay: '0.2s' }}
           >
             Welcomes You

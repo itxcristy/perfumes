@@ -15,12 +15,10 @@ import { LoadingSpinner } from '../components/Common/LoadingSpinner';
 import { Review, Product } from '../types';
 import ProductImage from '../components/Common/ProductImage';
 import {
-  SocialProof,
   ReviewSummary,
   TrendingIndicator,
   StockUrgency,
   TrustBadges,
-  ProductTrustSignals,
   MiniTrustIndicators
 } from '../components/Trust';
 
@@ -136,7 +134,7 @@ export const ProductDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="aspect-square mb-4">
               <ProductImage
@@ -147,7 +145,7 @@ export const ProductDetailPage: React.FC = () => {
               />
             </div>
             {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-5 gap-3">
                 {product.images.map((image, index) => (
                   <button key={index} onClick={() => setSelectedImage(index)} className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-indigo-500 scale-105' : 'border-gray-200'}`}>
                     <ProductImage
@@ -165,7 +163,7 @@ export const ProductDetailPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
                 <div className="flex items-center space-x-2">
                   <TrendingIndicator isHot={product.featured} salesIncrease={15} />
                   <MiniTrustIndicators
@@ -189,9 +187,9 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-4 mb-6">
-                <span className="text-4xl font-bold text-gray-900">₹{product.price.toLocaleString('en-IN')}</span>
+                <span className="text-3xl md:text-4xl font-bold text-gray-900">₹{product.price.toLocaleString('en-IN')}</span>
                 {product.originalPrice && (
-                  <span className="text-2xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+                  <span className="text-xl md:text-2xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                 )}
               </div>
 
@@ -202,19 +200,19 @@ export const ProductDetailPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-3">Quantity</label>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:bg-gray-50 transition-colors"><Minus className="h-4 w-4" /></button>
-                  <span className="px-6 py-3 border-x border-gray-300 min-w-[80px] text-center">{quantity}</span>
-                  <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="p-3 hover:bg-gray-50 transition-colors" disabled={quantity >= product.stock}><Plus className="h-4 w-4" /></button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-2 md:p-3 hover:bg-gray-50 transition-colors"><Minus className="h-4 w-4" /></button>
+                  <span className="px-4 md:px-6 py-2 md:py-3 border-x border-gray-300 min-w-[60px] md:min-w-[80px] text-center">{quantity}</span>
+                  <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="p-2 md:p-3 hover:bg-gray-50 transition-colors" disabled={quantity >= product.stock}><Plus className="h-4 w-4" /></button>
                 </div>
                 <span className="text-sm text-gray-600">{product.stock} available</span>
               </div>
             </div>
             <div className="flex space-x-4">
-              <motion.button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 btn-primary !text-lg" whileHover={product.stock > 0 ? { scale: 1.02 } : {}} whileTap={product.stock > 0 ? { scale: 0.98 } : {}}>
+              <motion.button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 btn-primary !text-base md:!text-lg" whileHover={product.stock > 0 ? { scale: 1.02 } : {}} whileTap={product.stock > 0 ? { scale: 0.98 } : {}}>
                 <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
               </motion.button>
-              <motion.button onClick={handleToggleWishlist} className={`p-4 border rounded-xl transition-colors ${isInWishlist(product.id) ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-300 hover:bg-gray-50'}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Heart className="h-6 w-6" fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
+              <motion.button onClick={handleToggleWishlist} className={`p-3 md:p-4 border rounded-xl transition-colors ${isInWishlist(product.id) ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-300 hover:bg-gray-50'}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Heart className="h-5 w-5 md:h-6 md:w-6" fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
               </motion.button>
             </div>
             {/* Trust Signals */}
@@ -231,25 +229,29 @@ export const ProductDetailPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Social Proof Section */}
+        {/* Product Images Gallery Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-8"
+          className="mt-12"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SocialProof
-              productId={product.id}
-              showRecentPurchases={true}
-              showViewingCount={true}
-              showCustomerCount={true}
-            />
-            <ProductTrustSignals />
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Product Gallery</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {product.images && product.images.map((image, index) => (
+              <div key={index} className="aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-indigo-300 transition-colors">
+                <ProductImage
+                  product={{ id: product.id, name: product.name, images: [image] }}
+                  className="w-full h-full object-cover"
+                  alt={`Product image ${index + 1}`}
+                  size="thumbnail"
+                />
+              </div>
+            ))}
           </div>
         </motion.div>
 
-        <motion.div id="reviews" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-16">
+        <motion.div id="reviews" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-12">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6">
@@ -266,7 +268,7 @@ export const ProductDetailPage: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                    <button onClick={() => setIsReviewModalOpen(true)} className="btn-primary"><Edit className="h-4 w-4 mr-2" /><span>Write a Review</span></button>
+                    <button onClick={() => setIsReviewModalOpen(true)} className="btn-primary text-sm md:text-base"><Edit className="h-4 w-4 mr-2" /><span>Write a Review</span></button>
                   </div>
                   {reviewsLoading ? <LoadingSpinner /> : reviews.length > 0 ? (
                     <div className="space-y-4">
@@ -286,14 +288,24 @@ export const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Product Recommendations */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         {/* Frequently Bought Together */}
         <ProductRecommendations
           currentProduct={product}
           type="frequently-bought"
           maxItems={3}
           showAddToCart={true}
-          className="bg-neutral-50 rounded-2xl p-8"
+          className="bg-neutral-50 rounded-xl p-6"
+        />
+
+        {/* You May Also Like */}
+        <ProductRecommendations
+          currentProduct={product}
+          type="you-may-like"
+          maxItems={4}
+          showAddToCart={true}
+          layout="grid"
+          className="bg-neutral-50 rounded-xl p-6"
         />
 
         {/* Related Products */}
@@ -302,15 +314,7 @@ export const ProductDetailPage: React.FC = () => {
           type="related"
           maxItems={4}
           showAddToCart={true}
-        />
-
-        {/* You May Also Like */}
-        <ProductRecommendations
-          currentProduct={product}
-          type="you-may-like"
-          maxItems={6}
-          showAddToCart={true}
-          layout="grid"
+          className="bg-neutral-50 rounded-xl p-6"
         />
       </div>
 
