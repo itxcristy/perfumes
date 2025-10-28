@@ -19,10 +19,8 @@
     "test": "vitest",
     "db:init": "tsx server/scripts/initDb.ts",
     "db:auto-init": "tsx server/scripts/autoInitDb.ts",
-    "db:test-auto-init": "tsx server/scripts/testAutoInit.ts",
-    "db:seed": "tsx server/scripts/seedSampleProducts.ts",
     "db:seed:categories": "tsx server/scripts/seedCategories.ts",
-    "db:test:auth": "tsx server/scripts/testAuth.ts"
+    "db:migrate:settings": "tsx server/scripts/runSiteSettingsMigration.ts"
   },
   "dependencies": {
     "@sentry/browser": "^10.10.0",

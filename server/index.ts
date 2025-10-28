@@ -27,6 +27,7 @@ import adminAnalyticsRoutes from './routes/admin/analytics';
 import adminProductsRoutes from './routes/admin/products';
 import adminUsersRoutes from './routes/admin/users';
 import adminOrdersRoutes from './routes/admin/orders';
+import adminSettingsRoutes from './routes/admin/settings';
 
 // Import seller routes
 import sellerProductsRoutes from './routes/seller/products';
@@ -76,6 +77,7 @@ app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/admin/products', adminProductsRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
 app.use('/api/admin/orders', adminOrdersRoutes);
+app.use('/api/admin/settings', adminSettingsRoutes);
 
 // Seller API Routes
 app.use('/api/seller/products', sellerProductsRoutes);

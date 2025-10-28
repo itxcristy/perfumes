@@ -27,7 +27,7 @@ const AboutPage = React.lazy(() => import('@/pages/AboutPage')); // Added About 
 
 // Heavy admin/dashboard pages - loaded only when needed
 const DashboardPage = React.lazy(() =>
-  import('./pages/DashboardPage.tsx').then(module => ({ default: module.default }))
+  import('@/pages/DashboardPage').then(module => ({ default: module.default }))
 );
 const ProfilePage = React.lazy(() =>
   import('./pages/ProductionProfilePage.tsx').then(module => ({ default: module.default }))

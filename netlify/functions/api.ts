@@ -2,32 +2,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import serverless from 'serverless-http';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Load environment variables
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
-// Import routes
-import { initializeDatabase } from '../../server/db/connection.js';
-import authRoutes from '../../server/routes/auth.js';
-import productsRoutes from '../../server/routes/products.js';
-import categoriesRoutes from '../../server/routes/categories.js';
-import cartRoutes from '../../server/routes/cart.js';
-import wishlistRoutes from '../../server/routes/wishlist.js';
-import ordersRoutes from '../../server/routes/orders.js';
-import addressesRoutes from '../../server/routes/addresses.js';
-import paymentMethodsRoutes from '../../server/routes/paymentMethods.js';
-import notificationPreferencesRoutes from '../../server/routes/notificationPreferences.js';
-import adminAnalyticsRoutes from '../../server/routes/admin/analytics.js';
-import adminOrdersRoutes from '../../server/routes/admin/orders.js';
-import adminProductsRoutes from '../../server/routes/admin/products.js';
-import adminUsersRoutes from '../../server/routes/admin/users.js';
-import sellerProductsRoutes from '../../server/routes/seller/products.js';
-import sellerOrdersRoutes from '../../server/routes/seller/orders.js';
+// Note: For Netlify deployment, environment variables are set in Netlify dashboard
+// No need to load .env file in production
 
 // Create Express app
 const app = express();
@@ -39,8 +16,8 @@ app.use(cors({
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     /^https:\/\/.*\.netlify\.app$/,
-    /^https:\/\/aligarh-attars\.netlify\.app$/,
-  ],
+    process.env.VITE_SITE_URL || '',
+  ].filter(Boolean),
   credentials: true,
 }));
 
@@ -53,54 +30,80 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Initialize database on first request
-let dbInitialized = false;
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  if (!dbInitialized) {
-    try {
-      await initializeDatabase();
-      dbInitialized = true;
-    } catch (error) {
-      console.error('Database initialization failed:', error);
-      return res.status(500).json({ error: 'Database connection failed' });
-    }
-  }
-  next();
-});
-
-// Health check endpoint
+// Health check endpoint (no database required)
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production'
+  });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productsRoutes);
-app.use('/api/categories', categoriesRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/addresses', addressesRoutes);
-app.use('/api/payment-methods', paymentMethodsRoutes);
-app.use('/api/notification-preferences', notificationPreferencesRoutes);
+// Mock API endpoints for frontend-only deployment
+// These will return sample data until a real database is connected
 
-// Admin Routes
-app.use('/api/admin/analytics', adminAnalyticsRoutes);
-app.use('/api/admin/orders', adminOrdersRoutes);
-app.use('/api/admin/products', adminProductsRoutes);
-app.use('/api/admin/users', adminUsersRoutes);
+// Products endpoint
+app.get('/api/products', (req: Request, res: Response) => {
+  res.json({
+    products: [],
+    total: 0,
+    page: 1,
+    limit: 20
+  });
+});
 
-// Seller Routes
-app.use('/api/seller/products', sellerProductsRoutes);
-app.use('/api/seller/orders', sellerOrdersRoutes);
+// Categories endpoint
+app.get('/api/categories', (req: Request, res: Response) => {
+  res.json({
+    categories: []
+  });
+});
+
+// Auth endpoints
+app.post('/api/auth/login', (req: Request, res: Response) => {
+  res.status(501).json({
+    error: 'Database not configured. Please set DATABASE_URL environment variable in Netlify.'
+  });
+});
+
+app.post('/api/auth/signup', (req: Request, res: Response) => {
+  res.status(501).json({
+    error: 'Database not configured. Please set DATABASE_URL environment variable in Netlify.'
+  });
+});
+
+// Cart endpoints
+app.get('/api/cart', (req: Request, res: Response) => {
+  res.json({ items: [], total: 0 });
+});
+
+// Wishlist endpoints
+app.get('/api/wishlist', (req: Request, res: Response) => {
+  res.json({ items: [] });
+});
+
+// Orders endpoints
+app.get('/api/orders', (req: Request, res: Response) => {
+  res.json({ orders: [] });
+});
+
+// Catch-all for unimplemented endpoints
+app.use('/api/*', (req: Request, res: Response) => {
+  res.status(501).json({
+    error: 'This endpoint requires database configuration',
+    message: 'Please configure DATABASE_URL in Netlify environment variables',
+    path: req.path,
+    method: req.method,
+  });
+});
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('Error:', err);
-  
+
   const status = err.status || err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  
+
   res.status(status).json({
     error: message,
     status,

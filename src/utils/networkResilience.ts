@@ -410,7 +410,6 @@ export class OfflineRequestQueue {
               // Move to end of same priority level
               this.queue = this.queue.filter(q => q.id !== item.id);
               this.queue.push(item);
-              console.log(`Retrying request ${item.id} (attempt ${item.retries + 1}) with ${item.priority} priority`);
             } else {
               item.reject(error);
               // Remove from queue

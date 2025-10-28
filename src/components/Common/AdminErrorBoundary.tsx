@@ -189,7 +189,12 @@ export class AdminErrorBoundary extends Component<Props, State> {
 
   handleCopyError = async () => {
     if (this.state.error) {
-      const errorText = `Error ID: ${this.state.errorId}
+      // In production, only copy error ID and type (no stack traces or sensitive info)
+      const errorText = import.meta.env.PROD
+        ? `Error ID: ${this.state.errorId}
+Type: ${this.state.errorType}
+Timestamp: ${new Date().toISOString()}`
+        : `Error ID: ${this.state.errorId}
 Type: ${this.state.errorType}
 Message: ${this.state.error.message}
 Stack: ${this.state.error.stack}

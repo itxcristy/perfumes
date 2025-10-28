@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { Settings, Share2, Phone, Globe, Link as LinkIcon } from 'lucide-react';
+import { SocialMediaList } from './SocialMediaList';
+import { ContactInfoList } from './ContactInfoList';
+import { SiteSettingsList } from './SiteSettingsList';
+import { FooterLinksList } from './FooterLinksList';
+
+type TabType = 'site' | 'social' | 'contact' | 'footer';
+
+interface Tab {
+  id: TabType;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
+const tabs: Tab[] = [
+  {
+    id: 'site',
+    label: 'Site Settings',
+    icon: <Settings className="h-5 w-5" />,
+    description: 'General website configuration'
+  },
+  {
+    id: 'social',
+    label: 'Social Media',
+    icon: <Share2 className="h-5 w-5" />,
+    description: 'Manage social media accounts'
+  },
+  {
+    id: 'contact',
+    label: 'Contact Info',
+    icon: <Phone className="h-5 w-5" />,
+    description: 'Business contact details'
+  },
+  {
+    id: 'footer',
+    label: 'Footer Links',
+    icon: <LinkIcon className="h-5 w-5" />,
+    description: 'Manage footer navigation'
+  }
+];
+
+export const SettingsPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<TabType>('site');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'site':
+        return <SiteSettingsList />;
+      case 'social':
+        return <SocialMediaList />;
+      case 'contact':
+        return <ContactInfoList />;
+      case 'footer':
+        return <FooterLinksList />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <Globe className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Website Settings</h1>
+            <p className="text-sm text-gray-600">Manage your website configuration and content</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Tab Headers */}
+        <div className="border-b border-gray-200 bg-gray-50">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-purple-600 text-purple-600 bg-white'
+                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                {tab.icon}
+                <div className="text-left">
+                  <div className="font-medium">{tab.label}</div>
+                  <div className="text-xs opacity-75">{tab.description}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {renderTabContent()}
+        </div>
+      </div>
+    </div>
+  );
+};
+

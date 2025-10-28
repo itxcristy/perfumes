@@ -19,33 +19,8 @@ interface SocialProofProps {
   showCustomerCount?: boolean;
 }
 
-// Mock data - in real implementation, this would come from your analytics/database
-const mockRecentPurchases: RecentPurchase[] = [
-  {
-    id: '1',
-    customerName: 'Sarah M.',
-    productName: 'Premium Smartphone Pro Max',
-    location: 'New York',
-    timeAgo: '2 minutes ago',
-    verified: true
-  },
-  {
-    id: '2',
-    customerName: 'Michael K.',
-    productName: 'Wireless Bluetooth Headphones',
-    location: 'California',
-    timeAgo: '5 minutes ago',
-    verified: true
-  },
-  {
-    id: '3',
-    customerName: 'Emma L.',
-    productName: 'Smart Fitness Watch',
-    location: 'Texas',
-    timeAgo: '8 minutes ago',
-    verified: false
-  }
-];
+// Recent purchases will be fetched from API in production
+const mockRecentPurchases: RecentPurchase[] = [];
 
 export const SocialProof: React.FC<SocialProofProps> = ({
   className = '',
@@ -60,7 +35,7 @@ export const SocialProof: React.FC<SocialProofProps> = ({
   // Rotate through recent purchases
   useEffect(() => {
     if (!showRecentPurchases) return;
-    
+
     const interval = setInterval(() => {
       setCurrentPurchaseIndex((prev) => (prev + 1) % mockRecentPurchases.length);
     }, 4000);
@@ -71,7 +46,7 @@ export const SocialProof: React.FC<SocialProofProps> = ({
   // Simulate viewing count changes
   useEffect(() => {
     if (!showViewingCount) return;
-    
+
     const interval = setInterval(() => {
       setViewingCount(prev => {
         const change = Math.random() > 0.5 ? 1 : -1;
@@ -181,11 +156,10 @@ export const ReviewSummary: React.FC<{
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              className={`h-5 w-5 ${
-                i < Math.floor(numericRating)
+              className={`h-5 w-5 ${i < Math.floor(numericRating)
                   ? 'text-yellow-400 fill-current'
                   : 'text-gray-300'
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -217,11 +191,10 @@ export const TrendingIndicator: React.FC<{
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-        isHot 
+      className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${isHot
           ? 'bg-red-100 text-red-700 border border-red-200'
           : 'bg-green-100 text-green-700 border border-green-200'
-      } ${className}`}
+        } ${className}`}
     >
       <TrendingUp className="h-3 w-3" />
       <span>
@@ -254,9 +227,8 @@ export const StockUrgency: React.FC<{
       className={`border rounded-lg p-3 ${styles[urgencyLevel]} ${className}`}
     >
       <div className="flex items-center space-x-2">
-        <div className={`w-2 h-2 rounded-full ${
-          isVeryLow ? 'bg-red-500 animate-pulse' : 'bg-orange-500'
-        }`} />
+        <div className={`w-2 h-2 rounded-full ${isVeryLow ? 'bg-red-500 animate-pulse' : 'bg-orange-500'
+          }`} />
         <span className="text-sm font-medium">
           {isVeryLow ? 'Almost sold out!' : 'Low stock alert'}
         </span>

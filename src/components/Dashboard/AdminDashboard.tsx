@@ -6,6 +6,7 @@ import { ProductsList } from '../Admin/Products/ProductsList';
 import { CategoriesList } from '../Admin/Categories/CategoriesList';
 import { OrdersList } from '../Admin/Orders/OrdersList';
 import { UsersList } from '../Admin/Users/UsersList';
+import { SettingsPage } from '../Admin/Settings/SettingsPage';
 
 export const AdminDashboard: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ export const AdminDashboard: React.FC = () => {
         <Route path="/categories" element={<CategoriesList />} />
         <Route path="/orders" element={<OrdersList />} />
         <Route path="/users" element={<UsersList />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/analytics" element={<div className="text-center py-12 text-gray-600">Analytics Dashboard (Coming Soon)</div>} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

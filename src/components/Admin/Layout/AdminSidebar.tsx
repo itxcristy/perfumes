@@ -9,7 +9,8 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -52,6 +53,11 @@ const navItems: NavItem[] = [
     icon: <Users className="h-5 w-5" />
   },
   {
+    name: 'Settings',
+    path: '/admin/settings',
+    icon: <Settings className="h-5 w-5" />
+  },
+  {
     name: 'Analytics',
     path: '/admin/analytics',
     icon: <BarChart3 className="h-5 w-5" />
@@ -77,9 +83,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:block ${
-          isOpen ? 'w-64' : 'w-20'
-        }`}
+        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:block ${isOpen ? 'w-64' : 'w-20'
+          }`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
@@ -105,19 +110,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group ${
-                isActive(item.path)
-                  ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group ${isActive(item.path)
+                ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
+                : 'text-gray-700 hover:bg-gray-50'
+                }`}
               title={!isOpen ? item.name : undefined}
             >
               <span
-                className={`${
-                  isActive(item.path)
-                    ? 'text-amber-600'
-                    : 'text-gray-500 group-hover:text-gray-700'
-                }`}
+                className={`${isActive(item.path)
+                  ? 'text-amber-600'
+                  : 'text-gray-500 group-hover:text-gray-700'
+                  }`}
               >
                 {item.icon}
               </span>
@@ -145,9 +148,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen w-64 transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 z-40 h-screen w-64 transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
@@ -168,18 +170,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               key={item.path}
               to={item.path}
               onClick={onMobileToggle}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 ${
-                isActive(item.path)
-                  ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 ${isActive(item.path)
+                ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
+                : 'text-gray-700 hover:bg-gray-50'
+                }`}
             >
               <span
-                className={`${
-                  isActive(item.path)
-                    ? 'text-amber-600'
-                    : 'text-gray-500'
-                }`}
+                className={`${isActive(item.path)
+                  ? 'text-amber-600'
+                  : 'text-gray-500'
+                  }`}
               >
                 {item.icon}
               </span>

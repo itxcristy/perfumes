@@ -20,31 +20,14 @@ export const generateUUID = (): string => {
 };
 
 /**
- * Maps legacy mock user IDs to valid UUIDs
- */
-const LEGACY_UUID_MAP: Record<string, string> = {
-  'mock-customer-1': '11111111-1111-1111-1111-111111111111',
-  'mock-seller-1': '22222222-2222-2222-2222-222222222222',
-  'mock-admin-1': '33333333-3333-3333-3333-333333333333',
-  'mock-customer-2': '44444444-4444-4444-4444-444444444444',
-  'mock-seller-2': '55555555-5555-5555-5555-555555555555',
-};
-
-/**
- * Converts legacy mock user IDs to valid UUIDs
+ * Converts invalid UUIDs to valid ones
  */
 export const convertLegacyUUID = (id: string): string => {
   if (isValidUUID(id)) {
     return id;
   }
-  
-  if (LEGACY_UUID_MAP[id]) {
-    console.warn(`Converting legacy UUID "${id}" to valid UUID "${LEGACY_UUID_MAP[id]}"`);
-    return LEGACY_UUID_MAP[id];
-  }
-  
-  // If it's not a valid UUID and not in our legacy map, generate a new one
-  console.warn(`Invalid UUID "${id}" detected, generating new UUID`);
+
+  // If it's not a valid UUID, generate a new one
   return generateUUID();
 };
 
@@ -74,15 +57,14 @@ export const validateAndFixStoredUser = (): void => {
  */
 export const validateSellerId = (sellerId: string | undefined): string => {
   if (!sellerId) {
-    // Return default admin UUID
-    return '33333333-3333-3333-3333-333333333333';
+    throw new Error('Seller ID is required');
   }
-  
+
   if (isValidUUID(sellerId)) {
     return sellerId;
   }
-  
-  // Convert legacy ID or generate new one
+
+  // Convert invalid ID to valid one
   return convertLegacyUUID(sellerId);
 };
 

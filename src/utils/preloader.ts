@@ -119,7 +119,6 @@ class DataPreloader {
 
     const preloadTask = async () => {
       try {
-        console.log(`🚀 Preloading next page (offset: ${nextOffset})...`);
         
         const products = await Promise.race([
           getProductsBasic({ limit, offset: nextOffset }),
