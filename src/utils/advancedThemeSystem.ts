@@ -183,7 +183,7 @@ export const COLOR_SCHEMES: Record<ColorScheme, Partial<ColorPalette>> = {
 export const TYPOGRAPHY_SCALES: Record<FontScale, TypographyConfig> = {
   compact: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
+      sans: ['Roboto', 'Inter', 'system-ui', 'sans-serif'],
       serif: ['Playfair Display', 'Georgia', 'serif'],
       mono: ['JetBrains Mono', 'Menlo', 'monospace'],
       display: ['Cormorant Garamond', 'Playfair Display', 'serif']
@@ -208,7 +208,7 @@ export const TYPOGRAPHY_SCALES: Record<FontScale, TypographyConfig> = {
   },
   comfortable: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
+      sans: ['Roboto', 'Inter', 'system-ui', 'sans-serif'],
       serif: ['Playfair Display', 'Georgia', 'serif'],
       mono: ['JetBrains Mono', 'Menlo', 'monospace'],
       display: ['Cormorant Garamond', 'Playfair Display', 'serif']
@@ -233,7 +233,7 @@ export const TYPOGRAPHY_SCALES: Record<FontScale, TypographyConfig> = {
   },
   spacious: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
+      sans: ['Roboto', 'Inter', 'system-ui', 'sans-serif'],
       serif: ['Playfair Display', 'Georgia', 'serif'],
       mono: ['JetBrains Mono', 'Menlo', 'monospace'],
       display: ['Cormorant Garamond', 'Playfair Display', 'serif']

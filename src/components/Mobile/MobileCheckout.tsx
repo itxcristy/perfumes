@@ -174,58 +174,80 @@ export const MobilePaymentSelector: React.FC<MobilePaymentSelectorProps> = ({
       available: true
     },
     {
-      id: 'apple-pay',
-      name: 'Apple Pay',
-      icon: Apple,
-      description: 'Touch ID or Face ID',
+      id: 'upi',
+      name: 'UPI',
+      icon: Smartphone,
+      description: 'Google Pay, PhonePe, Paytm',
       available: true
     },
     {
-      id: 'google-pay',
-      name: 'Google Pay',
-      icon: Smartphone,
-      description: 'Quick and secure',
+      id: 'netbanking',
+      name: 'Net Banking',
+      icon: Building,
+      description: 'All major banks',
+      available: true
+    },
+    {
+      id: 'wallet',
+      name: 'Wallets',
+      icon: Wallet,
+      description: 'Paytm, Mobikwik',
+      available: true
+    },
+    {
+      id: 'cod',
+      name: 'Cash on Delivery',
+      icon: Banknote,
+      description: 'Pay when delivered',
       available: true
     }
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <h3 className="text-lg font-semibold text-neutral-900">Payment Method</h3>
-      <div className="space-y-3">
-        {paymentMethods.map((method) => (
-          <motion.button
-            key={method.id}
-            onClick={() => onMethodChange(method.id)}
-            disabled={!method.available}
-            className={`
-              w-full p-3 sm:p-4 rounded-xl border-2 transition-all duration-200
-              ${selectedMethod === method.id
-                ? 'border-neutral-900 bg-neutral-50'
-                : 'border-neutral-200 bg-white hover:border-neutral-300'
-              }
-              ${!method.available ? 'opacity-50 cursor-not-allowed' : ''}
-              touch-manipulation
-            `}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="flex items-center space-x-3 sm:space-x-4">
+
+      {/* Horizontal Scrollable Payment Methods */}
+      <div className="flex overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+        <div className="flex space-x-3 min-w-max">
+          {paymentMethods.map((method) => (
+            <motion.button
+              key={method.id}
+              onClick={() => onMethodChange(method.id)}
+              disabled={!method.available}
+              className={`
+                flex flex-col items-center p-3 rounded-xl border-2 transition-all
+                ${selectedMethod === method.id
+                  ? 'border-neutral-900 bg-neutral-50'
+                  : 'border-neutral-200 bg-white hover:border-neutral-300'
+                }
+                ${!method.available ? 'opacity-50 cursor-not-allowed' : ''}
+                touch-manipulation min-w-[90px]
+              `}
+              whileTap={{ scale: 0.95 }}
+            >
               <div className={`
-                p-2 rounded-lg
+                p-2 rounded-full mb-2
                 ${selectedMethod === method.id ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-600'}
               `}>
-                <method.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                <method.icon className="h-5 w-5" />
               </div>
-              <div className="flex-1 text-left">
-                <div className="font-medium text-neutral-900 text-sm sm:text-base">{method.name}</div>
-                <div className="text-xs sm:text-sm text-neutral-500">{method.description}</div>
+              <div className="text-center">
+                <div className="font-medium text-neutral-900 text-xs">{method.name}</div>
+                {selectedMethod === method.id && (
+                  <CheckCircle className="h-3 w-3 text-neutral-900 mx-auto mt-1" />
+                )}
               </div>
-              {selectedMethod === method.id && (
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-neutral-900" />
-              )}
-            </div>
-          </motion.button>
-        ))}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Payment Method Description */}
+      <div className="p-3 bg-neutral-50 rounded-lg">
+        <p className="text-sm text-neutral-600 text-center">
+          {paymentMethods.find(m => m.id === selectedMethod)?.description}
+        </p>
       </div>
     </div>
   );

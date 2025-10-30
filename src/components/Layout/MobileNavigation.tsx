@@ -151,7 +151,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       >
         {/* Header with close button */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 id="mobile-nav-title" className="text-lg font-semibold text-gray-900">
+          <h2 id="mobile-nav-title" className="text-lg font-semibold text-gray-900 font-roboto">
             Menu
           </h2>
           <button
@@ -173,8 +173,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 className="h-12 w-12 rounded-full border-2 border-purple-200"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                <p className="text-xs text-gray-500 uppercase">{user.role}</p>
+                <p className="text-sm font-semibold text-gray-900 truncate font-roboto">{user.name}</p>
+                <p className="text-xs text-gray-500 uppercase font-roboto">{user.role}</p>
               </div>
             </div>
           ) : (
@@ -183,13 +183,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 <User className="h-6 w-6 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Guest</p>
+                <p className="text-sm font-semibold text-gray-900 font-roboto">Guest</p>
                 <button
                   onClick={() => {
                     navigate('/auth');
                     onClose();
                   }}
-                  className="text-xs text-purple-600 font-medium hover:text-purple-700 focus:outline-none focus:underline"
+                  className="text-xs text-purple-600 font-medium hover:text-purple-700 focus:outline-none focus:underline font-roboto"
                 >
                   Sign in
                 </button>
@@ -208,12 +208,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <div className="relative">
               <Heart className="h-6 w-6 text-gray-600" />
               {wishlistItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 h-5 w-5 text-xs rounded-full flex items-center justify-center font-medium bg-purple-600 text-white">
+                <span className="absolute -top-2 -right-2 h-5 w-5 text-xs rounded-full flex items-center justify-center font-medium bg-purple-600 text-white font-roboto">
                   {wishlistItems.length > 9 ? '9+' : wishlistItems.length}
                 </span>
               )}
             </div>
-            <span className="text-xs mt-1 text-gray-600">Wishlist</span>
+            <span className="text-xs mt-1 text-gray-600 font-roboto">Wishlist</span>
           </Link>
 
           <button
@@ -226,12 +226,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <div className="relative">
               <ShoppingCart className="h-6 w-6 text-gray-600" />
               {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 h-5 w-5 text-xs rounded-full flex items-center justify-center font-medium bg-purple-600 text-white">
+                <span className="absolute -top-2 -right-2 h-5 w-5 text-xs rounded-full flex items-center justify-center font-medium bg-purple-600 text-white font-roboto">
                   {itemCount > 9 ? '9+' : itemCount}
                 </span>
               )}
             </div>
-            <span className="text-xs mt-1 text-gray-600">Cart</span>
+            <span className="text-xs mt-1 text-gray-600 font-roboto">Cart</span>
           </button>
 
           {user ? (
@@ -241,7 +241,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <User className="h-6 w-6 text-gray-600" />
-              <span className="text-xs mt-1 text-gray-600">Profile</span>
+              <span className="text-xs mt-1 text-gray-600 font-roboto">Profile</span>
             </Link>
           ) : (
             <button
@@ -252,7 +252,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <User className="h-6 w-6 text-gray-600" />
-              <span className="text-xs mt-1 text-gray-600">Account</span>
+              <span className="text-xs mt-1 text-gray-600 font-roboto">Account</span>
             </button>
           )}
         </div>
@@ -266,7 +266,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   <>
                     <button
                       onClick={() => toggleDropdown(item.name)}
-                      className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium ${isActiveLink(item.href)
+                      className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium font-roboto ${isActiveLink(item.href)
                         ? 'text-purple-600 bg-purple-50'
                         : 'text-gray-700 hover:bg-gray-50'
                         }`}
@@ -274,7 +274,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     >
                       <div className="flex items-center">
                         <span className="mr-3 text-gray-500">{item.icon}</span>
-                        <span>{item.name}</span>
+                        <span className="font-roboto">{item.name}</span>
                       </div>
                       <ChevronRight
                         className={`h-5 w-5 text-gray-400 transition-transform ${activeDropdown === item.name ? 'rotate-90' : ''
@@ -289,7 +289,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                             key={dropdownItem.name}
                             to={dropdownItem.href}
                             onClick={onClose}
-                            className={`block px-12 py-3 text-sm ${isActiveLink(dropdownItem.href)
+                            className={`block px-12 py-3 text-sm font-roboto ${isActiveLink(dropdownItem.href)
                               ? 'text-purple-600 bg-purple-50'
                               : 'text-gray-600 hover:bg-gray-100'
                               }`}
@@ -304,13 +304,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   <Link
                     to={item.href}
                     onClick={onClose}
-                    className={`flex items-center px-4 py-3 text-base font-medium ${isActiveLink(item.href)
+                    className={`flex items-center px-4 py-3 text-base font-medium font-roboto ${isActiveLink(item.href)
                       ? 'text-purple-600 bg-purple-50'
                       : 'text-gray-700 hover:bg-gray-50'
                       }`}
                   >
                     <span className="mr-3 text-gray-500">{item.icon}</span>
-                    <span>{item.name}</span>
+                    <span className="font-roboto">{item.name}</span>
                   </Link>
                 )}
               </div>
@@ -324,19 +324,19 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <Link
               to="/dashboard"
               onClick={onClose}
-              className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 font-roboto"
             >
               <Settings className="h-5 w-5 text-gray-500 mr-3" />
-              <span>Dashboard</span>
+              <span className="font-roboto">Dashboard</span>
             </Link>
 
             <Link
               to="/orders"
               onClick={onClose}
-              className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 font-roboto"
             >
               <PackageIcon className="h-5 w-5 text-gray-500 mr-3" />
-              <span>My Orders</span>
+              <span className="font-roboto">My Orders</span>
             </Link>
 
             <button
@@ -344,10 +344,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 logout();
                 onClose();
               }}
-              className="flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 font-roboto"
             >
               <LogOut className="h-5 w-5 text-red-500 mr-3" />
-              <span>Sign Out</span>
+              <span className="font-roboto">Sign Out</span>
             </button>
           </div>
         )}

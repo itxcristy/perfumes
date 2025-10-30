@@ -206,7 +206,7 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                       <div className="relative" ref={categoriesDropdownRef}>
                         <button
                           onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                          className={`flex items-center space-x-1 px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${isActiveLink(item.href)
+                          className={`flex items-center space-x-1 px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg font-roboto ${isActiveLink(item.href)
                             ? 'text-purple-600 bg-purple-50/50'
                             : isHomePage && !isScrolled
                               ? 'text-white hover:text-purple-200 hover:bg-white/10'
@@ -228,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                                   setIsCategoriesOpen(false);
                                   window.scrollTo(0, 0);
                                 }}
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 font-roboto"
                               >
                                 {dropdownItem.name}
                               </Link>
@@ -240,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                       <Link
                         to={item.href}
                         onClick={() => window.scrollTo(0, 0)}
-                        className={`px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${isActiveLink(item.href)
+                        className={`px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg font-roboto ${isActiveLink(item.href)
                           ? 'text-purple-600 bg-purple-50/50'
                           : isHomePage && !isScrolled
                             ? 'text-white hover:text-purple-200 hover:bg-white/10'

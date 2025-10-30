@@ -53,7 +53,7 @@ export const designTokens = {
   // Typography Scale
   typography: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
+      sans: ['Roboto', 'Inter', 'system-ui', 'sans-serif'],
       serif: ['Georgia', 'serif'],
       mono: ['JetBrains Mono', 'monospace']
     },

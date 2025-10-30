@@ -611,43 +611,57 @@ export const CheckoutPage: React.FC = () => {
                 </h2>
 
                 {/* Payment Method Selection */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Select Payment Method</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setSelectedPaymentMethod('razorpay')}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${selectedPaymentMethod === 'razorpay'
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 rounded-lg bg-blue-500 text-white">
-                          <CreditCard className="h-5 w-5" />
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
+
+                  {/* Horizontal Payment Methods */}
+                  <div className="flex overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
+                    <div className="flex space-x-3 min-w-max">
+                      <button
+                        onClick={() => setSelectedPaymentMethod('razorpay')}
+                        className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all min-w-[100px] ${selectedPaymentMethod === 'razorpay'
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                      >
+                        <div className="p-3 rounded-full bg-blue-500 text-white mb-2">
+                          <CreditCard className="h-6 w-6" />
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">Online Payment</div>
-                          <div className="text-sm text-gray-500">Credit/Debit Cards, UPI, Net Banking</div>
+                        <div className="text-center">
+                          <div className="font-medium text-gray-900 text-sm">Online Payment</div>
+                          {selectedPaymentMethod === 'razorpay' && (
+                            <CheckCircle className="w-4 h-4 text-indigo-500 mx-auto mt-1" />
+                          )}
                         </div>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setSelectedPaymentMethod('cod')}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${selectedPaymentMethod === 'cod'
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 rounded-lg bg-gray-500 text-white">
-                          <Wallet className="h-5 w-5" />
+                      </button>
+
+                      <button
+                        onClick={() => setSelectedPaymentMethod('cod')}
+                        className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all min-w-[100px] ${selectedPaymentMethod === 'cod'
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                      >
+                        <div className="p-3 rounded-full bg-gray-500 text-white mb-2">
+                          <Banknote className="h-6 w-6" />
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">Cash on Delivery</div>
-                          <div className="text-sm text-gray-500">Pay when delivered</div>
+                        <div className="text-center">
+                          <div className="font-medium text-gray-900 text-sm">Cash on Delivery</div>
+                          {selectedPaymentMethod === 'cod' && (
+                            <CheckCircle className="w-4 h-4 text-indigo-500 mx-auto mt-1" />
+                          )}
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Payment Method Description */}
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 text-center">
+                      {selectedPaymentMethod === 'cod'
+                        ? 'You will pay when your order is delivered'
+                        : 'Secure online payment via Razorpay - Credit/Debit Cards, UPI, Net Banking'}
+                    </p>
                   </div>
                 </div>
 

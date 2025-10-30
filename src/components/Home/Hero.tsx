@@ -108,7 +108,7 @@ export const Hero: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Main Heading - Largest and Most Prominent - Fade in from top */}
           <h1
-            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 md:mb-5 leading-tight tracking-tight animate-fade-in-down"
+            className="font-roboto text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 md:mb-5 leading-tight tracking-tight animate-fade-in-down"
             style={{ animationDelay: '0.1s' }}
           >
             <span className="block drop-shadow-2xl">
@@ -118,7 +118,7 @@ export const Hero: React.FC = () => {
 
           {/* Welcome Message - Secondary Heading - Fade in from top with delay */}
           <h2
-            className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-purple-200 mb-4 md:mb-6 drop-shadow-lg animate-fade-in-down"
+            className="font-roboto text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-purple-200 mb-4 md:mb-6 drop-shadow-lg animate-fade-in-down"
             style={{ animationDelay: '0.2s' }}
           >
             Welcomes You
@@ -126,7 +126,7 @@ export const Hero: React.FC = () => {
 
           {/* Description - Smaller than headings - Fade in with delay */}
           <p
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-purple-100/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto drop-shadow-md font-light animate-fade-in-up"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-purple-100/90 mb-6 md:mb-10 leading-relaxed max-w-3xl mx-auto drop-shadow-md font-light animate-fade-in-up font-roboto"
             style={{ animationDelay: '0.3s' }}
           >
             Discover the timeless elegance of traditional Indian attars, crafted with passion and heritage

@@ -25,7 +25,7 @@
     --color-error: #ef4444;
 
     /* Typography */
-    --font-family-sans: 'Inter', system-ui, sans-serif;
+    --font-family-sans: 'Roboto', 'Inter', system-ui, sans-serif;
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
