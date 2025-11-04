@@ -10,6 +10,7 @@ interface TrustBadgeProps {
 
 const trustBadges = [
   {
+    id: 'ssl-secured',
     icon: Shield,
     label: 'SSL Secured',
     description: '256-bit encryption',
@@ -18,6 +19,7 @@ const trustBadges = [
     borderColor: 'border-green-200'
   },
   {
+    id: 'privacy-protected',
     icon: Lock,
     label: 'Privacy Protected',
     description: 'GDPR Compliant',
@@ -26,6 +28,7 @@ const trustBadges = [
     borderColor: 'border-blue-200'
   },
   {
+    id: 'secure-payments',
     icon: CreditCard,
     label: 'Secure Payments',
     description: 'PCI DSS Certified',
@@ -34,6 +37,7 @@ const trustBadges = [
     borderColor: 'border-purple-200'
   },
   {
+    id: 'trusted-store',
     icon: Award,
     label: 'Trusted Store',
     description: 'Verified Business',
@@ -43,8 +47,8 @@ const trustBadges = [
   }
 ];
 
-export const TrustBadges: React.FC<TrustBadgeProps> = ({ 
-  variant = 'horizontal', 
+export const TrustBadges: React.FC<TrustBadgeProps> = ({
+  variant = 'horizontal',
   showLabels = true,
   className = ''
 }) => {
@@ -64,7 +68,7 @@ export const TrustBadges: React.FC<TrustBadgeProps> = ({
     <div className={`${containerClasses[variant]} ${className}`}>
       {trustBadges.map((badge, index) => (
         <motion.div
-          key={badge.label}
+          key={badge.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
@@ -116,7 +120,7 @@ export const SecurityGuarantee: React.FC<{ className?: string }> = ({ className 
           100% Secure Checkout
         </h3>
       </div>
-      
+
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="flex items-center space-x-2">
           <CheckCircle className="h-4 w-4 text-green-600" />
@@ -135,7 +139,7 @@ export const SecurityGuarantee: React.FC<{ className?: string }> = ({ className 
           <span className="text-gray-700">Money Back Guarantee</span>
         </div>
       </div>
-      
+
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-600">
           Your payment information is processed securely. We do not store credit card details.
@@ -148,12 +152,12 @@ export const SecurityGuarantee: React.FC<{ className?: string }> = ({ className 
 // Payment method badges
 export const PaymentBadges: React.FC<{ className?: string }> = ({ className = '' }) => {
   const paymentMethods = [
-    { name: 'Visa', logo: '💳' },
-    { name: 'Mastercard', logo: '💳' },
-    { name: 'American Express', logo: '💳' },
-    { name: 'PayPal', logo: '🅿️' },
-    { name: 'Apple Pay', logo: '🍎' },
-    { name: 'Google Pay', logo: '🔵' }
+    { id: 'visa', name: 'Visa', logo: '💳' },
+    { id: 'mastercard', name: 'Mastercard', logo: '💳' },
+    { id: 'amex', name: 'American Express', logo: '💳' },
+    { id: 'paypal', name: 'PayPal', logo: '🅿️' },
+    { id: 'apple-pay', name: 'Apple Pay', logo: '🍎' },
+    { id: 'google-pay', name: 'Google Pay', logo: '🔵' }
   ];
 
   return (
@@ -162,7 +166,7 @@ export const PaymentBadges: React.FC<{ className?: string }> = ({ className = ''
       <div className="flex items-center space-x-2">
         {paymentMethods.map((method, index) => (
           <div
-            key={method.name}
+            key={method.id}
             className="flex items-center justify-center w-10 h-6 bg-white border border-gray-200 rounded text-xs"
             title={method.name}
           >
@@ -177,17 +181,17 @@ export const PaymentBadges: React.FC<{ className?: string }> = ({ className = ''
 // Company credibility indicators
 export const CredibilityIndicators: React.FC<{ className?: string }> = ({ className = '' }) => {
   const stats = [
-    { value: '10+', label: 'Years in Business', icon: Globe },
-    { value: '50K+', label: 'Happy Customers', icon: Award },
-    { value: '99.9%', label: 'Uptime Guarantee', icon: Shield },
-    { value: '24/7', label: 'Customer Support', icon: CheckCircle }
+    { id: 'years-business', value: '10+', label: 'Years in Business', icon: Globe },
+    { id: 'happy-customers', value: '50K+', label: 'Happy Customers', icon: Award },
+    { id: 'uptime-guarantee', value: '99.9%', label: 'Uptime Guarantee', icon: Shield },
+    { id: 'customer-support', value: '24/7', label: 'Customer Support', icon: CheckCircle }
   ];
 
   return (
     <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 ${className}`}>
       {stats.map((stat, index) => (
         <motion.div
-          key={stat.label}
+          key={stat.id}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

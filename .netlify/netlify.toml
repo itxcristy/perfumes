@@ -1,18 +1,18 @@
-functionsDirectory = "D:\\perfumes\\netlify\\functions"
+functionsDirectory = "D:\\client\\perfumes\\netlify\\functions"
 functionsDirectoryOrigin = "config"
 headersOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
 
 [build]
-publish = "D:\\perfumes\\dist"
+publish = "D:\\client\\perfumes\\dist"
 publishOrigin = "config"
 commandOrigin = "config"
-command = "npm ci && npm run build"
-functions = "D:\\perfumes\\netlify\\functions"
+command = "echo 'Using pre-built dist folder'"
+functions = "D:\\client\\perfumes\\netlify\\functions"
 
 [build.environment]
-NODE_VERSION = "18"
+NODE_VERSION = "20"
 CI = "true"
 VITE_APP_ENV = "production"
 NODE_ENV = "production"
@@ -37,7 +37,7 @@ port = 5173.0
 
 [functions.api]
 node_bundler = "esbuild"
-external_node_modules = ["pg", "bcrypt", "jsonwebtoken"]
+external_node_modules = ["pg", "bcrypt", "jsonwebtoken", "express", "serverless-http", "cors", "helmet", "dotenv", "express-rate-limit"]
 
 [functions."*"]
 node_bundler = "esbuild"
@@ -97,8 +97,8 @@ for = "/manifest.json"
 Cache-Control = "public, max-age=86400"
 
 [[redirects]]
-from = "/*"
-to = "/index.html"
+from = "/api/*"
+to = "/.netlify/functions/api/:splat"
 status = 200.0
 force = false
 
@@ -109,8 +109,8 @@ force = false
 [redirects.headers]
 
 [[redirects]]
-from = "/api/*"
-to = "/.netlify/functions/api/:splat"
+from = "/*"
+to = "/index.html"
 status = 200.0
 force = false
 

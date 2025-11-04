@@ -4,6 +4,7 @@ import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface FeaturedProductCardProps {
   product: Product;
@@ -16,6 +17,7 @@ interface FeaturedProductCardProps {
 export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
+  const { cartButtonStyle, cartButtonHoverStyle } = useCartButtonStyles();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,8 +80,15 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
             </button>
             <button
               onClick={handleAddToCart}
-              className="p-1.5 md:p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md transition-all duration-200"
+              className="p-1.5 md:p-2 text-white rounded-lg shadow-md transition-all duration-200"
               aria-label="Add to cart"
+              style={cartButtonStyle}
+              onMouseEnter={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+              }}
+              onMouseLeave={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonStyle);
+              }}
             >
               <ShoppingCart className="h-3 w-3 md:h-4 md:w-4" />
             </button>
@@ -148,4 +157,3 @@ export const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ produc
 };
 
 export default FeaturedProductCard;
-

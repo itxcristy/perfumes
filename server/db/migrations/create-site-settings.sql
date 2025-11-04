@@ -122,7 +122,14 @@ INSERT INTO site_settings (setting_key, setting_value, setting_type, category, d
   ('currency', 'USD', 'text', 'general', 'Default currency', true),
   ('currency_symbol', '$', 'text', 'general', 'Currency symbol', true),
   ('tax_rate', '0.10', 'number', 'general', 'Tax rate (10%)', false),
-  ('free_shipping_threshold', '50', 'number', 'general', 'Free shipping above this amount', true)
+  ('free_shipping_threshold', '50', 'number', 'general', 'Free shipping above this amount', true),
+  ('logo_url', '/src/assets/images/logo.png', 'text', 'design', 'Website logo URL', true),
+  ('primary_color', '#7e22ce', 'text', 'design', 'Primary color for the website', true),
+  ('secondary_color', '#8b5cf6', 'text', 'design', 'Secondary color for the website', true),
+  ('accent_color', '#a855f7', 'text', 'design', 'Accent color for the website', true),
+  ('cart_button_text', 'Add to Cart', 'text', 'design', 'Text for the add to cart button', true),
+  ('cart_button_color', '#7e22ce', 'text', 'design', 'Background color for the add to cart button', true),
+  ('cart_button_text_color', '#ffffff', 'text', 'design', 'Text color for the add to cart button', true)
 ON CONFLICT (setting_key) DO NOTHING;
 
 -- Insert sample social media accounts

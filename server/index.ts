@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { autoInitializeDatabase } from './scripts/autoInitDb'; // Use our new auto-init script
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
+import { apiLimiter, adminLimiter } from './middleware/rateLimiter';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,9 @@ import addressRoutes from './routes/addresses';
 import orderRoutes from './routes/orders';
 import paymentMethodRoutes from './routes/paymentMethods';
 import notificationPreferenceRoutes from './routes/notificationPreferences';
+import shippingRoutes from './routes/shipping';
+import sitemapRoutes from './routes/sitemap';
+import razorpayRoutes from './routes/razorpay';
 
 // Import admin routes
 import adminAnalyticsRoutes from './routes/admin/analytics';
@@ -28,6 +32,9 @@ import adminProductsRoutes from './routes/admin/products';
 import adminUsersRoutes from './routes/admin/users';
 import adminOrdersRoutes from './routes/admin/orders';
 import adminSettingsRoutes from './routes/admin/settings';
+
+// Import public routes
+import publicSettingsRoutes from './routes/public/settings';
 
 // Import seller routes
 import sellerProductsRoutes from './routes/seller/products';
@@ -40,26 +47,60 @@ const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(helmet());
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:5173$/, // Allow local network access
-    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:5173$/, // Allow private network
-    /^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:5173$/ // Allow private network
-  ],
-  credentials: true
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
 }));
+
+// CORS Configuration - Production ready
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      process.env.FRONTEND_URL || 'https://yourdomain.com',
+      // Add your Hostinger domain here
+    ]
+  : [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:5173$/, // Allow local network access
+      /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:5173$/, // Allow private network
+      /^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:5173$/ // Allow private network
+    ];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Increase payload limits for image uploads and large data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(requestLogger);
 
+// Apply rate limiting to all API routes (except health check)
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api', apiLimiter);
+}
+
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Sitemap route (before API routes)
+app.use('/', sitemapRoutes);
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -71,13 +112,21 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment-methods', paymentMethodRoutes);
 app.use('/api/notification-preferences', notificationPreferenceRoutes);
+app.use('/api/shipping', shippingRoutes);
+app.use('/api/razorpay', razorpayRoutes);
 
-// Admin API Routes
+// Admin API Routes (with stricter rate limiting in production)
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/admin', adminLimiter);
+}
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/admin/products', adminProductsRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
 app.use('/api/admin/orders', adminOrdersRoutes);
 app.use('/api/admin/settings', adminSettingsRoutes);
+
+// Public API Routes
+app.use('/api/public/settings', publicSettingsRoutes);
 
 // Seller API Routes
 app.use('/api/seller/products', sellerProductsRoutes);

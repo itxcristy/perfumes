@@ -68,13 +68,23 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // Wrap in try-catch to prevent theme errors from crashing the app
+  let themeData;
+  try {
+    themeData = useAdvancedTheme();
+  } catch (error) {
+    console.error('Theme system error:', error);
+    // Return children without theme context if theme system fails
+    return <>{children}</>;
+  }
+
   const {
     preferences,
     themeConfig,
     systemPreferences,
     updatePreferences,
     resetToDefaults
-  } = useAdvancedTheme();
+  } = themeData;
 
   // Theme control functions
   const setMode = (mode: ThemeMode) => updatePreferences({ mode });

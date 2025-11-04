@@ -6,6 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useAddToCartWithAuth } from '../../hooks/useAddToCartWithAuth';
 import { useAddToWishlistWithAuth } from '../../hooks/useAddToWishlistWithAuth';
 import ProductImage from '../Common/ProductImage';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface ProductDetailsProps {
   product: Product;
@@ -16,6 +17,7 @@ interface ProductDetailsProps {
 export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen, onClose }) => {
   const { handleAddToCart } = useAddToCartWithAuth();
   const { handleAddToWishlist } = useAddToWishlistWithAuth();
+  const { cartButtonText, cartButtonStyle, cartButtonHoverStyle } = useCartButtonStyles();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -154,9 +156,20 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({ product, isOpen,
                         }`}
                       whileHover={product.stock > 0 ? { scale: 1.02 } : {}}
                       whileTap={product.stock > 0 ? { scale: 0.98 } : {}}
+                      style={product.stock !== 0 ? cartButtonStyle : undefined}
+                      onMouseEnter={(e) => {
+                        if (product.stock !== 0) {
+                          Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (product.stock !== 0) {
+                          Object.assign(e.currentTarget.style, cartButtonStyle);
+                        }
+                      }}
                     >
                       <ShoppingCart className="h-5 w-5" />
-                      <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                      <span>{product.stock === 0 ? 'Out of Stock' : cartButtonText}</span>
                     </motion.button>
 
                     <motion.button

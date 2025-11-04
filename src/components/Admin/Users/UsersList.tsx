@@ -51,7 +51,7 @@ export const UsersList: React.FC = () => {
       });
 
       const response = await apiClient.get(`/admin/users?${params}`);
-      
+
       if (response.success) {
         setUsers(response.data);
         setTotalPages(response.pagination.totalPages);
@@ -122,9 +122,9 @@ export const UsersList: React.FC = () => {
       label: 'Name',
       sortable: true,
       render: (user) => (
-        <div>
-          <p className="font-medium text-gray-900">{user.full_name}</p>
-          <p className="text-xs text-gray-500">{user.email}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-xs sm:text-sm text-gray-900 truncate">{user.full_name}</p>
+          <p className="text-xs text-gray-500 truncate">{user.email}</p>
         </div>
       )
     },
@@ -132,7 +132,7 @@ export const UsersList: React.FC = () => {
       key: 'role',
       label: 'Role',
       render: (user) => (
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
+        <span className={`px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
           {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
         </span>
       )
@@ -142,16 +142,16 @@ export const UsersList: React.FC = () => {
       label: 'Orders',
       sortable: true,
       render: (user) => (
-        <span className="text-sm text-gray-600">{user.order_count || 0}</span>
+        <span className="text-xs sm:text-sm text-gray-600">{user.order_count || 0}</span>
       )
     },
     {
       key: 'total_spent',
-      label: 'Total Spent',
+      label: 'Spent',
       sortable: true,
       render: (user) => (
-        <span className="text-sm font-medium text-gray-900">
-          ${Number(user.total_spent || 0).toFixed(2)}
+        <span className="text-xs sm:text-sm font-medium text-gray-900">
+          ₹{Number(user.total_spent || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
         </span>
       )
     },
@@ -160,47 +160,37 @@ export const UsersList: React.FC = () => {
       label: 'Status',
       render: (user) => (
         <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            user.is_active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
+          className={`px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full ${user.is_active
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
+            }`}
         >
           {user.is_active ? 'Active' : 'Inactive'}
         </span>
       )
     },
     {
-      key: 'created_at',
-      label: 'Registered',
-      sortable: true,
-      render: (user) => (
-        <span className="text-sm text-gray-600">
-          {new Date(user.created_at).toLocaleDateString()}
-        </span>
-      )
-    },
-    {
       key: 'actions',
       label: 'Actions',
-      width: '150px',
+      width: '100px',
       render: (user) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => handleToggleStatus(user)}
-            className={`p-1 rounded transition-colors ${
-              user.is_active
-                ? 'text-orange-600 hover:bg-orange-50'
-                : 'text-green-600 hover:bg-green-50'
-            }`}
+            className={`p-1.5 sm:p-2 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center ${user.is_active
+              ? 'text-orange-600 hover:bg-orange-50 active:bg-orange-100'
+              : 'text-green-600 hover:bg-green-50 active:bg-green-100'
+              }`}
             title={user.is_active ? 'Deactivate' : 'Activate'}
+            aria-label={user.is_active ? 'Deactivate user' : 'Activate user'}
           >
             <Power className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleEdit(user)}
-            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Edit"
+            aria-label="Edit user"
           >
             <Edit className="h-4 w-4" />
           </button>
@@ -209,8 +199,9 @@ export const UsersList: React.FC = () => {
               setSelectedUser(user);
               setShowDeleteModal(true);
             }}
-            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 active:bg-red-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Delete"
+            aria-label="Delete user"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -220,36 +211,37 @@ export const UsersList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <p className="text-gray-600 mt-1">Manage user accounts</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Users</h1>
+          <p className="text-xs sm:text-base text-gray-600 mt-1">Manage user accounts</p>
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center space-x-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 active:bg-amber-800 transition-colors text-sm sm:text-base min-h-[44px] sm:min-h-auto flex-shrink-0"
         >
-          <Plus className="h-5 w-5" />
-          <span>Add User</span>
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">Add User</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
             />
           </div>
           <select
@@ -258,7 +250,7 @@ export const UsersList: React.FC = () => {
               setRoleFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
           >
             <option value="">All Roles</option>
             <option value="admin">Admin</option>
@@ -271,7 +263,7 @@ export const UsersList: React.FC = () => {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -284,9 +276,9 @@ export const UsersList: React.FC = () => {
               setStatusFilter('');
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
           >
-            Clear Filters
+            Clear
           </button>
         </div>
       </div>

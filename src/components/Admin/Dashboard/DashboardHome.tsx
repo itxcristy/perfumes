@@ -147,38 +147,38 @@ export const DashboardHome: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {statCards.map((stat, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                <div className="flex items-center mt-2 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{stat.title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2 truncate">{stat.value}</p>
+                <div className="flex items-center mt-1 sm:mt-2 text-xs sm:text-sm gap-1">
                   {stat.trend === 'up' && (
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
                   )}
                   {stat.trend === 'down' && (
-                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
                   )}
-                  <span className={stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'}>
+                  <span className={`truncate ${stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'}`}>
                     {stat.change}
                   </span>
                 </div>
               </div>
-              <div className={`${stat.color} p-3 rounded-lg`}>
-                <stat.icon className="h-6 w-6 text-white" />
+              <div className={`${stat.color} p-2 sm:p-3 rounded-lg flex-shrink-0`}>
+                <stat.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
             </div>
           </div>
@@ -187,24 +187,24 @@ export const DashboardHome: React.FC = () => {
 
       {/* Alerts */}
       {metrics && (metrics.pendingOrders > 0 || metrics.lowStockProducts > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {metrics.pendingOrders > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
-              <Clock className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 flex items-start gap-3">
+              <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0">
                 <h3 className="text-sm font-semibold text-yellow-900">Pending Orders</h3>
-                <p className="text-sm text-yellow-700 mt-1">
+                <p className="text-xs sm:text-sm text-yellow-700 mt-1">
                   You have {metrics.pendingOrders} orders waiting to be processed.
                 </p>
               </div>
             </div>
           )}
           {metrics.lowStockProducts > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0">
                 <h3 className="text-sm font-semibold text-red-900">Low Stock Alert</h3>
-                <p className="text-sm text-red-700 mt-1">
+                <p className="text-xs sm:text-sm text-red-700 mt-1">
                   {metrics.lowStockProducts} products are running low on stock.
                 </p>
               </div>
@@ -213,58 +213,58 @@ export const DashboardHome: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Products */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Top Selling Products</h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Top Selling Products</h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {topProducts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {topProducts.map((product) => (
-                  <div key={product.id} className="flex items-center space-x-4">
+                  <div key={product.id} className="flex items-center gap-3 sm:gap-4">
                     <img
                       src={(product.images && product.images[0]) || '/placeholder.png'}
                       alt={product.name}
-                      className="w-12 h-12 rounded-lg object-cover"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                      <p className="text-sm text-gray-500">₹{Number(product.price).toLocaleString('en-IN')}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">₹{Number(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">{product.total_sold} sold</p>
-                      <p className="text-xs text-gray-500">{product.stock} in stock</p>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900">{product.total_sold} sold</p>
+                      <p className="text-xs text-gray-500">{product.stock} stock</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-gray-500 py-8">No sales data available</p>
+              <p className="text-center text-gray-500 py-6 sm:py-8 text-sm">No sales data available</p>
             )}
           </div>
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Orders</h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {recentOrders.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {recentOrders.slice(0, 5).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between">
+                  <div key={order.id} className="flex items-center justify-between gap-2 pb-3 sm:pb-4 border-b border-gray-100 last:border-0 last:pb-0">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{order.order_number}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{order.order_number}</p>
                       <p className="text-xs text-gray-500 truncate">{order.customer_name || order.customer_email}</p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm font-semibold text-gray-900">
-                        ₹{Number(order.total_amount).toLocaleString('en-IN')}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        ₹{Number(order.total_amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                       </span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>
                     </div>
@@ -272,7 +272,7 @@ export const DashboardHome: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-gray-500 py-8">No orders yet</p>
+              <p className="text-center text-gray-500 py-6 sm:py-8 text-sm">No orders yet</p>
             )}
           </div>
         </div>
@@ -280,21 +280,21 @@ export const DashboardHome: React.FC = () => {
 
       {/* Low Stock Products */}
       {lowStockProducts.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Low Stock Products</h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Low Stock Products</h2>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {lowStockProducts.map((product) => (
-                <div key={product.id} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                <div key={product.id} className="flex items-center gap-3 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
                   <img
                     src={product.images[0] || '/placeholder.png'}
                     alt={product.name}
-                    className="w-12 h-12 rounded-lg object-cover"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{product.name}</p>
                     <p className="text-xs text-red-600 font-semibold">
                       Only {product.stock} left (Min: {product.min_stock_level})
                     </p>

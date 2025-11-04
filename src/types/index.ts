@@ -10,6 +10,14 @@ export interface User {
   gender?: string; // Maps to gender in DB
   isActive?: boolean; // Maps to is_active in DB
   emailVerified?: boolean; // Maps to email_verified in DB
+  // Seller specific fields
+  businessName?: string; // Maps to business_name in DB
+  businessAddress?: string; // Maps to business_address in DB
+  businessPhone?: string; // Maps to business_phone in DB
+  taxId?: string; // Maps to tax_id in DB
+  // Customer specific fields
+  preferredLanguage?: string; // Maps to preferred_language in DB
+  newsletterSubscribed?: boolean; // Maps to newsletter_subscribed in DB
   createdAt: Date; // Maps to created_at in DB
   updatedAt?: Date; // Maps to updated_at in DB
   password?: string; // Added for registration

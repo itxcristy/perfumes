@@ -24,7 +24,9 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       // Production-ready rules
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': process.env.NODE_ENV === 'production'
+        ? ['error', { allow: [] }]
+        : ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',

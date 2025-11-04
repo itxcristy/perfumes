@@ -4,6 +4,7 @@ import { Sparkles, Clock, Heart, ShoppingCart, Calendar } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface LatestArrivalProductCardProps {
   product: Product;
@@ -16,6 +17,7 @@ interface LatestArrivalProductCardProps {
 export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> = ({ product }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
+  const { cartButtonStyle, cartButtonHoverStyle } = useCartButtonStyles();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -91,19 +93,25 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
           <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
             <button
               onClick={handleToggleWishlist}
-              className={`p-1.5 rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110 ${
-                isInWishlist(product.id)
+              className={`p-1.5 rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110 ${isInWishlist(product.id)
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 text-gray-700 hover:bg-white'
-              }`}
+                }`}
               aria-label="Add to wishlist"
             >
               <Heart className={`h-3.5 w-3.5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={handleAddToCart}
-              className="p-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110"
+              className="p-1.5 text-white rounded-md backdrop-blur-sm shadow-sm transition-all duration-300 hover:scale-110"
               aria-label="Add to cart"
+              style={cartButtonStyle}
+              onMouseEnter={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+              }}
+              onMouseLeave={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonStyle);
+              }}
             >
               <ShoppingCart className="h-3.5 w-3.5" />
             </button>
@@ -117,9 +125,9 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
             <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold mb-1.5">
               <Clock className="h-2.5 w-2.5" />
               <span>
-                {daysAgo === 1 ? 'Added today' : 
-                 daysAgo <= 7 ? `${daysAgo} days ago` : 
-                 'Recently added'}
+                {daysAgo === 1 ? 'Added today' :
+                  daysAgo <= 7 ? `${daysAgo} days ago` :
+                    'Recently added'}
               </span>
             </div>
           )}
@@ -166,4 +174,3 @@ export const LatestArrivalProductCard: React.FC<LatestArrivalProductCardProps> =
 };
 
 export default LatestArrivalProductCard;
-

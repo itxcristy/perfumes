@@ -292,6 +292,48 @@ async function seedProducts(query: Function) {
   return insertedCount;
 }
 
+async function seedSiteSettings(query: Function) {
+  let insertedCount = 0;
+
+  const siteSettings = [
+    { key: 'site_name', value: 'Aligarh Attars', type: 'text', category: 'general', description: 'Website name', is_public: true },
+    { key: 'logo_url', value: '/src/assets/images/logo.png', type: 'text', category: 'design', description: 'Website logo URL', is_public: true },
+    { key: 'site_description', value: 'Premium perfumes and attars from Aligarh', type: 'text', category: 'general', description: 'Website description', is_public: true },
+    { key: 'copyright_text', value: '© 2024 Aligarh Attars. All rights reserved.', type: 'text', category: 'general', description: 'Copyright text', is_public: true },
+    { key: 'support_email', value: 'support@aligarh-attars.com', type: 'text', category: 'contact', description: 'Support email', is_public: true },
+    { key: 'support_phone', value: '+91-9876543210', type: 'text', category: 'contact', description: 'Support phone', is_public: true },
+  ];
+
+  for (const setting of siteSettings) {
+    const sql = `
+      INSERT INTO site_settings (setting_key, setting_value, setting_type, category, description, is_public)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (setting_key) DO NOTHING
+      RETURNING id, setting_key
+    `;
+
+    const values = [
+      setting.key,
+      setting.value,
+      setting.type,
+      setting.category,
+      setting.description,
+      setting.is_public
+    ];
+
+    const result = await query(sql, values);
+
+    if (result.rows.length > 0) {
+      insertedCount++;
+    }
+  }
+
+  if (insertedCount > 0) {
+    console.log(`   ✓ Added ${insertedCount} site settings`);
+  }
+  return insertedCount;
+}
+
 /**
  * Check if database has any data
  */
@@ -359,6 +401,7 @@ export async function autoInitializeDatabase(): Promise<void> {
       await seedCategories(query);
       await seedUsers(query);
       await seedProducts(query);
+      await seedSiteSettings(query);
 
       console.log('\n🎉 Database setup complete!');
       console.log('📝 Sample credentials:');

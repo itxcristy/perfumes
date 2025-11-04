@@ -9,6 +9,7 @@ import { MiniTrustIndicators, TrendingIndicator } from '../Trust';
 import { useAddToCartWithAuth } from '../../hooks/useAddToCartWithAuth';
 import { useAddToWishlistWithAuth } from '../../hooks/useAddToWishlistWithAuth';
 import ProductImage from '../Common/ProductImage';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface ProductCardProps {
   product: Product;
@@ -20,6 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
   const { showNotification } = useNotification();
   const { handleAddToCart } = useAddToCartWithAuth();
   const { handleAddToWishlist } = useAddToWishlistWithAuth();
+  const { cartButtonText, cartButtonStyle, cartButtonHoverStyle } = useCartButtonStyles();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -134,12 +136,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
               disabled={product.stock === 0}
               className={`w-full flex items-center justify-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg font-medium transition-colors duration-200 ${product.stock === 0
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:bg-orange-700'
+                : ''
                 } touch-manipulation`}
+              style={product.stock !== 0 ? cartButtonStyle : undefined}
+              onMouseEnter={(e) => {
+                if (product.stock !== 0) {
+                  Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (product.stock !== 0) {
+                  Object.assign(e.currentTarget.style, cartButtonStyle);
+                }
+              }}
             >
               <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               <span className="text-[10px] sm:text-xs font-medium">
-                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {product.stock === 0 ? 'Out of Stock' : cartButtonText}
               </span>
             </button>
           </div>
@@ -268,12 +281,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, isListView = 
               disabled={product.stock === 0}
               className={`px-3 py-2 rounded-md font-medium transition-colors duration-200 whitespace-nowrap ${product.stock === 0
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700'
+                : ''
                 } touch-manipulation`}
-              style={{ minHeight: '40px' }}
+              style={product.stock !== 0 ? { ...cartButtonStyle, minHeight: '40px' } : { minHeight: '40px' }}
+              onMouseEnter={(e) => {
+                if (product.stock !== 0) {
+                  Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (product.stock !== 0) {
+                  Object.assign(e.currentTarget.style, cartButtonStyle);
+                }
+              }}
             >
               <span className="text-xs font-medium">
-                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {product.stock === 0 ? 'Out of Stock' : cartButtonText}
               </span>
             </button>
           </div>

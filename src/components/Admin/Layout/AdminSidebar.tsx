@@ -83,22 +83,22 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:block ${isOpen ? 'w-64' : 'w-20'
+        className={`fixed top-0 left-0 z-30 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:flex lg:flex-col ${isOpen ? 'w-64' : 'w-20'
           }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 flex-shrink-0">
           {isOpen ? (
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+            <Link to="/" className="flex items-center space-x-2 min-w-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent truncate">
                 Admin
               </span>
             </Link>
           ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto flex-shrink-0">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
           )}
@@ -110,14 +110,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group ${isActive(item.path)
+              className={`flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group min-h-[44px] ${isActive(item.path)
                 ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
-                : 'text-gray-700 hover:bg-gray-50'
+                : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 }`}
               title={!isOpen ? item.name : undefined}
             >
               <span
-                className={`${isActive(item.path)
+                className={`flex-shrink-0 ${isActive(item.path)
                   ? 'text-amber-600'
                   : 'text-gray-500 group-hover:text-gray-700'
                   }`}
@@ -125,17 +125,18 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 {item.icon}
               </span>
               {isOpen && (
-                <span className="ml-3 text-sm font-medium">{item.name}</span>
+                <span className="ml-3 text-sm font-medium truncate">{item.name}</span>
               )}
             </Link>
           ))}
         </nav>
 
         {/* Toggle Button */}
-        <div className="absolute bottom-4 right-0 transform translate-x-1/2">
+        <div className="absolute bottom-4 right-0 transform translate-x-1/2 flex-shrink-0">
           <button
             onClick={onToggle}
-            className="w-8 h-8 bg-white border border-gray-200 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+            className="w-8 h-8 bg-white border border-gray-200 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+            aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
             {isOpen ? (
               <ChevronLeft className="h-4 w-4 text-gray-600" />
@@ -148,16 +149,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen w-64 transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 z-50 h-screen w-64 max-w-[85vw] transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden flex flex-col ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+        <div className="flex items-center justify-between h-14 sm:h-16 px-4 border-b border-gray-200 flex-shrink-0">
+          <Link to="/" className="flex items-center space-x-2 min-w-0">
+            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent truncate">
               Admin
             </span>
           </Link>
@@ -170,20 +171,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               key={item.path}
               to={item.path}
               onClick={onMobileToggle}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 ${isActive(item.path)
+              className={`flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 min-h-[44px] ${isActive(item.path)
                 ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 font-medium'
-                : 'text-gray-700 hover:bg-gray-50'
+                : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 }`}
             >
               <span
-                className={`${isActive(item.path)
+                className={`flex-shrink-0 ${isActive(item.path)
                   ? 'text-amber-600'
                   : 'text-gray-500'
                   }`}
               >
                 {item.icon}
               </span>
-              <span className="ml-3 text-sm font-medium">{item.name}</span>
+              <span className="ml-3 text-sm font-medium truncate">{item.name}</span>
             </Link>
           ))}
         </nav>

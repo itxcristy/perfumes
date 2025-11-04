@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../Common/Modal';
 import { FormInput, FormTextarea, FormSelect, FormCheckbox } from '../../Common/FormInput';
-import { ImageUpload } from '../Common/ImageUpload';
+import { ImageUpload } from '../../Common/ImageUpload';
 import { apiClient } from '../../../lib/apiClient';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Loader2 } from 'lucide-react';
@@ -43,7 +43,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
 
   useEffect(() => {
     fetchCategories();
-    
+
     if (category) {
       setFormData({
         name: category.name || '',
@@ -74,7 +74,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
@@ -156,11 +156,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
       title={category ? 'Edit Category' : 'Add New Category'}
       size="2xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Basic Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
-          
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Basic Information</h3>
+
           <FormInput
             label="Category Name"
             name="name"
@@ -217,7 +217,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
         {/* Hierarchy & Settings */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Hierarchy & Settings</h3>
-          
+
           <FormSelect
             label="Parent Category"
             name="parent_id"
@@ -251,22 +251,22 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onClose, o
           />
         </div>
 
-        {/* Form Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+        {/* Form Actions - Sticky on mobile */}
+        <div className="sticky bottom-0 left-0 right-0 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-4 sm:pt-6 pb-4 sm:pb-0 px-4 sm:px-0 -mx-4 sm:mx-0 border-t border-gray-200 bg-white sm:bg-transparent">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] sm:min-h-auto"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading && <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />}
             <span>{category ? 'Update Category' : 'Create Category'}</span>
           </button>
         </div>

@@ -3,6 +3,7 @@ import { query } from '../db/connection';
 import { hashPassword, comparePassword, generateToken } from '../utils/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { authLimiter, registerLimiter, passwordResetLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ const router = Router();
  */
 router.post(
   '/register',
+  registerLimiter, // Apply rate limiting
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email, password, fullName, role = 'customer' } = req.body;
 
@@ -24,9 +26,9 @@ router.post(
       throw createError('Password must be at least 8 characters', 400, 'VALIDATION_ERROR');
     }
 
-    // Validate role
-    const validRoles = ['admin', 'seller', 'customer'];
-    const userRole = validRoles.includes(role) ? role : 'customer';
+    // Public registrations are always customer role
+    // Admin and seller accounts must be created by administrators only
+    const userRole = 'customer';
 
     // Check if user exists
     const existingUser = await query(
@@ -71,6 +73,7 @@ router.post(
  */
 router.post(
   '/login',
+  authLimiter, // Apply rate limiting
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email, password } = req.body;
 
@@ -123,7 +126,8 @@ router.get(
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await query(
       `SELECT id, email, full_name, avatar_url, role, phone, date_of_birth, gender,
-              is_active, email_verified, created_at, updated_at
+              is_active, email_verified, business_name, business_address, business_phone, tax_id,
+              preferred_language, newsletter_subscribed, created_at, updated_at
        FROM public.profiles WHERE id = $1`,
       [req.userId]
     );
@@ -145,6 +149,12 @@ router.get(
         gender: user.gender,
         isActive: user.is_active,
         emailVerified: user.email_verified,
+        businessName: user.business_name,
+        businessAddress: user.business_address,
+        businessPhone: user.business_phone,
+        taxId: user.tax_id,
+        preferredLanguage: user.preferred_language,
+        newsletterSubscribed: user.newsletter_subscribed,
         createdAt: user.created_at,
         updatedAt: user.updated_at,
       },
@@ -160,19 +170,39 @@ router.put(
   '/profile',
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { fullName, phone, dateOfBirth, avatarUrl, gender } = req.body;
+    const {
+      fullName,
+      phone,
+      dateOfBirth,
+      avatarUrl,
+      gender,
+      // Seller fields
+      businessName,
+      businessAddress,
+      businessPhone,
+      taxId,
+      // Customer fields
+      preferredLanguage,
+      newsletterSubscribed
+    } = req.body;
 
     const result = await query(
-      `UPDATE public.profiles 
+      `UPDATE public.profiles
        SET full_name = COALESCE($1, full_name),
            phone = COALESCE($2, phone),
            date_of_birth = COALESCE($3, date_of_birth),
            avatar_url = COALESCE($4, avatar_url),
            gender = COALESCE($5, gender),
+           business_name = COALESCE($7, business_name),
+           business_address = COALESCE($8, business_address),
+           business_phone = COALESCE($9, business_phone),
+           tax_id = COALESCE($10, tax_id),
+           preferred_language = COALESCE($11, preferred_language),
+           newsletter_subscribed = COALESCE($12, newsletter_subscribed),
            updated_at = NOW()
        WHERE id = $6
-       RETURNING id, email, full_name, avatar_url, role, phone, date_of_birth, gender, updated_at`,
-      [fullName, phone, dateOfBirth, avatarUrl, gender, req.userId]
+       RETURNING id, email, full_name, avatar_url, role, phone, date_of_birth, gender, business_name, business_address, business_phone, tax_id, preferred_language, newsletter_subscribed, updated_at`,
+      [fullName, phone, dateOfBirth, avatarUrl, gender, req.userId, businessName, businessAddress, businessPhone, taxId, preferredLanguage, newsletterSubscribed]
     );
 
     if (result.rows.length === 0) {
@@ -191,6 +221,12 @@ router.put(
         phone: user.phone,
         dateOfBirth: user.date_of_birth,
         gender: user.gender,
+        businessName: user.business_name,
+        businessAddress: user.business_address,
+        businessPhone: user.business_phone,
+        taxId: user.tax_id,
+        preferredLanguage: user.preferred_language,
+        newsletterSubscribed: user.newsletter_subscribed,
         updatedAt: user.updated_at,
       },
     });

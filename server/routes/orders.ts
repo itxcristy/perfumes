@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { query } from '../db';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
+import { sendOrderConfirmation } from '../services/emailService';
 
 const router = Router();
 
@@ -285,6 +286,48 @@ router.post(
       'DELETE FROM public.cart_items WHERE user_id = $1',
       [req.userId]
     );
+
+    // Get user details for email
+    const userResult = await query(
+      'SELECT email, full_name FROM public.profiles WHERE id = $1',
+      [req.userId]
+    );
+    const user = userResult.rows[0];
+
+    // Get order items for email
+    const orderItemsResult = await query(
+      `SELECT oi.quantity, oi.unit_price, p.name
+       FROM public.order_items oi
+       LEFT JOIN public.products p ON oi.product_id = p.id
+       WHERE oi.order_id = $1`,
+      [order.id]
+    );
+
+    // Send order confirmation email
+    try {
+      await sendOrderConfirmation({
+        id: order.id,
+        orderNumber: order.order_number,
+        customerName: user.full_name,
+        customerEmail: user.email,
+        items: orderItemsResult.rows.map((item: any) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: parseFloat(item.unit_price)
+        })),
+        subtotal: parseFloat(order.subtotal),
+        shipping: parseFloat(order.shipping_amount),
+        tax: parseFloat(order.tax_amount),
+        total: parseFloat(order.total_amount),
+        shippingAddress: typeof shippingAddress === 'string' ? JSON.parse(shippingAddress) : shippingAddress,
+        paymentMethod: order.payment_method,
+        createdAt: order.created_at
+      });
+      console.log(`✓ Order confirmation email sent for order ${order.order_number}`);
+    } catch (emailError) {
+      console.error('✗ Failed to send order confirmation email:', emailError);
+      // Don't fail the order creation if email fails
+    }
 
     res.status(201).json({
       success: true,

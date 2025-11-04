@@ -19,6 +19,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   gender TEXT,
   is_active BOOLEAN DEFAULT true,
   email_verified BOOLEAN DEFAULT false,
+  -- Seller specific fields
+  business_name TEXT,
+  business_address TEXT,
+  business_phone TEXT,
+  tax_id TEXT,
+  -- Customer specific fields
+  preferred_language TEXT DEFAULT 'en',
+  newsletter_subscribed BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -218,10 +226,26 @@ CREATE TABLE IF NOT EXISTS public.notification_preferences (
   UNIQUE(user_id)
 );
 
+-- Site Settings table
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value TEXT,
+  setting_type VARCHAR(50) DEFAULT 'text',
+  category VARCHAR(50) DEFAULT 'general',
+  description TEXT,
+  is_public BOOLEAN DEFAULT false,
+  updated_by UUID REFERENCES public.profiles(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ==========================================
 -- Indexes for Performance
 -- ==========================================
 
+CREATE INDEX IF NOT EXISTS idx_site_settings_key ON public.site_settings(setting_key);
+CREATE INDEX IF NOT EXISTS idx_site_settings_category ON public.site_settings(category);
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON public.categories(slug);

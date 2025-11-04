@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
 import { SearchOverlay } from './SearchOverlay';
+import { usePublicSettings } from '../../hooks/usePublicSettings';
 
 import MobileNavigation from './MobileNavigation';
 import logo from '../../assets/images/optimized/logo-optimized.webp';
@@ -16,15 +17,16 @@ const preloadImage = (src: string) => {
 };
 
 // Convert to optimized image component with better loading strategy
-const OptimizedLogo = React.memo(() => {
+const OptimizedLogo = React.memo(({ logoUrl }: { logoUrl?: string | undefined }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [logoSrc, setLogoSrc] = useState('');
 
   useEffect(() => {
-    preloadImage(logo);
-    setLogoSrc(logo);
+    const src = logoUrl || logo;
+    preloadImage(src);
+    setLogoSrc(src);
     setIsLoaded(true);
-  }, []);
+  }, [logoUrl]);
 
   if (!isLoaded) {
     return (
@@ -37,7 +39,7 @@ const OptimizedLogo = React.memo(() => {
   return (
     <img
       src={logoSrc}
-      alt="Aligarh Attar House Logo"
+      alt="Logo"
       width={40}
       height={40}
       loading="eager"
@@ -68,6 +70,7 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
   const { user, logout } = useAuth();
   const { itemCount } = useCart();
   const { items: wishlistItems } = useWishlist();
+  const { getSiteSetting } = usePublicSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -80,6 +83,10 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
 
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Get dynamic settings
+  const siteName = getSiteSetting('site_name') || 'Aligarh Attar House';
+  const logoUrl = getSiteSetting('logo_url');
 
   // Real categories from the database
   const realCategories = [
@@ -187,13 +194,13 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
             }`}>
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 flex-shrink-0 group" onClick={() => window.scrollTo(0, 0)}>
-              <OptimizedLogo />
+              <OptimizedLogo logoUrl={logoUrl} />
               <span className={`font-bold tracking-tight transition-all duration-300 ${isScrolled
                 ? 'text-gray-900 text-lg'
                 : isHomePage && !isScrolled
                   ? 'text-white text-xl drop-shadow-lg'
                   : 'text-gray-900 text-xl'
-                }`}>Aligarh Attar House</span>
+                }`}>{siteName}</span>
             </Link>
 
             {/* Desktop Navigation - Centered (hidden on mobile, visible on tablet and desktop) */}
@@ -220,9 +227,9 @@ export const Header: React.FC<HeaderProps> = ({ onAuthClick, onCartClick }) => {
                         {/* Simplified Dropdown without heavy animations */}
                         {isCategoriesOpen && (
                           <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2">
-                            {item.dropdownItems?.map((dropdownItem) => (
+                            {item.dropdownItems?.map((dropdownItem, index) => (
                               <Link
-                                key={dropdownItem.name}
+                                key={`${item.name}-${index}`}
                                 to={dropdownItem.href}
                                 onClick={() => {
                                   setIsCategoriesOpen(false);

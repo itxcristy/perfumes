@@ -338,9 +338,10 @@ export const useAdvancedTheme = () => {
   const themeConfig = useMemo((): ThemeConfig => {
     const actualMode = 'light'; // Force light mode only
 
-    const baseColors = COLOR_SCHEMES[preferences.colorScheme];
-    const typography = TYPOGRAPHY_SCALES[preferences.fontScale];
-    const borderRadius = BORDER_RADIUS_CONFIGS[preferences.borderRadius];
+    // Defensive checks to prevent undefined errors
+    const baseColors = COLOR_SCHEMES[preferences.colorScheme] || COLOR_SCHEMES.neutral;
+    const typography = TYPOGRAPHY_SCALES[preferences.fontScale] || TYPOGRAPHY_SCALES.comfortable;
+    const borderRadius = BORDER_RADIUS_CONFIGS[preferences.borderRadius] || BORDER_RADIUS_CONFIGS.medium;
 
     // Generate complete color palette
     const colors = generateColorPalette(baseColors, actualMode, preferences.highContrast);
@@ -472,18 +473,21 @@ function detectSystemPreferences() {
  * Generate complete color palette
  */
 function generateColorPalette(
-  baseColors: Partial<ColorPalette>,
+  baseColors: Partial<ColorPalette> | undefined,
   mode: ThemeMode,
   highContrast: boolean
 ): ColorPalette {
   // This is a simplified implementation
   // In a real application, you would have more sophisticated color generation
   const isDark = false; // Force light mode only
-  
+
+  // Defensive fallback to neutral scheme if baseColors is undefined
+  const safeBaseColors = baseColors || COLOR_SCHEMES.neutral;
+
   return {
-    primary: baseColors.primary || COLOR_SCHEMES.neutral.primary!,
-    secondary: baseColors.secondary || COLOR_SCHEMES.neutral.secondary!,
-    accent: baseColors.primary || COLOR_SCHEMES.neutral.primary!,
+    primary: safeBaseColors.primary || COLOR_SCHEMES.neutral.primary!,
+    secondary: safeBaseColors.secondary || COLOR_SCHEMES.neutral.secondary!,
+    accent: safeBaseColors.primary || COLOR_SCHEMES.neutral.primary!,
     neutral: COLOR_SCHEMES.neutral.primary!,
     semantic: {
       success: {

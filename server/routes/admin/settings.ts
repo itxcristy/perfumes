@@ -676,5 +676,41 @@ router.delete('/footer-links/:id', async (req, res) => {
   }
 });
 
+// ============================================
+// FILE UPLOAD ROUTES
+// ============================================
+
+// Upload file (logo, etc.)
+router.post('/upload', async (req, res) => {
+  try {
+    const { file } = req.body;
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file provided'
+      });
+    }
+
+    // For now, we'll store the base64 data URL directly
+    // In production, you might want to save to cloud storage (S3, etc.)
+    // and return a URL to the stored file
+
+    res.json({
+      success: true,
+      data: {
+        url: file // Return the base64 data URL
+      }
+    });
+  } catch (error: any) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload file',
+      error: error.message
+    });
+  }
+});
+
 export default router;
 

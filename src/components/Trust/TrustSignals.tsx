@@ -10,8 +10,13 @@ interface TrustSignal {
   bgColor: string;
 }
 
-const trustSignals: TrustSignal[] = [
+interface TrustSignalWithId extends TrustSignal {
+  id: string;
+}
+
+const trustSignals: TrustSignalWithId[] = [
   {
+    id: 'fast-shipping',
     icon: Truck,
     title: 'Fast Shipping',
     description: 'On orders over $50',
@@ -19,6 +24,7 @@ const trustSignals: TrustSignal[] = [
     bgColor: 'bg-emerald-50'
   },
   {
+    id: 'returns',
     icon: RotateCcw,
     title: '30-Day Returns',
     description: 'Hassle-free returns',
@@ -26,6 +32,7 @@ const trustSignals: TrustSignal[] = [
     bgColor: 'bg-blue-50'
   },
   {
+    id: 'secure-checkout',
     icon: Shield,
     title: 'Secure Checkout',
     description: 'SSL encrypted & protected',
@@ -33,6 +40,7 @@ const trustSignals: TrustSignal[] = [
     bgColor: 'bg-neutral-100'
   },
   {
+    id: 'support',
     icon: Headphones,
     title: '24/7 Support',
     description: 'Expert customer care',
@@ -70,7 +78,7 @@ export const TrustSignals: React.FC<TrustSignalsProps> = ({
     <div className={`${containerClasses[variant]} ${className}`}>
       {trustSignals.map((signal, index) => (
         <motion.div
-          key={signal.title}
+          key={signal.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
@@ -127,16 +135,19 @@ export const ProductTrustSignals: React.FC<{ className?: string }> = ({ classNam
 export const CheckoutTrustSignals: React.FC<{ className?: string }> = ({ className = '' }) => {
   const checkoutSignals = [
     {
+      id: 'checkout-secure',
       icon: Shield,
       title: 'Secure Checkout',
       description: 'Your data is protected with 256-bit SSL encryption'
     },
     {
+      id: 'checkout-trusted',
       icon: Award,
       title: 'Trusted by 50,000+',
       description: 'Join thousands of satisfied customers'
     },
     {
+      id: 'checkout-quick',
       icon: Clock,
       title: 'Quick Processing',
       description: 'Orders processed within 24 hours'
@@ -151,7 +162,7 @@ export const CheckoutTrustSignals: React.FC<{ className?: string }> = ({ classNa
       <div className="space-y-3">
         {checkoutSignals.map((signal, index) => (
           <motion.div
-            key={signal.title}
+            key={signal.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -230,16 +241,16 @@ export const MiniTrustIndicators: React.FC<{
   returns?: boolean;
   className?: string;
 }> = ({ freeShipping, warranty, returns, className = '' }) => {
-  const indicators = [];
+  const indicators: Array<{ id: string; icon: React.ElementType; text: string; color: string }> = [];
 
   if (freeShipping) {
-    indicators.push({ icon: Truck, text: 'Fast Shipping', color: 'text-blue-600' });
+    indicators.push({ id: 'free-shipping', icon: Truck, text: 'Fast Shipping', color: 'text-blue-600' });
   }
   if (warranty) {
-    indicators.push({ icon: Shield, text: 'Warranty', color: 'text-green-600' });
+    indicators.push({ id: 'warranty', icon: Shield, text: 'Warranty', color: 'text-green-600' });
   }
   if (returns) {
-    indicators.push({ icon: RotateCcw, text: 'Returns', color: 'text-purple-600' });
+    indicators.push({ id: 'returns', icon: RotateCcw, text: 'Returns', color: 'text-purple-600' });
   }
 
   if (indicators.length === 0) return null;
@@ -248,7 +259,7 @@ export const MiniTrustIndicators: React.FC<{
     <div className={`flex items-center space-x-2 ${className}`}>
       {indicators.map((indicator, index) => (
         <div
-          key={indicator.text}
+          key={indicator.id}
           className="flex items-center space-x-1 text-xs text-gray-600"
           title={indicator.text}
         >

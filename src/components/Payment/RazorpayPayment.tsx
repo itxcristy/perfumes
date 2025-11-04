@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { useNotification } from '../../contexts/NotificationContext';
 import { CartItem } from '../../types';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface RazorpayPaymentProps {
   amount: number;
   items: CartItem[];
@@ -88,14 +90,208 @@ export const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       return;
     }
 
-    // For other payment methods, we'll simulate a successful payment
+    // For online payment methods, use Razorpay
     setIsProcessing(true);
 
-    // Simulate payment processing delay
-    setTimeout(() => {
+    try {
+      // Verify token exists
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.');
+      }
+
+      // Validate Razorpay SDK is loaded
+      if (typeof (window as any).Razorpay === 'undefined') {
+        throw new Error('Payment service is not available. Please refresh the page and try again.');
+      }
+
+      // Validate API URL is configured
+      if (!API_URL) {
+        throw new Error('Payment service configuration error. Please contact support.');
+      }
+
+      console.log('Initiating payment:', {
+        amount: total,
+        currency: 'INR',
+        method: selectedMethod
+      });
+
+      // Step 1: Create Razorpay order on backend
+      const createOrderResponse = await fetch(`${API_URL}/razorpay/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: total,
+          currency: 'INR',
+          receipt: `receipt_${Date.now()}`,
+          notes: {
+            customer_name: customerInfo.name,
+            customer_email: customerInfo.email,
+            items_count: items.length,
+            payment_method: selectedMethod
+          }
+        })
+      });
+
+      if (!createOrderResponse.ok) {
+        // Try to get error details from response
+        let errorMessage = 'Failed to create payment order';
+        try {
+          const errorData = await createOrderResponse.json();
+          errorMessage = errorData.error?.message || errorData.message || errorMessage;
+          console.error('Order creation error:', {
+            status: createOrderResponse.status,
+            statusText: createOrderResponse.statusText,
+            error: errorData
+          });
+        } catch (e) {
+          console.error('Order creation error:', {
+            status: createOrderResponse.status,
+            statusText: createOrderResponse.statusText
+          });
+        }
+        throw new Error(errorMessage);
+      }
+
+      const responseData = await createOrderResponse.json();
+      const { data } = responseData;
+      if (!data || !data.orderId) {
+        throw new Error('Invalid response from server: missing order ID');
+      }
+      const { orderId } = data;
+
+      console.log('Order created successfully:', { orderId });
+
+      // Step 2: Initialize Razorpay checkout with secure options
+      const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKeyId) {
+        throw new Error('Payment service is not configured. Please contact support.');
+      }
+
+      const options: any = {
+        key: razorpayKeyId,
+        amount: Math.round(total * 100), // Amount in paise
+        currency: 'INR',
+        name: 'Aligarh Attar House',
+        description: `Payment for ${items.length} item(s)`,
+        order_id: orderId,
+        prefill: {
+          name: customerInfo.name,
+          email: customerInfo.email,
+          contact: customerInfo.phone
+        },
+        notes: {
+          shipping_address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.zipCode}`,
+          payment_method: selectedMethod
+        },
+        theme: {
+          color: '#4F46E5' // Indigo color
+        },
+        // Disable payment method selection if specific method is chosen
+        method: selectedMethod !== 'card' ? selectedMethod : undefined,
+        // Handler for successful payment
+        handler: async function (response: any) {
+          // Step 3: Verify payment on backend
+          try {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              throw new Error('Authentication token not found. Please login again.');
+            }
+
+            console.log('Payment response received:', {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id
+            });
+
+            const verifyResponse = await fetch(`${API_URL}/razorpay/verify-payment`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            if (!verifyResponse.ok) {
+              let errorMessage = 'Payment verification failed';
+              try {
+                const errorData = await verifyResponse.json();
+                errorMessage = errorData.error?.message || errorData.message || errorMessage;
+                console.error('Payment verification error:', {
+                  status: verifyResponse.status,
+                  statusText: verifyResponse.statusText,
+                  error: errorData
+                });
+              } catch (e) {
+                console.error('Payment verification error:', {
+                  status: verifyResponse.status,
+                  statusText: verifyResponse.statusText
+                });
+              }
+              throw new Error(errorMessage);
+            }
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success && verifyData.data && verifyData.data.verified) {
+              // Payment successful and verified
+              console.log('Payment verified successfully:', {
+                paymentId: response.razorpay_payment_id,
+                status: verifyData.data.status
+              });
+              onSuccess(response.razorpay_payment_id);
+            } else {
+              throw new Error(verifyData.error?.message || 'Payment verification failed');
+            }
+          } catch (error: any) {
+            console.error('Payment verification error:', error);
+            setIsProcessing(false);
+            onError(error.message || 'Payment verification failed');
+          }
+        },
+        // Modal options
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            showNotification({
+              type: 'info',
+              title: 'Payment Cancelled',
+              message: 'You cancelled the payment process. Your cart is still saved.'
+            });
+          }
+        }
+      };
+
+      console.log('Opening Razorpay checkout...');
+
+      // Open Razorpay checkout
+      const razorpayInstance = new (window as any).Razorpay(options);
+
+      // Handle payment failure
+      razorpayInstance.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', {
+          code: response.error.code,
+          description: response.error.description
+        });
+        setIsProcessing(false);
+        onError(response.error.description || 'Payment failed. Please try again.');
+      });
+
+      razorpayInstance.open();
       setIsProcessing(false);
-      onSuccess('rzp_' + Date.now());
-    }, 2000);
+
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      setIsProcessing(false);
+      onError(error.message || 'Failed to initiate payment');
+    }
   };
 
   return (
@@ -160,8 +356,8 @@ export const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedMethod(method.id)}
                     className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all min-w-[100px] ${selectedMethod === method.id
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <div className={`p-3 rounded-full ${method.color} text-white mb-2`}>
@@ -201,10 +397,10 @@ export const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
             onClick={handlePayment}
             disabled={isProcessing}
             className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all flex items-center justify-center ${isProcessing
-                ? 'bg-gray-400 cursor-not-allowed'
-                : selectedMethod === 'cod'
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+              ? 'bg-gray-400 cursor-not-allowed'
+              : selectedMethod === 'cod'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
               } shadow-md hover:shadow-lg transition-shadow`}
           >
             {isProcessing ? (

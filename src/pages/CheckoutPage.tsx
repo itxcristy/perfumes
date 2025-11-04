@@ -25,6 +25,7 @@ import {
 } from '../components/Mobile/MobileCheckoutForms';
 import { useMobileDetection } from '../hooks/useMobileGestures';
 import { RazorpayPayment } from '../components/Payment/RazorpayPayment';
+import { useShipping } from '../hooks/useShipping';
 
 export const CheckoutPage: React.FC = () => {
   const { items, total, clearCart } = useCart();
@@ -32,6 +33,7 @@ export const CheckoutPage: React.FC = () => {
   const { createOrder } = useOrders();
   const { showNotification } = useNotification();
   const { isMobile } = useMobileDetection();
+  const { calculateShippingByState } = useShipping();
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -64,9 +66,12 @@ export const CheckoutPage: React.FC = () => {
   // Calculate Indian pricing
   const subtotal = total;
   const gst = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST for perfumes
+
+  // Use shipping service for accurate calculation
+  const shippingCalculation = calculateShippingByState(formData.state || '', subtotal);
+  const shipping = shippingCalculation.cost;
   const freeShippingThreshold = 2000;
-  const shipping = subtotal >= freeShippingThreshold ? 0 :
-    (formData.state.toLowerCase().includes('kashmir') ? 50 : 100);
+
   const finalTotal = subtotal + gst + shipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -620,8 +625,8 @@ export const CheckoutPage: React.FC = () => {
                       <button
                         onClick={() => setSelectedPaymentMethod('razorpay')}
                         className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all min-w-[100px] ${selectedPaymentMethod === 'razorpay'
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="p-3 rounded-full bg-blue-500 text-white mb-2">
@@ -638,8 +643,8 @@ export const CheckoutPage: React.FC = () => {
                       <button
                         onClick={() => setSelectedPaymentMethod('cod')}
                         className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all min-w-[100px] ${selectedPaymentMethod === 'cod'
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="p-3 rounded-full bg-gray-500 text-white mb-2">

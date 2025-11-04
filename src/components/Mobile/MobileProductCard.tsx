@@ -9,6 +9,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { MobileTouchButton, MobileIconButton } from './MobileTouchButton';
 import { useSwipeGesture } from '../../hooks/useMobileGestures';
 import ProductImage from '../Common/ProductImage';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface MobileProductCardProps {
   product: Product;
@@ -19,9 +20,10 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
   product,
   variant = 'default'
 }) => {
-  const { addToCart } = useCart();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addItem } = useCart();
+  const { addItem: addToWishlist, isInWishlist } = useWishlist();
   const { showNotification } = useNotification();
+  const { cartButtonText } = useCartButtonStyles();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Swipe gesture for image carousel
@@ -46,8 +48,13 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
     e.stopPropagation();
     e.preventDefault();
     if (product.stock > 0) {
-      addToCart(product);
-      showSuccess(`${product.name} has been added to your cart.`, 'Added to Cart');
+      addItem(product);
+      showNotification({
+        type: 'success',
+        title: 'Added to Cart',
+        message: `${product.name} has been added to your cart.`,
+        duration: 3000
+      });
     }
   };
 
@@ -55,13 +62,13 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
     e.stopPropagation();
     e.preventDefault();
     addToWishlist(product);
-    showSuccess(
-      `${product.name} has been ${isInWishlist(product.id) ? 'removed from' : 'added to'} your wishlist.`,
-      isInWishlist(product.id) ? 'Removed from Wishlist' : 'Added to Wishlist'
-    );
+    showNotification({
+      type: 'success',
+      title: isInWishlist(product.id) ? 'Removed from Wishlist' : 'Added to Wishlist',
+      message: `${product.name} has been ${isInWishlist(product.id) ? 'removed from' : 'added to'} your wishlist.`,
+      duration: 3000
+    });
   };
-
-
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -235,7 +242,7 @@ export const MobileProductCard: React.FC<MobileProductCardProps> = ({
           fullWidth
           ariaLabel={product.stock === 0 ? 'Out of stock' : 'Add to cart'}
         >
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          {product.stock === 0 ? 'Out of Stock' : cartButtonText}
         </MobileTouchButton>
       </div>
     </div>

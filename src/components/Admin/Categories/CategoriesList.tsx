@@ -39,7 +39,7 @@ export const CategoriesList: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/categories');
-      
+
       if (response.success) {
         let filteredCategories = response.data;
 
@@ -103,12 +103,12 @@ export const CategoriesList: React.FC = () => {
     {
       key: 'image_url',
       label: 'Image',
-      width: '80px',
+      width: '60px',
       render: (category) => (
         <img
           src={category.image_url || '/placeholder.png'}
           alt={category.name}
-          className="w-12 h-12 rounded-lg object-cover"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
         />
       )
     },
@@ -117,17 +117,17 @@ export const CategoriesList: React.FC = () => {
       label: 'Name',
       sortable: true,
       render: (category) => (
-        <div>
-          <p className="font-medium text-gray-900">{category.name}</p>
-          <p className="text-xs text-gray-500">{category.slug}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-xs sm:text-sm text-gray-900 truncate">{category.name}</p>
+          <p className="text-xs text-gray-500 truncate">{category.slug}</p>
         </div>
       )
     },
     {
       key: 'parent_name',
-      label: 'Parent Category',
+      label: 'Parent',
       render: (category) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-xs sm:text-sm text-gray-600 truncate">
           {category.parent_name || '-'}
         </span>
       )
@@ -137,17 +137,9 @@ export const CategoriesList: React.FC = () => {
       label: 'Products',
       sortable: true,
       render: (category) => (
-        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+        <span className="px-2 py-0.5 sm:py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
           {category.product_count || 0}
         </span>
-      )
-    },
-    {
-      key: 'sort_order',
-      label: 'Order',
-      sortable: true,
-      render: (category) => (
-        <span className="text-sm text-gray-600">{category.sort_order}</span>
       )
     },
     {
@@ -155,11 +147,10 @@ export const CategoriesList: React.FC = () => {
       label: 'Status',
       render: (category) => (
         <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            category.is_active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
+          className={`px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full ${category.is_active
+            ? 'bg-green-100 text-green-800'
+            : 'bg-gray-100 text-gray-800'
+            }`}
         >
           {category.is_active ? 'Active' : 'Inactive'}
         </span>
@@ -168,13 +159,14 @@ export const CategoriesList: React.FC = () => {
     {
       key: 'actions',
       label: 'Actions',
-      width: '120px',
+      width: '80px',
       render: (category) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => handleEdit(category)}
-            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Edit"
+            aria-label="Edit category"
           >
             <Edit className="h-4 w-4" />
           </button>
@@ -183,8 +175,9 @@ export const CategoriesList: React.FC = () => {
               setSelectedCategory(category);
               setShowDeleteModal(true);
             }}
-            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 active:bg-red-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Delete"
+            aria-label="Delete category"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -194,39 +187,40 @@ export const CategoriesList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <p className="text-gray-600 mt-1">Manage product categories</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Categories</h1>
+          <p className="text-xs sm:text-base text-gray-600 mt-1">Manage product categories</p>
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center space-x-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 active:bg-amber-800 transition-colors text-sm sm:text-base min-h-[44px] sm:min-h-auto flex-shrink-0"
         >
-          <Plus className="h-5 w-5" />
-          <span>Add Category</span>
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">Add Category</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search categories..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -237,9 +231,9 @@ export const CategoriesList: React.FC = () => {
               setSearchTerm('');
               setStatusFilter('');
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
           >
-            Clear Filters
+            Clear
           </button>
         </div>
       </div>

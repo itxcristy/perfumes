@@ -250,9 +250,17 @@ const ProductsPage: React.FC = () => {
         }));
     }, [searchParams]);
 
+    // Fetch products with category filter when category changes
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        const filterParams: any = {};
+        if (filters.category) {
+            filterParams.categoryId = filters.category;
+        }
+        if (filters.search) {
+            filterParams.search = filters.search;
+        }
+        fetchProducts(1, 20, filterParams);
+    }, [filters.category, filters.search, fetchProducts]);
 
     // Handle scroll for sticky header
     useEffect(() => {

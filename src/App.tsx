@@ -8,7 +8,8 @@ import { ErrorBoundary } from '@/components/Common/ErrorBoundary';
 import { ScrollToTop } from '@/components/Common/ScrollToTop';
 import { PageLoader } from '@/components/Common/UniversalLoader';
 import { GlobalMediaErrorHandler } from '@/components/Common/MediaErrorHandler';
-import { SkipLink } from '@/utils/accessibilityEnhancements';
+import { ProfessionalLoader } from '@/components/Common/ProfessionalLoader';
+import { usePageTracking } from '@/hooks/usePageTracking';
 
 // Lazy-loaded pages for code splitting - optimized for performance
 const HomePage = React.lazy(() => import('@/pages/HomePage'));
@@ -24,6 +25,12 @@ const CollectionsPage = React.lazy(() => import('@/pages/CollectionsPage'));
 const AuthPage = React.lazy(() => import('@/pages/AuthPage'));
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'));
 const AboutPage = React.lazy(() => import('@/pages/AboutPage')); // Added About page
+
+// Legal pages
+const PrivacyPolicyPage = React.lazy(() => import('@/pages/PrivacyPolicyPage'));
+const TermsOfServicePage = React.lazy(() => import('@/pages/TermsOfServicePage'));
+const RefundPolicyPage = React.lazy(() => import('@/pages/RefundPolicyPage'));
+const ShippingPolicyPage = React.lazy(() => import('@/pages/ShippingPolicyPage'));
 
 // Heavy admin/dashboard pages - loaded only when needed
 const DashboardPage = React.lazy(() =>
@@ -46,28 +53,20 @@ const SettingsPage = React.lazy(() =>
 
 // Universal optimized loading fallback component
 const PageLoadingFallback = memo(() => (
-  <div className="min-h-screen bg-white">
-    {/* Show immediate header skeleton */
-    }
-    <div className="h-16 bg-white shadow-sm animate-pulse">
-      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-        <div className="h-8 w-32 bg-gray-200 rounded"></div>
-        <div className="h-8 w-24 bg-gray-200 rounded"></div>
-      </div>
-    </div>
-
-    {/* Show hero skeleton */
-    }
-    <div className="min-h-[50vh] bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
-      <div className="text-center">
-        <div className="h-12 w-80 bg-white/20 rounded mb-4 mx-auto"></div>
-        <div className="h-6 w-60 bg-white/20 rounded mx-auto"></div>
-      </div>
-    </div>
-  </div>
+  <ProfessionalLoader
+    fullPage={true}
+    text="Loading your experience..."
+    showBrand={true}
+  />
 ));
 
 PageLoadingFallback.displayName = 'PageLoadingFallback';
+
+// Component to track page views
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 function App() {
   // Handle media errors globally
@@ -103,9 +102,9 @@ function App() {
     <ErrorBoundary>
       <CombinedProvider>
         <Router>
+          <PageTracker />
           <GlobalMediaErrorHandler />
           <ScrollToTop />
-          <SkipLink href="#main-content">Skip to main content</SkipLink>
           <Suspense fallback={<PageLoadingFallback />}>
             <Routes>
               {/* Admin routes - NO Layout wrapper (has its own AdminLayout) */}
@@ -135,6 +134,13 @@ function App() {
                       <Route path="/collections/:slug" element={<ProductsPage />} />
                       <Route path="/auth" element={<AuthPage />} />
                       <Route path="/about" element={<AboutPage />} /> {/* Added About route */}
+
+                      {/* Legal pages */}
+                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+                      <Route path="/refund-policy" element={<RefundPolicyPage />} />
+                      <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+
                       <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </main>

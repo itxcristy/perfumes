@@ -4,6 +4,7 @@ import { TrendingUp, Star, Heart, ShoppingBag, Flame } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { useCartButtonStyles } from '../../hooks/useCartButtonStyles';
 
 interface BestSellerProductCardProps {
   product: Product;
@@ -17,6 +18,7 @@ interface BestSellerProductCardProps {
 export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ product, rank }) => {
   const { addItem: addToCart } = useCart();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
+  const { cartButtonText, cartButtonStyle, cartButtonHoverStyle } = useCartButtonStyles();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,11 +48,10 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
         {/* Rank Badge (Top Left) */}
         {rank && rank <= 3 && (
           <div className="absolute top-0 left-0 z-20">
-            <div className={`w-16 h-16 flex items-center justify-center font-bold text-2xl ${
-              rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-900' :
-              rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-gray-900' :
-              'bg-gradient-to-br from-orange-400 to-orange-600 text-orange-900'
-            } rounded-br-3xl shadow-lg`}>
+            <div className={`w-16 h-16 flex items-center justify-center font-bold text-2xl ${rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-yellow-900' :
+                rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-gray-900' :
+                  'bg-gradient-to-br from-orange-400 to-orange-600 text-orange-900'
+              } rounded-br-3xl shadow-lg`}>
               #{rank}
             </div>
           </div>
@@ -77,11 +78,10 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
           {/* Wishlist Button */}
           <button
             onClick={handleToggleWishlist}
-            className={`absolute top-3 left-3 p-2 rounded-full backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 z-10 ${
-              isInWishlist(product.id)
+            className={`absolute top-3 left-3 p-2 rounded-full backdrop-blur-sm shadow-md transition-all duration-300 hover:scale-110 z-10 ${isInWishlist(product.id)
                 ? 'bg-red-500 text-white'
                 : 'bg-white/80 text-gray-700 hover:bg-white'
-            }`}
+              }`}
             aria-label="Add to wishlist"
           >
             <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
@@ -91,10 +91,17 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={handleAddToCart}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg text-white"
+              style={cartButtonStyle}
+              onMouseEnter={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonHoverStyle);
+              }}
+              onMouseLeave={(e) => {
+                Object.assign(e.currentTarget.style, cartButtonStyle);
+              }}
             >
               <ShoppingBag className="h-4 w-4" />
-              Add to Cart
+              {cartButtonText}
             </button>
           </div>
         </div>
@@ -161,5 +168,10 @@ export const BestSellerProductCard: React.FC<BestSellerProductCardProps> = ({ pr
   );
 };
 
-export default BestSellerProductCard;
+export default BestSellerProductCard; <div className="absolute inset-0 border-2 border-transparent group-hover:border-amber-400 rounded-2xl transition-colors duration-300 pointer-events-none"></div>
+      </div >
+    </Link >
+  );
+};
 
+export default BestSellerProductCard;

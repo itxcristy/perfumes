@@ -284,9 +284,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
                     {activeDropdown === item.name && (
                       <div className="bg-gray-50" role="region" aria-label={`${item.name} submenu`}>
-                        {item.dropdownItems?.map((dropdownItem) => (
+                        {item.dropdownItems?.map((dropdownItem, index) => (
                           <Link
-                            key={dropdownItem.name}
+                            key={`${item.name}-${index}`}
                             to={dropdownItem.href}
                             onClick={onClose}
                             className={`block px-12 py-3 text-sm font-roboto ${isActiveLink(dropdownItem.href)

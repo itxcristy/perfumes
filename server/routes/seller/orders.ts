@@ -194,7 +194,7 @@ router.patch(
     // Update status and set shipped_at or delivered_at if applicable
     let updateQuery = `UPDATE public.orders SET status = $1, updated_at = NOW()`;
     const params: any[] = [status];
-    let paramIndex = 2;
+    const paramIndex = 2;
 
     if (status === 'shipped' && existingOrder.rows[0].status !== 'shipped') {
       updateQuery += `, shipped_at = NOW()`;

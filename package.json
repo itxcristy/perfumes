@@ -23,6 +23,7 @@
     "db:migrate:settings": "tsx server/scripts/runSiteSettingsMigration.ts"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "@sentry/browser": "^10.10.0",
     "@sentry/react": "^10.10.0",
     "@types/bcrypt": "^6.0.0",
@@ -36,6 +37,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.0",
     "framer-motion": "^12.23.6",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
@@ -45,6 +47,8 @@
     "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-ga4": "^2.1.0",
+    "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.6.3",
     "recharts": "^3.1.0",
     "serverless-http": "^4.0.0",

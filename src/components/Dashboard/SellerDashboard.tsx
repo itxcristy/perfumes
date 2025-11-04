@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  User, 
-  BarChart3, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  User,
+  BarChart3,
+  ChevronLeft,
   ChevronRight,
   Sparkles
 } from 'lucide-react';
@@ -77,14 +77,13 @@ const SellerSidebar: React.FC<SellerSidebarProps> = ({
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:block ${
-          isOpen ? 'w-64' : 'w-20'
-        }`}
+        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-white border-r border-gray-200 hidden lg:block ${isOpen ? 'w-64' : 'w-20'
+          }`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           {isOpen ? (
-            <button 
+            <button
               onClick={() => handleNavigation('dashboard')}
               className="flex items-center space-x-2 cursor-pointer"
             >
@@ -108,19 +107,17 @@ const SellerSidebar: React.FC<SellerSidebarProps> = ({
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group w-full text-left ${
-                activeTab === item.path
+              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group w-full text-left ${activeTab === item.path
                   ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 font-medium'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
               title={!isOpen ? item.name : undefined}
             >
               <span
-                className={`${
-                  activeTab === item.path
+                className={`${activeTab === item.path
                     ? 'text-blue-600'
                     : 'text-gray-500 group-hover:text-gray-700'
-                }`}
+                  }`}
               >
                 {item.icon}
               </span>
@@ -148,13 +145,12 @@ const SellerSidebar: React.FC<SellerSidebarProps> = ({
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen w-64 transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 z-40 h-screen w-64 transition-transform duration-300 bg-white border-r border-gray-200 lg:hidden ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-          <button 
+          <button
             onClick={() => handleNavigation('dashboard')}
             className="flex items-center space-x-2 cursor-pointer"
           >
@@ -173,18 +169,16 @@ const SellerSidebar: React.FC<SellerSidebarProps> = ({
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 w-full text-left ${
-                activeTab === item.path
+              className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 w-full text-left ${activeTab === item.path
                   ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 font-medium'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <span
-                className={`${
-                  activeTab === item.path
+                className={`${activeTab === item.path
                     ? 'text-blue-600'
                     : 'text-gray-500'
-                }`}
+                  }`}
               >
                 {item.icon}
               </span>
@@ -199,14 +193,14 @@ const SellerSidebar: React.FC<SellerSidebarProps> = ({
 
 const SellerDashboardHome: React.FC = () => {
   const { user } = useAuth();
-  
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Seller Dashboard</h1>
         <p className="text-gray-600 mt-2">Welcome back, {user?.fullName || user?.email || 'Seller'}!</p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between">
@@ -220,7 +214,7 @@ const SellerDashboardHome: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -233,7 +227,7 @@ const SellerDashboardHome: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -247,11 +241,11 @@ const SellerDashboardHome: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Getting Started</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <button 
+          <button
             onClick={() => window.location.hash = '#/dashboard/products'}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
@@ -265,8 +259,8 @@ const SellerDashboardHome: React.FC = () => {
               </div>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => window.location.hash = '#/dashboard/orders'}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
@@ -280,8 +274,8 @@ const SellerDashboardHome: React.FC = () => {
               </div>
             </div>
           </button>
-          
-          <button 
+
+          <button
             onClick={() => window.location.hash = '#/dashboard/profile'}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
@@ -320,12 +314,12 @@ const AnalyticsPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
         <p className="text-gray-600 mt-2">Track your sales performance</p>
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Sales Analytics</h2>
         </div>
-        
+
         <div className="text-center py-12">
           <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Dashboard</h3>
@@ -337,32 +331,76 @@ const AnalyticsPage: React.FC = () => {
 };
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
-  
+  const { user, updateProfile } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    fullName: user?.fullName || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    businessName: user?.businessName || '',
+    businessAddress: user?.businessAddress || '',
+    businessPhone: user?.businessPhone || '',
+    taxId: user?.taxId || ''
+  });
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await updateProfile({
+        fullName: profileData.fullName,
+        phone: profileData.phone,
+        businessName: profileData.businessName,
+        businessAddress: profileData.businessAddress,
+        businessPhone: profileData.businessPhone,
+        taxId: profileData.taxId
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
         <p className="text-gray-600 mt-2">Manage your seller information</p>
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Seller Profile</h2>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            {isEditing ? 'Cancel' : 'Edit'}
+          </button>
         </div>
-        
+
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
               <User className="h-8 w-8 text-gray-500" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900">{user?.fullName || 'Seller'}</h3>
-              <p className="text-gray-600">{user?.email}</p>
+              <h3 className="text-lg font-medium text-gray-900">{profileData.fullName || 'Seller'}</h3>
+              <p className="text-gray-600">{profileData.email}</p>
               <p className="text-sm text-gray-500">Role: Seller</p>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-200 pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -370,41 +408,102 @@ const ProfilePage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input
                   type="text"
-                  defaultValue={user?.fullName || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="fullName"
+                  value={profileData.fullName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
-                  defaultValue={user?.email || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="email"
+                  value={profileData.email}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input
                   type="tel"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleChange}
+                  disabled={!isEditing}
                   placeholder="Enter phone number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
                 <input
                   type="text"
+                  name="businessName"
+                  value={profileData.businessName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
                   placeholder="Enter business name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Business Address</label>
+                <input
+                  type="text"
+                  name="businessAddress"
+                  value={profileData.businessAddress}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="Enter business address"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Business Phone</label>
+                <input
+                  type="tel"
+                  name="businessPhone"
+                  value={profileData.businessPhone}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="Enter business phone"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+                <input
+                  type="text"
+                  name="taxId"
+                  value={profileData.taxId}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="Enter tax ID"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
             </div>
-            
-            <div className="mt-6">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Save Changes
-              </button>
-            </div>
+
+            {isEditing && (
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -467,9 +566,8 @@ export const SellerDashboard: React.FC = () => {
 
       {/* Main Content */}
       <div
-        className={`transition-all duration-300 ${
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
-        }`}
+        className={`transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
+          }`}
       >
         {/* Header */}
         <SellerHeader

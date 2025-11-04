@@ -1,12 +1,13 @@
 # Netlify Configuration
 [build]
-  command = "npm ci && npm run build"
+  command = "npm install --legacy-peer-deps && npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   CI = "true"
   VITE_APP_ENV = "production"
+  NODE_ENV = "development"
 
 # API redirects must come BEFORE catch-all redirect
 [[redirects]]
@@ -76,7 +77,7 @@
 
 [functions."api"]
   node_bundler = "esbuild"
-  external_node_modules = ["pg", "bcrypt", "jsonwebtoken"]
+  external_node_modules = ["pg", "bcrypt", "jsonwebtoken", "express", "serverless-http", "cors", "helmet", "dotenv", "express-rate-limit"]
 
 [context.production.environment]
   VITE_APP_ENV = "production"

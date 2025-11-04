@@ -51,7 +51,7 @@ export const ProductsList: React.FC = () => {
       });
 
       const response = await apiClient.get(`/admin/products?${params}`);
-      
+
       if (response.success) {
         setProducts(response.data);
         setTotalPages(response.pagination.totalPages);
@@ -101,12 +101,12 @@ export const ProductsList: React.FC = () => {
     {
       key: 'images',
       label: 'Image',
-      width: '80px',
+      width: '60px',
       render: (product) => (
         <img
           src={product.images[0] || '/placeholder.png'}
           alt={product.name}
-          className="w-12 h-12 rounded-lg object-cover"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
         />
       )
     },
@@ -115,9 +115,9 @@ export const ProductsList: React.FC = () => {
       label: 'Name',
       sortable: true,
       render: (product) => (
-        <div>
-          <p className="font-medium text-gray-900">{product.name}</p>
-          <p className="text-xs text-gray-500">{product.category_name}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-xs sm:text-sm text-gray-900 truncate">{product.name}</p>
+          <p className="text-xs text-gray-500 truncate">{product.category_name}</p>
         </div>
       )
     },
@@ -127,10 +127,10 @@ export const ProductsList: React.FC = () => {
       sortable: true,
       render: (product) => (
         <div>
-          <p className="font-semibold text-gray-900">₹{Number(product.price).toLocaleString('en-IN')}</p>
+          <p className="font-semibold text-xs sm:text-sm text-gray-900">₹{Number(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
           {product.original_price && (
             <p className="text-xs text-gray-500 line-through">
-              ₹{Number(product.original_price).toLocaleString('en-IN')}
+              ₹{Number(product.original_price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </p>
           )}
         </div>
@@ -142,13 +142,12 @@ export const ProductsList: React.FC = () => {
       sortable: true,
       render: (product) => (
         <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            product.stock === 0
-              ? 'bg-red-100 text-red-800'
-              : product.stock < 10
+          className={`px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full ${product.stock === 0
+            ? 'bg-red-100 text-red-800'
+            : product.stock < 10
               ? 'bg-yellow-100 text-yellow-800'
               : 'bg-green-100 text-green-800'
-          }`}
+            }`}
         >
           {product.stock}
         </span>
@@ -159,11 +158,10 @@ export const ProductsList: React.FC = () => {
       label: 'Status',
       render: (product) => (
         <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            product.is_active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
+          className={`px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full ${product.is_active
+            ? 'bg-green-100 text-green-800'
+            : 'bg-gray-100 text-gray-800'
+            }`}
         >
           {product.is_active ? 'Active' : 'Inactive'}
         </span>
@@ -172,13 +170,14 @@ export const ProductsList: React.FC = () => {
     {
       key: 'actions',
       label: 'Actions',
-      width: '120px',
+      width: '80px',
       render: (product) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => handleEdit(product)}
-            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Edit"
+            aria-label="Edit product"
           >
             <Edit className="h-4 w-4" />
           </button>
@@ -187,8 +186,9 @@ export const ProductsList: React.FC = () => {
               setSelectedProduct(product);
               setShowDeleteModal(true);
             }}
-            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 active:bg-red-100 rounded transition-colors min-h-[44px] sm:min-h-auto flex items-center justify-center"
             title="Delete"
+            aria-label="Delete product"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -198,36 +198,37 @@ export const ProductsList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600 mt-1">Manage your product catalog</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Products</h1>
+          <p className="text-xs sm:text-base text-gray-600 mt-1">Manage your product catalog</p>
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center space-x-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 active:bg-amber-800 transition-colors text-sm sm:text-base min-h-[44px] sm:min-h-auto flex-shrink-0"
         >
-          <Plus className="h-5 w-5" />
-          <span>Add Product</span>
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">Add Product</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
             />
           </div>
           <select
@@ -236,7 +237,7 @@ export const ProductsList: React.FC = () => {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs sm:text-sm"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -249,9 +250,9 @@ export const ProductsList: React.FC = () => {
               setStatusFilter('');
               setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
           >
-            Clear Filters
+            Clear
           </button>
         </div>
       </div>

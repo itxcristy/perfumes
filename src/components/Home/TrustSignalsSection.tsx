@@ -5,6 +5,7 @@ import { Shield, Award, Truck, RefreshCw, CreditCard, Users, CheckCircle, Star }
 export const TrustSignalsSection: React.FC = () => {
   const trustFeatures = [
     {
+      id: 'secure-protected',
       icon: Shield,
       title: "Secure & Protected",
       description: "Bank-level 256-bit SSL encryption protects your data",
@@ -12,6 +13,7 @@ export const TrustSignalsSection: React.FC = () => {
       color: "green"
     },
     {
+      id: 'quality-guaranteed',
       icon: Award,
       title: "Quality Guaranteed",
       description: "100% authentic products from verified brands",
@@ -19,6 +21,7 @@ export const TrustSignalsSection: React.FC = () => {
       color: "blue"
     },
     {
+      id: 'fast-shipping',
       icon: Truck,
       title: "Fast & Fast Shipping",
       description: "Fast Shipping on orders over $50, express delivery available",
@@ -26,6 +29,7 @@ export const TrustSignalsSection: React.FC = () => {
       color: "purple"
     },
     {
+      id: 'easy-returns',
       icon: RefreshCw,
       title: "Easy Returns",
       description: "Hassle-free 30-day return policy, no questions asked",
@@ -36,16 +40,19 @@ export const TrustSignalsSection: React.FC = () => {
 
   const guarantees = [
     {
+      id: 'payment-protection',
       icon: CreditCard,
       title: "Payment Protection",
       description: "Your payment information is encrypted and secure"
     },
     {
+      id: 'expert-support',
       icon: Users,
       title: "Expert Support",
       description: "24/7 customer service from shopping experts"
     },
     {
+      id: 'satisfaction-guarantee',
       icon: CheckCircle,
       title: "Satisfaction Guarantee",
       description: "100% money-back guarantee if you're not satisfied"
@@ -86,7 +93,7 @@ export const TrustSignalsSection: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {trustFeatures.map((feature, index) => (
             <motion.div
-              key={feature.title}
+              key={feature.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -127,7 +134,7 @@ export const TrustSignalsSection: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {guarantees.map((guarantee, index) => (
               <motion.div
-                key={guarantee.title}
+                key={guarantee.id}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
