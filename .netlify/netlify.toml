@@ -8,7 +8,7 @@ plugins = []
 publish = "D:\\client\\perfumes\\dist"
 publishOrigin = "config"
 commandOrigin = "config"
-command = "echo 'Using pre-built dist folder'"
+command = "npm run build"
 functions = "D:\\client\\perfumes\\netlify\\functions"
 
 [build.environment]
@@ -16,6 +16,7 @@ NODE_VERSION = "20"
 CI = "true"
 VITE_APP_ENV = "production"
 NODE_ENV = "production"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [build.processing]
 
