@@ -82,7 +82,6 @@
 
 [context.production.environment]
   VITE_APP_ENV = "production"
-  NODE_ENV = "production"
 
 [context.deploy-preview.environment]
   VITE_APP_ENV = "staging"
