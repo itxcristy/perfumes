@@ -6,8 +6,6 @@
 [build.environment]
   NODE_VERSION = "20"
   CI = "true"
-  VITE_APP_ENV = "production"
-  NODE_ENV = "development"
   NPM_FLAGS = "--legacy-peer-deps"
 
 # API redirects must come BEFORE catch-all redirect
@@ -80,12 +78,23 @@
   node_bundler = "esbuild"
   external_node_modules = ["pg", "bcrypt", "jsonwebtoken", "express", "serverless-http", "cors", "helmet", "dotenv", "express-rate-limit"]
 
+[context.production]
+  command = "npm run build"
+
 [context.production.environment]
   VITE_APP_ENV = "production"
   NODE_ENV = "production"
 
+[context.deploy-preview]
+  command = "npm run build"
+
 [context.deploy-preview.environment]
   VITE_APP_ENV = "staging"
+  NODE_ENV = "production"
+
+[context.branch-deploy]
+  command = "npm run build"
 
 [context.branch-deploy.environment]
   VITE_APP_ENV = "development"
+  NODE_ENV = "production"
