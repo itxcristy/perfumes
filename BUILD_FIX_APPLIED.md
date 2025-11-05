@@ -34,14 +34,39 @@ command = "npm install --legacy-peer-deps && npx tsc && npx vite build"
 
 **After:**
 ```toml
-command = "npx tsc && npx vite build"
+command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  CI = "true"
+  VITE_APP_ENV = "production"
+  NODE_ENV = "development"
+  NPM_FLAGS = "--legacy-peer-deps"
 ```
 
-**Reason:** Netlify runs `npm install` automatically before the build command. The `.npmrc` file ensures it uses `legacy-peer-deps` globally.
+**Reason:**
+- Netlify runs `npm install` automatically before the build command
+- The `.npmrc` file ensures it uses `legacy-peer-deps` globally
+- `npm run build` already includes `tsc && vite build` from package.json
+- `NODE_ENV = "development"` ensures devDependencies are installed
+- `NPM_FLAGS` provides additional npm configuration
 
-### 3. Committed Changes
+### 3. Additional Fixes Applied
+
+**Issue:** Build was failing with exit code 2 because:
+- `NODE_ENV` was set to `production` in production context
+- This prevented devDependencies (TypeScript, Vite) from being installed
+- TypeScript compilation was failing
+
+**Solution:**
+- Set `NODE_ENV = "development"` in build environment
+- This ensures devDependencies are installed during build
+- Added `NPM_FLAGS = "--legacy-peer-deps"` for additional npm configuration
+- Changed build command to `npm run build` which respects package.json scripts
+
+### 4. Committed Changes
 - Added `.npmrc`
-- Updated `netlify.toml`
+- Updated `netlify.toml` (multiple times)
 - Pushed to `main` branch
 
 ---
